@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": ".",
+			"name": "Root"
+		},
+		{
+			"path": "apps/api-gateway",
+			"name": "API Gateway"
+		},
+		{
+			"path": "apps/discord-bot",
+			"name": "Discord Bot"
+		}
+	],
+	"settings": {
+		"java.compile.nullAnalysis.mode": "automatic"
+	}
+}
