@@ -1,27 +1,26 @@
 version: '3.9'
-networks:
-  w2g-tier:
-    driver: bridge
+name: "w2g-builder-services"
 services:
-  kafka:
-    image: 'bitnami/kafka:latest'
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: w2g-builder-rabbitmq-1
+    restart: always
     ports:
-      - '9092:9092'
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./docker-volume/rabbitmq:/var/lib/rabbitmq/
     environment:
-      - KAFKA_CFG_NODE_ID=0
-      - KAFKA_CFG_PROCESS_ROLES=controller,broker
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-    networks:
-      - w2g-tier
-  watch2gether-gateway-service:
-    build:
-      context: ./apps/api-gateway/
-      dockerfile: Dockerfile
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=123
+  messenger-postgres:
+    container_name: messenger-postgres-1
+    image: postgres
+    restart: always
     ports:
-      - '8080:8080'
-      - '9229:9229'
-    networks:
-      - w2g-tier
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: admin
+    volumes:
+      - ./docker-volume/messenger-postgres:/var/lib/postgresql/data
