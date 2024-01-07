@@ -4,4 +4,6 @@ export class TypeUtils {
       return val as T;
     }
   }
+
+  private constructor() {}
 }

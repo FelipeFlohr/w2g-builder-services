@@ -1,3 +1,5 @@
+import { DiscordChannelDTO } from "../../models/discord-channel.dto";
+
 export interface DiscordChannel {
   readonly createdAt: Date;
   readonly id: string;
@@ -6,4 +8,5 @@ export interface DiscordChannel {
   readonly url: string;
   readonly viewable: boolean;
   isTextChannel(): boolean;
+  toDTO(): DiscordChannelDTO;
 }

@@ -16,4 +16,6 @@ export class ErrorHandlingUtils {
       `The fields ${fields} are invalid.`,
     );
   }
+
+  private constructor() {}
 }

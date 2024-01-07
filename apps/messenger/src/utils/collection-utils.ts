@@ -29,6 +29,8 @@ export class CollectionUtils {
     return records;
   }
 
+  private constructor() {}
+
   private static lastFetchReturnedRecords<T>(
     lastFetchedRecords: Array<T>,
   ): boolean {

@@ -4,15 +4,18 @@ import { GuildFetchOptionsType } from "../types/guild-fetch-options.type";
 import { DiscordGuildInfo } from "../business/discord-guild-info";
 import { DiscordGuild } from "../business/discord-guild";
 import { DiscordJsGuildImpl } from "../business/impl/discord-js-guild.impl";
-import { Logger } from "@nestjs/common";
 import { DiscordClient } from "../discord-client";
 import { CollectionUtils } from "src/utils/collection-utils";
 import { DiscordJsGuildInfoImpl } from "../business/impl/discord-js-guild-info.impl";
+import { DiscordAPIError } from "discord.js";
+import { DiscordErrorCodeEnum } from "src/utils/discord-error-code.enum";
+import { Logger } from "@nestjs/common";
 
 export class LoggedDiscordJsClientImpl
   extends DiscordJsClientImpl
   implements LoggedDiscordClient
 {
+  private static readonly logger = new Logger(LoggedDiscordJsClientImpl.name);
   private static readonly MAX_GUILD_FETCH = 200;
 
   public static async fromClient(
@@ -46,7 +49,14 @@ export class LoggedDiscordJsClientImpl
       const guild = await this.client.guilds.fetch(id);
       return DiscordJsGuildImpl.fromGuild(guild);
     } catch (e) {
-      Logger.error(e);
+      if (
+        e instanceof DiscordAPIError &&
+        e.code === DiscordErrorCodeEnum.UNKNOWN_GUILD
+      ) {
+        LoggedDiscordJsClientImpl.logger.error(e);
+        return;
+      }
+      throw e;
     }
   }
 

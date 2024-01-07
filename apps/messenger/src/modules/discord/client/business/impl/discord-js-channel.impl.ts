@@ -2,9 +2,11 @@ import {
   Channel,
   GuildBasedChannel,
   NonThreadGuildBasedChannel,
+  TextChannel,
 } from "discord.js";
 import { DiscordChannel } from "../discord-channel";
 import { DiscordJsChannelOptions } from "../types/discord-js-channel-options.type";
+import { DiscordChannelDTO } from "src/modules/discord/models/discord-channel.dto";
 
 export class DiscordJsChannelImpl implements DiscordChannel {
   public readonly createdAt: Date;
@@ -40,6 +42,17 @@ export class DiscordJsChannelImpl implements DiscordChannel {
   }
 
   public isTextChannel(): boolean {
-    return this.channel.isTextBased();
+    return this.channel.isTextBased() && this.channel instanceof TextChannel;
+  }
+
+  public toDTO(): DiscordChannelDTO {
+    return new DiscordChannelDTO({
+      createdAt: this.createdAt,
+      id: this.id,
+      manageable: this.manageable,
+      name: this.name,
+      url: this.url,
+      viewable: this.viewable,
+    });
   }
 }

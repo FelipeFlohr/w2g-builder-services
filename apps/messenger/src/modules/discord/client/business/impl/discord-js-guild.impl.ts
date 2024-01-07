@@ -1,9 +1,11 @@
-import { Guild, NonThreadGuildBasedChannel } from "discord.js";
+import { DiscordAPIError, Guild, NonThreadGuildBasedChannel } from "discord.js";
 import { DiscordGuild } from "../discord-guild";
 import { DiscordJsGuildOptions } from "../types/discord-js-guild-options.type";
 import { DiscordChannel } from "../discord-channel";
 import { DiscordJsChannelImpl } from "./discord-js-channel.impl";
 import { DiscordGuildDTO } from "src/modules/discord/models/discord-guild.dto";
+import { DiscordErrorCodeEnum } from "src/utils/discord-error-code.enum";
+import { Logger } from "@nestjs/common";
 
 export class DiscordJsGuildImpl implements DiscordGuild {
   public readonly applicationId?: string;
@@ -16,6 +18,8 @@ export class DiscordJsGuildImpl implements DiscordGuild {
   public readonly name: string;
   public readonly large: boolean;
   private readonly guild: Guild;
+
+  private static readonly logger = new Logger(DiscordJsGuildImpl.name);
 
   public constructor(options: DiscordJsGuildOptions) {
     this.applicationId = options.applicationId;
@@ -57,9 +61,20 @@ export class DiscordJsGuildImpl implements DiscordGuild {
   public async fetchChannelById(
     id: string,
   ): Promise<DiscordChannel | undefined> {
-    const guild = await this.guild.channels.fetch(id);
-    if (guild) {
-      return DiscordJsChannelImpl.fromJsChannel(guild);
+    try {
+      const guild = await this.guild.channels.fetch(id);
+      if (guild) {
+        return DiscordJsChannelImpl.fromJsChannel(guild);
+      }
+    } catch (e) {
+      if (
+        e instanceof DiscordAPIError &&
+        e.code === DiscordErrorCodeEnum.UNKNOWN_CHANNEL
+      ) {
+        DiscordJsGuildImpl.logger.error(e);
+        return;
+      }
+      throw e;
     }
   }
 
