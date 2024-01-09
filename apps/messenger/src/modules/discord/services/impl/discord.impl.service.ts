@@ -2,11 +2,13 @@ import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { DiscordService } from "../discord.service";
 import { DiscordClientService } from "../discord-client.service";
 import { GuildFetchOptionsType } from "../../client/types/guild-fetch-options.type";
-import { DiscordGuildInfoDTO } from "../../models/discord-guild-info.dto";
-import { DiscordGuildDTO } from "../../models/discord-guild.dto";
-import { DiscordTextChannelDTO } from "../../models/discord-text-channel.dto";
 import { DiscordJsTextChannelImpl } from "../../client/business/impl/discord-js-text-channel.impl";
 import { DiscordJsChannelImpl } from "../../client/business/impl/discord-js-channel.impl";
+import { MessageFetchOptions } from "../../client/types/message-fetch-options.type";
+import { DiscordGuild } from "../../client/business/discord-guild";
+import { DiscordGuildInfo } from "../../client/business/discord-guild-info";
+import { DiscordMessage } from "../../client/business/discord-message";
+import { DiscordTextChannel } from "../../client/business/discord-text-channel";
 
 @Injectable()
 export class DiscordServiceImpl implements DiscordService {
@@ -20,21 +22,17 @@ export class DiscordServiceImpl implements DiscordService {
 
   public async fetchGuilds(
     options?: GuildFetchOptionsType,
-  ): Promise<DiscordGuildInfoDTO[]> {
-    const guilds = await this.clientService.client.fetchGuilds(options);
-    return guilds.map((guild) => guild.toDTO());
+  ): Promise<DiscordGuildInfo[]> {
+    return await this.clientService.client.fetchGuilds(options);
   }
 
-  public async fetchGuildById(
-    id: string,
-  ): Promise<DiscordGuildDTO | undefined> {
-    const guild = await this.clientService.client.fetchGuildById(id);
-    return guild?.toDTO();
+  public async fetchGuildById(id: string): Promise<DiscordGuild | undefined> {
+    return await this.clientService.client.fetchGuildById(id);
   }
 
   public async fetchTextChannels(
     guildId: string,
-  ): Promise<DiscordTextChannelDTO[]> {
+  ): Promise<DiscordTextChannel[]> {
     const guild = await this.clientService.client.fetchGuildById(guildId);
     if (guild) {
       const channels = await guild.fetchChannels();
@@ -42,8 +40,7 @@ export class DiscordServiceImpl implements DiscordService {
         .filter((channel) => channel.isTextChannel())
         .map((channel) =>
           DiscordJsTextChannelImpl.fromChannel(channel as DiscordJsChannelImpl),
-        )
-        .map((textChannel) => textChannel.toDTO());
+        );
     }
 
     throw new NotFoundException();
@@ -52,16 +49,34 @@ export class DiscordServiceImpl implements DiscordService {
   public async fetchTextChannelById(
     guildId: string,
     channelId: string,
-  ): Promise<DiscordTextChannelDTO | undefined> {
-    const guild = await this.clientService.client.fetchGuildById(guildId);
+  ): Promise<DiscordTextChannel | undefined> {
+    const guild = await this.fetchGuildById(guildId);
     if (guild) {
       const channel = await guild.fetchChannelById(channelId);
       if (channel?.isTextChannel()) {
-        const textChannel = DiscordJsTextChannelImpl.fromChannel(
+        return DiscordJsTextChannelImpl.fromChannel(
           channel as DiscordJsChannelImpl,
         );
-        return textChannel.toDTO();
       }
     }
+  }
+
+  public async fetchChannelMessages(
+    options: MessageFetchOptions,
+  ): Promise<DiscordMessage[]> {
+    const channel = await this.fetchTextChannelById(
+      options.guildId,
+      options.channelId,
+    );
+
+    if (channel) {
+      return await channel.fetchMessages({
+        after: options.after,
+        amount: options.limit,
+        around: options.around,
+        before: options.before,
+      });
+    }
+    return [];
   }
 }

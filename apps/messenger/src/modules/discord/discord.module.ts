@@ -5,7 +5,7 @@ import { DiscordNetworkHandler } from "./handlers/discord-network.handler";
 import { DiscordNetworkHandlerImpl } from "./handlers/impl/discord-network.impl.handler";
 import { DiscordService } from "./services/discord.service";
 import { DiscordServiceImpl } from "./services/impl/discord.impl.service";
-import { DiscordController } from "./controllers/discord.controller";
+import { DiscordControllerImpl } from "./controllers/impl/discord.impl.controller";
 
 @Module({
   providers: [
@@ -23,6 +23,6 @@ import { DiscordController } from "./controllers/discord.controller";
     },
   ],
   exports: [DiscordService],
-  controllers: [DiscordController],
+  controllers: [DiscordControllerImpl],
 })
 export class DiscordModule {}

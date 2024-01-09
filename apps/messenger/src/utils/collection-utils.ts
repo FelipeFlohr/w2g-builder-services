@@ -11,7 +11,10 @@ export class CollectionUtils {
    */
   public static async fetchCollection<T>(
     options: FetchCollectionOptions,
-    fetchFunc: (amountToFetch: number) => Promise<Array<T>>,
+    fetchFunc: (
+      amountToFetch: number,
+      lastItemFetched: T | undefined,
+    ) => Promise<Array<T>>,
   ): Promise<Array<T>> {
     let records: Array<T> = [];
     let lastFetchedRecords: Array<T> = [];
@@ -19,6 +22,7 @@ export class CollectionUtils {
     do {
       lastFetchedRecords = await fetchFunc(
         this.remainingItemsToFetch(options, records),
+        records[records.length - 1],
       );
       records = [...records, ...lastFetchedRecords];
     } while (

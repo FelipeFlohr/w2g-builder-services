@@ -8,6 +8,10 @@ import { DiscordTextChannelDTO } from "src/modules/discord/models/discord-text-c
 import { DiscordParentCategory } from "../discord-parent-category";
 import { DiscordJsParentCategoryImpl } from "./discord-js-parent-category.impl";
 import { DiscordParentCategoryDTO } from "src/modules/discord/models/discord-parent-category.dto";
+import { DiscordMessage } from "../discord-message";
+import { DiscordJsMessageImpl } from "./discord-js-message.impl";
+import { MessageFetchOptions } from "../types/message-fetch-options.type";
+import { CollectionUtils } from "src/utils/collection-utils";
 
 export class DiscordJsTextChannelImpl
   extends DiscordJsChannelImpl
@@ -16,14 +20,45 @@ export class DiscordJsTextChannelImpl
   public readonly lastMessageId?: string;
   public readonly parent?: DiscordParentCategory;
   public readonly rateLimitPerUser?: number;
+  public override readonly channel: TextChannel;
 
   public constructor(options: DiscordJsTextChannelOptions) {
     super(options);
     this.lastMessageId = options.lastMessageId;
     this.rateLimitPerUser = options.rateLimitPerUser;
+    this.channel = options.channel;
     if (options.parent) {
       this.parent = new DiscordJsParentCategoryImpl(options.parent);
     }
+  }
+
+  public async fetchMessageById(
+    id: string,
+  ): Promise<DiscordMessage | undefined> {
+    const message = await this.channel.messages.fetch(id);
+    return DiscordJsMessageImpl.fromJsMessage(message);
+  }
+
+  public async fetchMessages(
+    options?: MessageFetchOptions,
+  ): Promise<DiscordMessage[]> {
+    const messages = await CollectionUtils.fetchCollection<DiscordMessage>(
+      {
+        maxPossibleRecordsToFetch: 100,
+        maxRecords: options?.amount,
+      },
+      async (amount, lastItem) => {
+        const messages = await this.channel.messages.fetch({
+          after: options?.after,
+          around: options?.around,
+          before: options?.before ?? lastItem?.id,
+          cache: true,
+          limit: amount,
+        });
+        return messages.map((item) => DiscordJsMessageImpl.fromJsMessage(item));
+      },
+    );
+    return messages;
   }
 
   public override toDTO(): DiscordTextChannelDTO {

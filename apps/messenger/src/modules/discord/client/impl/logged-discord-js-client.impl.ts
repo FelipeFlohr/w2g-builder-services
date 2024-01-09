@@ -10,6 +10,7 @@ import { DiscordJsGuildInfoImpl } from "../business/impl/discord-js-guild-info.i
 import { DiscordAPIError } from "discord.js";
 import { DiscordErrorCodeEnum } from "src/utils/discord-error-code.enum";
 import { Logger } from "@nestjs/common";
+import { DiscordAPIErrorHandler } from "../business/handlers/discord-api-error.handler";
 
 export class LoggedDiscordJsClientImpl
   extends DiscordJsClientImpl
@@ -33,10 +34,10 @@ export class LoggedDiscordJsClientImpl
         maxPossibleRecordsToFetch: LoggedDiscordJsClientImpl.MAX_GUILD_FETCH,
         maxRecords: options?.limit,
       },
-      async (amount) => {
+      async (amount, lastItemFetched) => {
         const res = await this.client.guilds.fetch({
           after: options?.after,
-          before: options?.before,
+          before: options?.before ?? lastItemFetched?.id,
           limit: amount,
         });
         return res.map((val) => DiscordJsGuildInfoImpl.fromOAuth2Guild(val));
@@ -56,6 +57,11 @@ export class LoggedDiscordJsClientImpl
         LoggedDiscordJsClientImpl.logger.error(e);
         return;
       }
+      DiscordAPIErrorHandler.handleDiscordJsErrors(
+        e,
+        LoggedDiscordJsClientImpl.logger,
+      );
+
       throw e;
     }
   }

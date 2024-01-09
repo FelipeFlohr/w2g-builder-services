@@ -1,4 +1,5 @@
 export enum DiscordErrorCodeEnum {
   UNKNOWN_CHANNEL = 10003,
   UNKNOWN_GUILD = 10004,
+  NUMBER_TYPE_COERCE = 50035,
 }

@@ -1,18 +1,23 @@
+import { DiscordGuild } from "../client/business/discord-guild";
+import { DiscordGuildInfo } from "../client/business/discord-guild-info";
+import { DiscordMessage } from "../client/business/discord-message";
+import { DiscordTextChannel } from "../client/business/discord-text-channel";
 import { GuildFetchOptionsType } from "../client/types/guild-fetch-options.type";
-import { DiscordGuildInfoDTO } from "../models/discord-guild-info.dto";
-import { DiscordGuildDTO } from "../models/discord-guild.dto";
-import { DiscordTextChannelDTO } from "../models/discord-text-channel.dto";
+import { MessageFetchOptions } from "../client/types/message-fetch-options.type";
 
 export interface DiscordService {
   fetchGuilds(
     options?: GuildFetchOptionsType,
-  ): Promise<Array<DiscordGuildInfoDTO>>;
-  fetchGuildById(id: string): Promise<DiscordGuildDTO | undefined>;
-  fetchTextChannels(guildId: string): Promise<Array<DiscordTextChannelDTO>>;
+  ): Promise<Array<DiscordGuildInfo>>;
+  fetchGuildById(id: string): Promise<DiscordGuild | undefined>;
+  fetchTextChannels(guildId: string): Promise<Array<DiscordTextChannel>>;
   fetchTextChannelById(
     guildId: string,
     channelId: string,
-  ): Promise<DiscordTextChannelDTO | undefined>;
+  ): Promise<DiscordTextChannel | undefined>;
+  fetchChannelMessages(
+    options: MessageFetchOptions,
+  ): Promise<Array<DiscordMessage>>;
 }
 
 export const DiscordService = Symbol("DiscordService");

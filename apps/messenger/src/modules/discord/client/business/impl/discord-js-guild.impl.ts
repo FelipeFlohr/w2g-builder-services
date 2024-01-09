@@ -6,6 +6,7 @@ import { DiscordJsChannelImpl } from "./discord-js-channel.impl";
 import { DiscordGuildDTO } from "src/modules/discord/models/discord-guild.dto";
 import { DiscordErrorCodeEnum } from "src/utils/discord-error-code.enum";
 import { Logger } from "@nestjs/common";
+import { DiscordAPIErrorHandler } from "../handlers/discord-api-error.handler";
 
 export class DiscordJsGuildImpl implements DiscordGuild {
   public readonly applicationId?: string;
@@ -74,6 +75,11 @@ export class DiscordJsGuildImpl implements DiscordGuild {
         DiscordJsGuildImpl.logger.error(e);
         return;
       }
+
+      DiscordAPIErrorHandler.handleDiscordJsErrors(
+        e,
+        DiscordJsGuildImpl.logger,
+      );
       throw e;
     }
   }
