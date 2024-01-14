@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { Message, PartialMessage } from "discord.js";
 import { DiscordMessage } from "../discord-message";
 import { DiscordMessageAuthor } from "../discord-message-author";
 import { DiscordJsMessageOptions } from "../types/discord-js-message-options.type";
@@ -19,6 +19,9 @@ export class DiscordJsMessageImpl implements DiscordMessage {
   public readonly position?: number;
   public readonly system: boolean;
   public readonly url: string;
+  public readonly guildId: string;
+  public readonly channelId: string;
+  public isFetched: boolean;
   private readonly message: Message<true>;
 
   public constructor(options: DiscordJsMessageOptions) {
@@ -35,9 +38,14 @@ export class DiscordJsMessageImpl implements DiscordMessage {
     this.system = options.system;
     this.url = options.url;
     this.message = options.message;
+    this.guildId = options.guildId;
+    this.channelId = options.channelId;
+    this.isFetched = this.isMessageFetched();
   }
 
-  public static fromJsMessage(message: Message<true>): DiscordJsMessageImpl {
+  public static fromJsFetchedMessage(
+    message: Message<true>,
+  ): DiscordJsMessageImpl {
     return new DiscordJsMessageImpl({
       author: DiscordJsMessageAuthorImpl.fromJsAuthor(message.author),
       cleanContent: message.cleanContent,
@@ -52,7 +60,17 @@ export class DiscordJsMessageImpl implements DiscordMessage {
       url: message.url,
       applicationId: TypeUtils.parseNullToUndefined(message.applicationId),
       position: TypeUtils.parseNullToUndefined(message.position),
+      channelId: message.channelId,
+      guildId: message.guildId,
     });
+  }
+
+  public static fromJsMessage(
+    message: Message<boolean> | PartialMessage,
+  ): DiscordJsMessageImpl | undefined {
+    if (!message.partial) {
+      return this.fromJsFetchedMessage(message as Message<true>);
+    }
   }
 
   public toDTO(): DiscordMessageDTO {
@@ -69,6 +87,24 @@ export class DiscordJsMessageImpl implements DiscordMessage {
       url: this.url,
       applicationId: this.applicationId,
       position: this.position,
+      channelId: this.channelId,
+      guildId: this.guildId,
     });
+  }
+
+  public async fetch(): Promise<DiscordMessage> {
+    if (!this.isFetched) {
+      await this.message.fetch();
+      this.isFetched = true;
+    }
+    return this;
+  }
+
+  private isMessageFetched(): boolean {
+    return (
+      this.message.content === "" ||
+      this.message.author.banner === undefined ||
+      this.message.author.accentColor === undefined
+    );
   }
 }

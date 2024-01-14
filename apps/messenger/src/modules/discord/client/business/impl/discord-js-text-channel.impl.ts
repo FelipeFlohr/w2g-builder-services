@@ -36,7 +36,7 @@ export class DiscordJsTextChannelImpl
     id: string,
   ): Promise<DiscordMessage | undefined> {
     const message = await this.channel.messages.fetch(id);
-    return DiscordJsMessageImpl.fromJsMessage(message);
+    return DiscordJsMessageImpl.fromJsFetchedMessage(message);
   }
 
   public async fetchMessages(
@@ -55,7 +55,9 @@ export class DiscordJsTextChannelImpl
           cache: true,
           limit: amount,
         });
-        return messages.map((item) => DiscordJsMessageImpl.fromJsMessage(item));
+        return messages.map((item) =>
+          DiscordJsMessageImpl.fromJsFetchedMessage(item),
+        );
       },
     );
     return messages;

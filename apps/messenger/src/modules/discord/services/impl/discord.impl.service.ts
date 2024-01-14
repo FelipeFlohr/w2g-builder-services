@@ -9,15 +9,22 @@ import { DiscordGuild } from "../../client/business/discord-guild";
 import { DiscordGuildInfo } from "../../client/business/discord-guild-info";
 import { DiscordMessage } from "../../client/business/discord-message";
 import { DiscordTextChannel } from "../../client/business/discord-text-channel";
+import { DiscordTextChannelListenerDTO } from "../../models/discord-text-channel-listener.dto";
+import { DiscordListenerRepository } from "../../repositories/discord-listener.repository";
 
 @Injectable()
-export class DiscordServiceImpl implements DiscordService {
+export class DiscordServiceImpl extends DiscordService {
   private readonly clientService: DiscordClientService;
+  private readonly listenerRepository: DiscordListenerRepository;
 
   public constructor(
     @Inject(DiscordClientService) clientService: DiscordClientService,
+    @Inject(DiscordListenerRepository)
+    listenerRepository: DiscordListenerRepository,
   ) {
+    super();
     this.clientService = clientService;
+    this.listenerRepository = listenerRepository;
   }
 
   public async fetchGuilds(
@@ -78,5 +85,22 @@ export class DiscordServiceImpl implements DiscordService {
       });
     }
     return [];
+  }
+
+  public async addTextChannelListener(
+    listener: DiscordTextChannelListenerDTO,
+  ): Promise<void> {
+    return await this.listenerRepository.saveListener(listener);
+  }
+
+  public async listenerExists(
+    channelId: string,
+    guildId: string,
+  ): Promise<boolean> {
+    const res = await this.listenerRepository.findListenerByGuildAndChannelId(
+      channelId,
+      guildId,
+    );
+    return res != undefined;
   }
 }

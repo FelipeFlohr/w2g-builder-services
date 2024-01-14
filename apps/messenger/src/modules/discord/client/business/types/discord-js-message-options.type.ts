@@ -14,5 +14,7 @@ export type DiscordJsMessageOptions = {
   readonly position?: number;
   readonly system: boolean;
   readonly url: string;
+  readonly guildId: string;
+  readonly channelId: string;
   readonly message: Message<true>;
 };

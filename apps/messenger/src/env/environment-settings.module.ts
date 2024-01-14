@@ -7,7 +7,7 @@ import { EnvironmentSettingsServiceImpl } from "./impl/environment-settings.impl
   providers: [
     {
       provide: EnvironmentSettingsService,
-      useClass: EnvironmentSettingsServiceImpl,
+      useValue: EnvironmentSettingsServiceImpl.getInstance(),
     },
   ],
   exports: [EnvironmentSettingsService],

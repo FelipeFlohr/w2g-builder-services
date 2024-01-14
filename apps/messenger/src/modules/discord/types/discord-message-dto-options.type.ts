@@ -13,4 +13,6 @@ export type DiscordMessageDTOOptions = {
   readonly position?: number;
   readonly system: boolean;
   readonly url: string;
+  readonly guildId: string;
+  readonly channelId: string;
 };

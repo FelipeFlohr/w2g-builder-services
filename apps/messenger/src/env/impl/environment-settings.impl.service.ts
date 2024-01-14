@@ -12,7 +12,9 @@ export class EnvironmentSettingsServiceImpl
   public readonly databaseSettings: DatabaseSettingsType;
   public readonly discordToken: string;
 
-  public constructor() {
+  private static instance: EnvironmentSettingsServiceImpl;
+
+  private constructor() {
     dotenv.config();
 
     this.port = this.parseInt("APP_PORT") ?? 3000;
@@ -20,6 +22,13 @@ export class EnvironmentSettingsServiceImpl
     this.rabbitMqSettings = this.parseRabbitMqSettings();
     this.databaseSettings = this.parseDatabaseSettings();
     this.discordToken = this.parseStringNotNull("DISCORD_TOKEN");
+  }
+
+  public static getInstance(): EnvironmentSettingsServiceImpl {
+    if (this.instance == undefined) {
+      this.instance = new EnvironmentSettingsServiceImpl();
+    }
+    return this.instance;
   }
 
   private parseDatabaseSettings(): DatabaseSettingsType {

@@ -7,3 +7,7 @@ export class TypeUtils {
 
   private constructor() {}
 }
+
+export type ClassType<T> = {
+  new (): T;
+};

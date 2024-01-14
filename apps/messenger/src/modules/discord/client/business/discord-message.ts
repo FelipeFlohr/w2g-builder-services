@@ -14,5 +14,9 @@ export interface DiscordMessage {
   readonly position?: number;
   readonly system: boolean;
   readonly url: string;
+  readonly guildId: string;
+  readonly channelId: string;
+  readonly isFetched: boolean;
+  fetch(): Promise<DiscordMessage>;
   toDTO(): DiscordMessageDTO;
 }

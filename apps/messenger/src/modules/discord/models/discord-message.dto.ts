@@ -14,6 +14,8 @@ export class DiscordMessageDTO {
   public readonly position?: number;
   public readonly system: boolean;
   public readonly url: string;
+  public readonly guildId: string;
+  public readonly channelId: string;
 
   public constructor(options: DiscordMessageDTOOptions) {
     this.applicationId = options.applicationId;

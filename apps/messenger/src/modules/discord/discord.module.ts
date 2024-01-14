@@ -6,6 +6,8 @@ import { DiscordNetworkHandlerImpl } from "./handlers/impl/discord-network.impl.
 import { DiscordService } from "./services/discord.service";
 import { DiscordServiceImpl } from "./services/impl/discord.impl.service";
 import { DiscordControllerImpl } from "./controllers/impl/discord.impl.controller";
+import { DiscordListenerRepository } from "./repositories/discord-listener.repository";
+import { DiscordListenerRepositoryImpl } from "./repositories/impl/discord-listener.impl.repository";
 
 @Module({
   providers: [
@@ -20,6 +22,10 @@ import { DiscordControllerImpl } from "./controllers/impl/discord.impl.controlle
     {
       provide: DiscordNetworkHandler,
       useClass: DiscordNetworkHandlerImpl,
+    },
+    {
+      provide: DiscordListenerRepository,
+      useClass: DiscordListenerRepositoryImpl,
     },
   ],
   exports: [DiscordService],

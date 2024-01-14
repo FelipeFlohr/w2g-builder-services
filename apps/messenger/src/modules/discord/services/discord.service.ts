@@ -4,20 +4,28 @@ import { DiscordMessage } from "../client/business/discord-message";
 import { DiscordTextChannel } from "../client/business/discord-text-channel";
 import { GuildFetchOptionsType } from "../client/types/guild-fetch-options.type";
 import { MessageFetchOptions } from "../client/types/message-fetch-options.type";
+import { DiscordTextChannelListenerDTO } from "../models/discord-text-channel-listener.dto";
 
-export interface DiscordService {
-  fetchGuilds(
+export abstract class DiscordService {
+  public abstract fetchGuilds(
     options?: GuildFetchOptionsType,
   ): Promise<Array<DiscordGuildInfo>>;
-  fetchGuildById(id: string): Promise<DiscordGuild | undefined>;
-  fetchTextChannels(guildId: string): Promise<Array<DiscordTextChannel>>;
-  fetchTextChannelById(
+  public abstract fetchGuildById(id: string): Promise<DiscordGuild | undefined>;
+  public abstract fetchTextChannels(
+    guildId: string,
+  ): Promise<Array<DiscordTextChannel>>;
+  public abstract fetchTextChannelById(
     guildId: string,
     channelId: string,
   ): Promise<DiscordTextChannel | undefined>;
-  fetchChannelMessages(
+  public abstract fetchChannelMessages(
     options: MessageFetchOptions,
   ): Promise<Array<DiscordMessage>>;
+  public abstract addTextChannelListener(
+    listener: DiscordTextChannelListenerDTO,
+  ): Promise<void>;
+  public abstract listenerExists(
+    channelId: string,
+    guildId: string,
+  ): Promise<boolean>;
 }
-
-export const DiscordService = Symbol("DiscordService");

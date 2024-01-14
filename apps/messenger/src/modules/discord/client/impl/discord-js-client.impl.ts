@@ -3,9 +3,18 @@ import { DiscordClient } from "../discord-client";
 
 export class DiscordJsClientImpl implements DiscordClient {
   public readonly client: Client;
+  private readonly intents = [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.DirectMessages,
+  ] as const;
 
   public constructor(client?: Client) {
-    this.client = client ?? new Client({ intents: [GatewayIntentBits.Guilds] });
+    this.client =
+      client ??
+      new Client({
+        intents: this.intents,
+      });
   }
 
   public async login(token: string): Promise<DiscordClient> {
