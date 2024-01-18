@@ -8,6 +8,8 @@ import { DiscordServiceImpl } from "./services/impl/discord.impl.service";
 import { DiscordControllerImpl } from "./controllers/impl/discord.impl.controller";
 import { DiscordListenerRepository } from "./repositories/discord-listener.repository";
 import { DiscordListenerRepositoryImpl } from "./repositories/impl/discord-listener.impl.repository";
+import { DiscordCommandRepository } from "./repositories/discord-command.repository";
+import { DiscordCommandRepositoryImpl } from "./repositories/impl/discord-command.impl.repository";
 
 @Module({
   providers: [
@@ -26,6 +28,10 @@ import { DiscordListenerRepositoryImpl } from "./repositories/impl/discord-liste
     {
       provide: DiscordListenerRepository,
       useClass: DiscordListenerRepositoryImpl,
+    },
+    {
+      provide: DiscordCommandRepository,
+      useClass: DiscordCommandRepositoryImpl,
     },
   ],
   exports: [DiscordService],

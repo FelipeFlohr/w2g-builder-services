@@ -7,6 +7,8 @@ import { DiscordGuildDTO } from "src/modules/discord/models/discord-guild.dto";
 import { DiscordErrorCodeEnum } from "src/utils/discord-error-code.enum";
 import { Logger } from "@nestjs/common";
 import { DiscordAPIErrorHandler } from "../handlers/discord-api-error.handler";
+import { DiscordSlashCommand } from "../discord-slash-command";
+import { DiscordJsSlashCommandImpl } from "./discord-js-slash-command.impl";
 
 export class DiscordJsGuildImpl implements DiscordGuild {
   public readonly applicationId?: string;
@@ -82,6 +84,12 @@ export class DiscordJsGuildImpl implements DiscordGuild {
       );
       throw e;
     }
+  }
+
+  public async addCommand(command: DiscordSlashCommand): Promise<void> {
+    await this.guild.commands.create(
+      (command as DiscordJsSlashCommandImpl).toSlashCommand(),
+    );
   }
 
   public toDTO(): DiscordGuildDTO {

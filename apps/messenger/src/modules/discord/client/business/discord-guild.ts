@@ -1,5 +1,6 @@
 import { DiscordGuildDTO } from "../../models/discord-guild.dto";
 import { DiscordChannel } from "./discord-channel";
+import { DiscordSlashCommand } from "./discord-slash-command";
 
 export interface DiscordGuild {
   readonly applicationId?: string;
@@ -13,5 +14,6 @@ export interface DiscordGuild {
   readonly large: boolean;
   fetchChannels(): Promise<Array<DiscordChannel>>;
   fetchChannelById(id: string): Promise<DiscordChannel | undefined>;
+  addCommand(command: DiscordSlashCommand): Promise<void>;
   toDTO(): DiscordGuildDTO;
 }

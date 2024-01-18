@@ -17,6 +17,7 @@ import { LoggedDiscordJsClientImpl } from "../../client/impl/logged-discord-js-c
 import { DiscordJsMessageImpl } from "../../client/business/impl/discord-js-message.impl";
 import { Client, Message } from "discord.js";
 import { DiscordService } from "../discord.service";
+import { DiscordCommandRepository } from "../../repositories/discord-command.repository";
 
 @Injectable()
 export class DiscordClientImplService
@@ -25,6 +26,7 @@ export class DiscordClientImplService
   private readonly networkHandler: DiscordNetworkHandler;
   private readonly envService: EnvironmentSettingsService;
   private readonly service: DiscordService;
+  private readonly commandsRepository: DiscordCommandRepository;
   private _textChannelListener: DiscordTextChannelListener;
   private _client: LoggedDiscordClient;
 
@@ -36,10 +38,13 @@ export class DiscordClientImplService
     @Inject(DiscordNetworkHandler) networkHandler: DiscordNetworkHandler,
     @Inject(EnvironmentSettingsService) envService: EnvironmentSettingsService,
     @Inject(forwardRef(() => DiscordService)) service: DiscordService,
+    @Inject(DiscordCommandRepository)
+    commandsRepository: DiscordCommandRepository,
   ) {
     this.networkHandler = networkHandler;
     this.envService = envService;
     this.service = service;
+    this.commandsRepository = commandsRepository;
   }
 
   public async onModuleInit() {
@@ -65,6 +70,15 @@ export class DiscordClientImplService
 
   public async onModuleDestroy() {
     await (this.client as LoggedDiscordJsClientImpl).client.destroy();
+  }
+
+  private async setupSlashCommands(): Promise<void> {
+    const guildInfos = await this.service.fetchGuilds();
+    const guildCommandFuncs = guildInfos.map(async (guild) => {
+      const guildFetched = await guild.fetch();
+      const addCommandFuncs = this.commandsRepository.commands
+        .map(async command => c)
+    });
   }
 
   private async setupTextChannelListeners(): Promise<void> {
