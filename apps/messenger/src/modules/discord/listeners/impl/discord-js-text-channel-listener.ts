@@ -1,4 +1,5 @@
 import { DiscordMessage } from "../../client/business/discord-message";
+import { DiscordTextChannelListenerDTO } from "../../models/discord-text-channel-listener.dto";
 import { DiscordService } from "../../services/discord.service";
 import { DiscordTextChannelListener } from "../discord-text-channel-listener";
 
@@ -12,7 +13,12 @@ export class DiscordJsTextChannelListener
   }
 
   public async onMessageCreated(message: DiscordMessage): Promise<void> {
-    if (await this.service.listenerExists(message.channelId, message.guildId)) {
+    const listener = new DiscordTextChannelListenerDTO(
+      message.guildId,
+      message.guildId,
+    );
+
+    if (await this.service.listenerExists(listener)) {
       await message.fetch();
     }
     // throw new Error("Method not implemented.");

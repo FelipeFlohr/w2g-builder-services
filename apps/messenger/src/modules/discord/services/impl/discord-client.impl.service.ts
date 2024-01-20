@@ -18,20 +18,24 @@ import { DiscordJsMessageImpl } from "../../client/business/impl/discord-js-mess
 import { Client, Message } from "discord.js";
 import { DiscordService } from "../discord.service";
 import { DiscordCommandRepository } from "../../repositories/discord-command.repository";
+import { DiscordSlashCommandHandler } from "../../handlers/discord-slash-command.handler";
+import { DiscordJsSlashCommandInteractionImpl } from "../../client/business/impl/discord-js-slash-command-interaction.impl";
+import { CollectionUtils } from "src/utils/collection-utils";
 
 @Injectable()
-export class DiscordClientImplService
+export class DiscordClientServiceImpl
   implements DiscordClientService, OnModuleInit, OnModuleDestroy
 {
   private readonly networkHandler: DiscordNetworkHandler;
   private readonly envService: EnvironmentSettingsService;
   private readonly service: DiscordService;
   private readonly commandsRepository: DiscordCommandRepository;
+  private readonly commandHandler: DiscordSlashCommandHandler;
   private _textChannelListener: DiscordTextChannelListener;
   private _client: LoggedDiscordClient;
 
   private static readonly logger: Logger = new Logger(
-    DiscordClientImplService.name,
+    DiscordClientServiceImpl.name,
   );
 
   public constructor(
@@ -40,28 +44,25 @@ export class DiscordClientImplService
     @Inject(forwardRef(() => DiscordService)) service: DiscordService,
     @Inject(DiscordCommandRepository)
     commandsRepository: DiscordCommandRepository,
+    @Inject(DiscordSlashCommandHandler)
+    commandHandler: DiscordSlashCommandHandler,
   ) {
     this.networkHandler = networkHandler;
     this.envService = envService;
     this.service = service;
     this.commandsRepository = commandsRepository;
+    this.commandHandler = commandHandler;
   }
 
   public async onModuleInit() {
     try {
-      const client = new DiscordJsClientImpl();
-
-      this._client = await this.networkHandler.login(
-        client,
-        this.envService.discordToken,
-      );
-      this._textChannelListener = new DiscordJsTextChannelListener(
-        this.service,
-      );
-      await this.setupTextChannelListeners();
-      DiscordClientImplService.logger.log("Logged into Discord");
+      const jsClient = await this.login();
+      await this.setupSlashCommands();
+      this.setupCommandHandler(jsClient);
+      await this.setupTextChannelListeners(jsClient);
+      DiscordClientServiceImpl.logger.log("Logged into Discord");
     } catch (e) {
-      DiscordClientImplService.logger.fatal(
+      DiscordClientServiceImpl.logger.fatal(
         `Error while logging on Discord: ${e}`,
       );
       throw e;
@@ -73,19 +74,42 @@ export class DiscordClientImplService
   }
 
   private async setupSlashCommands(): Promise<void> {
-    const guildInfos = await this.service.fetchGuilds();
-    const guildCommandFuncs = guildInfos.map(async (guild) => {
-      const guildFetched = await guild.fetch();
-      const addCommandFuncs = this.commandsRepository.commands
-        .map(async command => c)
+    try {
+      const guildInfos = await this.service.fetchGuilds();
+      DiscordClientServiceImpl.logger.log(
+        `Adding ${this.commandsRepository.commands.length} command(s) slash commands to all guilds. Total of ${guildInfos.length} guild(s).`,
+      );
+
+      await CollectionUtils.asyncForEach(guildInfos, async (guild) => {
+        const guildFetched = await guild.fetch();
+        await guildFetched.removeAllCommands();
+
+        CollectionUtils.asyncForEach(
+          this.commandsRepository.commands,
+          async (command) => {
+            await guildFetched.addCommand(command);
+          },
+        );
+      });
+    } catch (e) {
+      DiscordClientServiceImpl.logger.fatal(e);
+      throw e;
+    }
+
+    DiscordClientServiceImpl.logger.log("Added slash commands to all guilds.");
+  }
+
+  private setupCommandHandler(client: Client<true>): void {
+    client.on("interactionCreate", async (interaction) => {
+      if (!interaction.isChatInputCommand()) return;
+
+      const chatInteraction =
+        DiscordJsSlashCommandInteractionImpl.fromJsInteraction(interaction);
+      this.commandHandler.handleSlashCommandByInteraction(chatInteraction);
     });
   }
 
-  private async setupTextChannelListeners(): Promise<void> {
-    const client = await (
-      this.client as LoggedDiscordJsClientImpl
-    ).getClientAsTrue();
-
+  private async setupTextChannelListeners(client: Client<true>): Promise<void> {
     this.setupMessageCreated(client);
     this.setupMessageDeleted(client);
     this.setupMessageEdited(client);
@@ -116,6 +140,18 @@ export class DiscordClientImplService
         this.textChannelListener.onMessageDeleted(messageParsed);
       }
     });
+  }
+
+  private async login(): Promise<Client<true>> {
+    const client = new DiscordJsClientImpl();
+
+    this._client = await this.networkHandler.login(
+      client,
+      this.envService.discordToken,
+    );
+    this._textChannelListener = new DiscordJsTextChannelListener(this.service);
+
+    return await (this._client as LoggedDiscordJsClientImpl).getClientAsTrue();
   }
 
   public get textChannelListener() {

@@ -23,4 +23,14 @@ export abstract class DiscordJsSlashCommandImpl implements DiscordSlashCommand {
       .setDescription(this.description)
       .setDMPermission(this.dmPermission);
   }
+
+  public equals(val: DiscordSlashCommand): boolean {
+    return this.name === val.name;
+  }
+
+  protected async guildDoesNotExistsInteraction(
+    interaction: DiscordSlashCommandInteraction,
+  ): Promise<void> {
+    await interaction.reply("Guild not found");
+  }
 }

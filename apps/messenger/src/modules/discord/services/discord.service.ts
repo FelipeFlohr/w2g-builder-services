@@ -25,7 +25,9 @@ export abstract class DiscordService {
     listener: DiscordTextChannelListenerDTO,
   ): Promise<void>;
   public abstract listenerExists(
-    channelId: string,
-    guildId: string,
+    listener: DiscordTextChannelListenerDTO,
   ): Promise<boolean>;
+  public abstract deleteListener(
+    listener: DiscordTextChannelListenerDTO,
+  ): Promise<void>;
 }

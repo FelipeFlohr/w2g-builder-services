@@ -3,10 +3,9 @@ import { DiscordTextChannelListenerDTO } from "../models/discord-text-channel-li
 
 export interface DiscordListenerRepository {
   saveListener(listener: DiscordTextChannelListenerDTO): Promise<void>;
-  deleteListener(guildId: string, channelId: string): Promise<void>;
-  findListenerByGuildAndChannelId(
-    guildId: string,
-    channelId: string,
+  deleteListener(listener: DiscordTextChannelListenerDTO): Promise<void>;
+  findListenerByDTO(
+    listener: DiscordTextChannelListenerDTO,
   ): Promise<DiscordListenerEntity | undefined>;
 }
 

@@ -11,3 +11,7 @@ export class TypeUtils {
 export type ClassType<T> = {
   new (): T;
 };
+
+export interface Equatable<T> {
+  equals(val: T): boolean;
+}

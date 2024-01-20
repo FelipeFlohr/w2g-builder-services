@@ -29,12 +29,11 @@ export class DiscordListenerRepositoryImpl
   }
 
   public async deleteListener(
-    guildId: string,
-    channelId: string,
+    listener: DiscordTextChannelListenerDTO,
   ): Promise<void> {
     const criteria: FindOptionsWhere<DiscordListenerTypeORMEntity> = {
-      channelId: channelId,
-      guildId: guildId,
+      channelId: listener.channelId,
+      guildId: listener.guildId,
     };
     const res = await this.getRepository().delete(criteria);
 
@@ -43,12 +42,11 @@ export class DiscordListenerRepositoryImpl
     }
   }
 
-  public async findListenerByGuildAndChannelId(
-    guildId: string,
-    channelId: string,
+  public async findListenerByDTO(
+    listener: DiscordTextChannelListenerDTO,
   ): Promise<DiscordListenerEntity | undefined> {
     const res = await this.getRepository().findOne({
-      where: { guildId: guildId, channelId: channelId },
+      where: { guildId: listener.guildId, channelId: listener.channelId },
       select: { id: true, channelId: true, guildId: true },
     });
     return TypeUtils.parseNullToUndefined(res);

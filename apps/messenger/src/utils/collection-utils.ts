@@ -1,3 +1,4 @@
+import { Equatable } from "./type-utils";
 import { FetchCollectionOptions } from "./types/collection-utils.types";
 
 export class CollectionUtils {
@@ -31,6 +32,55 @@ export class CollectionUtils {
     );
 
     return records;
+  }
+
+  public static deepCopyArray<T>(arr: Array<T>): Array<T> {
+    const stringArray = JSON.stringify(arr);
+    return JSON.parse(stringArray);
+  }
+
+  public static arrayHasDuplicatedItems<T extends Equatable<T>>(
+    arr: Array<T>,
+    val: T,
+  ) {
+    const results = arr.filter((i) => i.equals(val));
+    return results.length > 1;
+  }
+
+  public static async asyncMap<T, U>(
+    array: Array<T>,
+    callbackfn: (i: T, index: number, array: Array<T>) => Promise<U>,
+    parallel = true,
+  ): Promise<Array<U>> {
+    if (parallel) {
+      const promises = array.map(callbackfn);
+      return await Promise.all(promises);
+    }
+
+    const resArray: Array<U> = [];
+    for (let i = 0; i < array.length; i++) {
+      const item = array[i];
+      const res = await callbackfn(item, i, array);
+      resArray.push(res);
+    }
+
+    return resArray;
+  }
+
+  public static async asyncForEach<T>(
+    array: Array<T>,
+    callbackfn: (i: T, index: number, array: Array<T>) => Promise<void>,
+    parallel = true,
+  ) {
+    if (parallel) {
+      const promises = array.map(callbackfn);
+      return await Promise.all(promises);
+    }
+
+    for (let i = 0; i < array.length; i++) {
+      const item = array[i];
+      await callbackfn(item, i, array);
+    }
   }
 
   private constructor() {}

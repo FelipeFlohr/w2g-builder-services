@@ -15,5 +15,6 @@ export interface DiscordGuild {
   fetchChannels(): Promise<Array<DiscordChannel>>;
   fetchChannelById(id: string): Promise<DiscordChannel | undefined>;
   addCommand(command: DiscordSlashCommand): Promise<void>;
+  removeAllCommands(): Promise<void>;
   toDTO(): DiscordGuildDTO;
 }

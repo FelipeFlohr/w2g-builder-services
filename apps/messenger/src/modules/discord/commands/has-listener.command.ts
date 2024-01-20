@@ -3,11 +3,15 @@ import { DiscordJsSlashCommandImpl } from "../client/business/impl/discord-js-sl
 import { DiscordTextChannelListenerDTO } from "../models/discord-text-channel-listener.dto";
 import { DiscordService } from "../services/discord.service";
 
-export class AddListenerCommand extends DiscordJsSlashCommandImpl {
+export class HasListenerCommand extends DiscordJsSlashCommandImpl {
   private readonly service: DiscordService;
 
   public constructor(service: DiscordService) {
-    super("addlistener", "Listen to messages in this channel", false);
+    super(
+      "haslistener",
+      "Returns a message saying if there is an active listener on this channel",
+      false,
+    );
     this.service = service;
   }
 
@@ -21,10 +25,9 @@ export class AddListenerCommand extends DiscordJsSlashCommandImpl {
       );
 
       if (await this.service.listenerExists(listener)) {
-        await interaction.reply("Listener already exists on this channel.");
+        await interaction.reply("Listener found in this channel.");
       } else {
-        await this.service.addTextChannelListener(listener);
-        await interaction.reply("Listener added to channel.");
+        await interaction.reply("No listener was found.");
       }
     } else {
       await this.guildDoesNotExistsInteraction(interaction);

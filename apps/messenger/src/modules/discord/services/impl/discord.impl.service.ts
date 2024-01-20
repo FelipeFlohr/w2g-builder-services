@@ -94,13 +94,15 @@ export class DiscordServiceImpl extends DiscordService {
   }
 
   public async listenerExists(
-    channelId: string,
-    guildId: string,
+    listener: DiscordTextChannelListenerDTO,
   ): Promise<boolean> {
-    const res = await this.listenerRepository.findListenerByGuildAndChannelId(
-      channelId,
-      guildId,
-    );
+    const res = await this.listenerRepository.findListenerByDTO(listener);
     return res != undefined;
+  }
+
+  public async deleteListener(
+    listener: DiscordTextChannelListenerDTO,
+  ): Promise<void> {
+    await this.listenerRepository.deleteListener(listener);
   }
 }

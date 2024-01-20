@@ -92,6 +92,10 @@ export class DiscordJsGuildImpl implements DiscordGuild {
     );
   }
 
+  public async removeAllCommands(): Promise<void> {
+    await this.guild.commands.set([]);
+  }
+
   public toDTO(): DiscordGuildDTO {
     return new DiscordGuildDTO({
       available: this.available,
