@@ -7,11 +7,12 @@ export class HasListenerCommand extends DiscordJsSlashCommandImpl {
   private readonly service: DiscordService;
 
   public constructor(service: DiscordService) {
-    super(
-      "haslistener",
-      "Returns a message saying if there is an active listener on this channel",
-      false,
-    );
+    super({
+      name: "haslistener",
+      description:
+        "Returns a message saying if there is an active listener on this channel",
+      dmPermission: false,
+    });
     this.service = service;
   }
 

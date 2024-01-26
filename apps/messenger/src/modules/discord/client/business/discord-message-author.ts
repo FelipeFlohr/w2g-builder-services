@@ -12,5 +12,6 @@ export interface DiscordMessageAuthor {
   readonly tag: string;
   readonly system: boolean;
   readonly username: string;
+  isApplicationAuthor(): boolean;
   toDTO(): DiscordMessageAuthorDTO;
 }

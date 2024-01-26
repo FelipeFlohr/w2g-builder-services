@@ -1,7 +1,7 @@
 import { OAuth2Guild } from "discord.js";
 import { DiscordGuild } from "../discord-guild";
 import { DiscordGuildInfo } from "../discord-guild-info";
-import { DiscordJsGuildInfoOptionsType } from "../types/discord-js-guild-info-options.type";
+import { DiscordJsGuildInfoOptionsType } from "./types/discord-js-guild-info-options.type";
 import { TypeUtils } from "src/utils/type-utils";
 import { DiscordJsGuildImpl } from "./discord-js-guild.impl";
 import { DiscordGuildInfoDTO } from "src/modules/discord/models/discord-guild-info.dto";

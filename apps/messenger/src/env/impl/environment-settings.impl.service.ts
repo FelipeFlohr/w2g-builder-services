@@ -1,34 +1,51 @@
 import * as dotenv from "dotenv";
 import { EnvironmentSettingsService } from "../environment-settings.service";
 import { DatabaseSettingsType } from "../types/database-settings.type";
-import { RabbitMQSetingsType } from "../types/rabbitmq-settings.type";
+import { RabbitMQSettingsType } from "../types/rabbitmq-settings.type";
+import { RedisSettingsType } from "../types/redis-settings.type";
+import { ApplicationSettingsType } from "../types/application-settings.type";
+import { LoggerUtils } from "src/utils/logger-utils";
 
 export class EnvironmentSettingsServiceImpl
   implements EnvironmentSettingsService
 {
-  public readonly port: number;
-  public readonly nodeEnv: "development" | "production";
-  public readonly rabbitMqSettings: RabbitMQSetingsType;
-  public readonly databaseSettings: DatabaseSettingsType;
+  public readonly application: ApplicationSettingsType;
+  public readonly rabbitMq: RabbitMQSettingsType;
+  public readonly database: DatabaseSettingsType;
+  public readonly redis: RedisSettingsType;
   public readonly discordToken: string;
 
+  private static readonly logger = LoggerUtils.from(
+    EnvironmentSettingsServiceImpl,
+  );
   private static instance: EnvironmentSettingsServiceImpl;
 
-  private constructor() {
+  public constructor() {
     dotenv.config();
 
-    this.port = this.parseInt("APP_PORT") ?? 3000;
-    this.nodeEnv = this.parseNodeEnv();
-    this.rabbitMqSettings = this.parseRabbitMqSettings();
-    this.databaseSettings = this.parseDatabaseSettings();
+    this.application = this.parseApplicationSettings();
+    this.rabbitMq = this.parseRabbitMqSettings();
+    this.database = this.parseDatabaseSettings();
+    this.redis = this.parseRedisSettings();
     this.discordToken = this.parseStringNotNull("DISCORD_TOKEN");
   }
 
   public static getInstance(): EnvironmentSettingsServiceImpl {
     if (this.instance == undefined) {
       this.instance = new EnvironmentSettingsServiceImpl();
+      EnvironmentSettingsServiceImpl.logger.debug(
+        `Initialized ${EnvironmentSettingsServiceImpl.name}`,
+      );
     }
     return this.instance;
+  }
+
+  private parseApplicationSettings(): ApplicationSettingsType {
+    return {
+      env: this.parseNodeEnv(),
+      name: this.parseStringNotNull("APP_NAME"),
+      port: this.parseInt("APP_PORT") ?? 3000,
+    };
   }
 
   private parseDatabaseSettings(): DatabaseSettingsType {
@@ -41,7 +58,7 @@ export class EnvironmentSettingsServiceImpl
     };
   }
 
-  private parseRabbitMqSettings(): RabbitMQSetingsType {
+  private parseRabbitMqSettings(): RabbitMQSettingsType {
     return {
       host: this.parseStringNotNull("RABBITMQ_HOST"),
       password: this.parseStringNotNull("RABBITMQ_PASSWORD"),
@@ -50,8 +67,16 @@ export class EnvironmentSettingsServiceImpl
     };
   }
 
+  private parseRedisSettings(): RedisSettingsType {
+    return {
+      host: this.parseStringNotNull("REDIS_HOST"),
+      port: this.parseIntNotNull("REDIS_PORT"),
+      password: this.parseString("REDIS_PASSWORD"),
+    };
+  }
+
   private parseNodeEnv(): "development" | "production" {
-    return process.env.NODE_EVN === "development"
+    return process.env.NODE_ENV === "development"
       ? "development"
       : "production";
   }

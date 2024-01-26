@@ -5,7 +5,7 @@ import {
   TextChannel,
 } from "discord.js";
 import { DiscordChannel } from "../discord-channel";
-import { DiscordJsChannelOptions } from "../types/discord-js-channel-options.type";
+import { DiscordJsChannelOptions } from "./types/discord-js-channel-options.type";
 import { DiscordChannelDTO } from "src/modules/discord/models/discord-channel.dto";
 
 export class DiscordJsChannelImpl implements DiscordChannel {

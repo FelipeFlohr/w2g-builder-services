@@ -9,14 +9,14 @@ import { CollectionUtils } from "src/utils/collection-utils";
 import { DiscordJsGuildInfoImpl } from "../business/impl/discord-js-guild-info.impl";
 import { DiscordAPIError } from "discord.js";
 import { DiscordErrorCodeEnum } from "src/utils/discord-error-code.enum";
-import { Logger } from "@nestjs/common";
 import { DiscordAPIErrorHandler } from "../business/handlers/discord-api-error.handler";
+import { LoggerUtils } from "src/utils/logger-utils";
 
 export class LoggedDiscordJsClientImpl
   extends DiscordJsClientImpl
   implements LoggedDiscordClient
 {
-  private static readonly logger = new Logger(LoggedDiscordJsClientImpl.name);
+  private static readonly logger = LoggerUtils.from(LoggedDiscordJsClientImpl);
   private static readonly MAX_GUILD_FETCH = 200;
 
   public static async fromClient(
@@ -64,21 +64,5 @@ export class LoggedDiscordJsClientImpl
 
       throw e;
     }
-  }
-
-  private lastFetchReturnedRecords(
-    lastGuildFetch?: Array<DiscordGuildInfo>,
-  ): boolean {
-    return lastGuildFetch != undefined && lastGuildFetch.length > 0;
-  }
-
-  private allGuildsFetched(
-    guildsFetched: Array<DiscordGuildInfo>,
-    options?: GuildFetchOptionsType,
-  ): boolean {
-    if (options?.limit == undefined) {
-      return false;
-    }
-    return guildsFetched.length >= options.limit;
   }
 }

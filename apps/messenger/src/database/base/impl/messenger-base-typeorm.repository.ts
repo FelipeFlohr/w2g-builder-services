@@ -13,7 +13,7 @@ export abstract class MessengerBaseTypeORMRepository<
   public readonly clazz: ClassType<T>;
   protected readonly databaseService: DatabaseServiceImpl;
 
-  public constructor(
+  protected constructor(
     @Inject(DatabaseService) databaseService: DatabaseService,
     clazz: ClassType<T>,
   ) {

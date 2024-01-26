@@ -1,6 +1,4 @@
-import { AMQPMessage } from "./amqp-message";
-
-export interface AMQPQueue<T> {
+export interface AMQPQueue {
   readonly name: string;
   readonly autodelete?: boolean;
   readonly deadLetterExchange?: string;
@@ -11,5 +9,4 @@ export interface AMQPQueue<T> {
   readonly maxLength?: number;
   readonly maxPriority?: number;
   readonly messageTtl?: number;
-  readonly onMessage: (msg: AMQPMessage<T>) => Promise<void>;
 }

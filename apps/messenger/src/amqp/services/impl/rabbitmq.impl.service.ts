@@ -1,10 +1,11 @@
-import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { AMQPService } from "../amqp.service";
 import { EnvironmentSettingsService } from "src/env/environment-settings.service";
 import amqp, { Channel } from "amqp-connection-manager";
 import { IAmqpConnectionManager } from "amqp-connection-manager/dist/types/AmqpConnectionManager";
 import { AMQPChannel } from "src/amqp/business/amqp-channel";
 import { RabbitMQChannelImpl } from "src/amqp/business/impl/rabbitmq-channel.impl";
+import { LoggerUtils } from "src/utils/logger-utils";
 
 @Injectable()
 export class RabbitMQServiceImpl implements AMQPService, OnModuleInit {
@@ -12,7 +13,7 @@ export class RabbitMQServiceImpl implements AMQPService, OnModuleInit {
   private connection: IAmqpConnectionManager;
   private _channel: AMQPChannel;
 
-  private static readonly logger = new Logger(RabbitMQServiceImpl.name);
+  private static readonly logger = LoggerUtils.from(RabbitMQChannelImpl);
   private static readonly APPLICATION_CHANNEL_NAME = "messenger-channel";
   private static readonly RABBITMQ_TIMEOUT = 15 * 1000;
 
@@ -28,10 +29,10 @@ export class RabbitMQServiceImpl implements AMQPService, OnModuleInit {
   }
 
   private async login(): Promise<void> {
-    const url = new URL(`amqp://${this.env.rabbitMqSettings.host}`);
-    url.username = this.env.rabbitMqSettings.user;
-    url.password = this.env.rabbitMqSettings.password;
-    url.port = this.env.rabbitMqSettings.port.toString();
+    const url = new URL(`amqp://${this.env.rabbitMq.host}`);
+    url.username = this.env.rabbitMq.user;
+    url.password = this.env.rabbitMq.password;
+    url.port = this.env.rabbitMq.port.toString();
 
     this.connection = amqp.connect({
       url: url.toString(),

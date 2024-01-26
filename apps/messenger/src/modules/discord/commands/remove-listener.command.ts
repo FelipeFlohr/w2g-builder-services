@@ -7,7 +7,11 @@ export class RemoveListenerCommand extends DiscordJsSlashCommandImpl {
   private readonly service: DiscordService;
 
   public constructor(service: DiscordService) {
-    super("removelistener", "Removes the listener from this channel", false);
+    super({
+      name: "removelistener",
+      description: "Removes the listener from this channel",
+      dmPermission: false,
+    });
     this.service = service;
   }
 

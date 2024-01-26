@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits } from "discord.js";
+import { Client, Events, GatewayIntentBits, Partials } from "discord.js";
 import { DiscordClient } from "../discord-client";
 
 export class DiscordJsClientImpl implements DiscordClient {
@@ -8,12 +8,14 @@ export class DiscordJsClientImpl implements DiscordClient {
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.DirectMessages,
   ] as const;
+  private readonly partials = [Partials.Message];
 
   public constructor(client?: Client) {
     this.client =
       client ??
       new Client({
         intents: this.intents,
+        partials: this.partials,
       });
   }
 

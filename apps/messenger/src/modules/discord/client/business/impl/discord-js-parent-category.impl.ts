@@ -1,5 +1,5 @@
 import { DiscordParentCategory } from "../discord-parent-category";
-import { DiscordJsParentCategoryOptions } from "../types/discord-js-parent-category-options.type";
+import { DiscordJsParentCategoryOptions } from "./types/discord-js-parent-category-options.type";
 
 export class DiscordJsParentCategoryImpl implements DiscordParentCategory {
   public readonly id: string;

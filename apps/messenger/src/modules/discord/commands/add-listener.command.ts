@@ -7,7 +7,11 @@ export class AddListenerCommand extends DiscordJsSlashCommandImpl {
   private readonly service: DiscordService;
 
   public constructor(service: DiscordService) {
-    super("addlistener", "Listen to messages in this channel", false);
+    super({
+      name: "addlistener",
+      description: "Listen to messages in this channel",
+      dmPermission: false,
+    });
     this.service = service;
   }
 

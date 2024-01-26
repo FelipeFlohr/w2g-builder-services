@@ -30,5 +30,7 @@ export class DiscordMessageDTO {
     this.position = options.position;
     this.system = options.system;
     this.url = options.url;
+    this.guildId = options.guildId;
+    this.channelId = options.channelId;
   }
 }

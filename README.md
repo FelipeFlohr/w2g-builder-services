@@ -2,6 +2,7 @@
 - Discord Messenger Bot (bot que faz CRUD de mensagens)
 	- Nest.js
 	- Postgres
+	- Redis
 - Discord Watch2Gether Builder (faz as consultas no bot e monta o que foi pedido)
     - Spring com Java
     - Mongo (para salvar o que foi retornado)
@@ -12,7 +13,3 @@
 - API File Storage (aplicação que devolve uma URL para o download de um arquivo)
 	- Spring com Java
 	- Postgres
-- Watch2Gether stats app (aplicação que faz uma análise dos dados)
-	- Nest.js
-	- Mongo
-	- Redis

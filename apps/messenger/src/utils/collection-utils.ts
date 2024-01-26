@@ -34,11 +34,6 @@ export class CollectionUtils {
     return records;
   }
 
-  public static deepCopyArray<T>(arr: Array<T>): Array<T> {
-    const stringArray = JSON.stringify(arr);
-    return JSON.parse(stringArray);
-  }
-
   public static arrayHasDuplicatedItems<T extends Equatable<T>>(
     arr: Array<T>,
     val: T,

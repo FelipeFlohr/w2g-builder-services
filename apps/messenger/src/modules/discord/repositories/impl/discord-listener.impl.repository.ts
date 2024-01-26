@@ -1,5 +1,8 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { DiscordListenerRepository } from "../discord-listener.repository";
+import {
+  DiscordListenerCacheRepository,
+  DiscordListenerRepository,
+} from "../discord-listener.repository";
 import { MessengerBaseTypeORMRepository } from "src/database/base/impl/messenger-base-typeorm.repository";
 import { DiscordListenerTypeORMEntity } from "../../entities/impl/discord-listener.typeorm.entity";
 import { DatabaseService } from "src/database/database.service";
@@ -13,19 +16,27 @@ export class DiscordListenerRepositoryImpl
   extends MessengerBaseTypeORMRepository<DiscordListenerTypeORMEntity>
   implements DiscordListenerRepository
 {
+  private readonly cacheRepository: DiscordListenerRepository;
+
   public constructor(
     @Inject(DatabaseService) databaseService: DatabaseService,
+    @Inject(DiscordListenerCacheRepository)
+    cacheRepository: DiscordListenerRepository,
   ) {
     super(databaseService, DiscordListenerTypeORMEntity);
+    this.cacheRepository = cacheRepository;
   }
 
   public async saveListener(
     listener: DiscordTextChannelListenerDTO,
   ): Promise<void> {
-    await this.getRepository().save({
-      guildId: listener.guildId,
-      channelId: listener.channelId,
-    });
+    await Promise.all([
+      this.getRepository().save({
+        guildId: listener.guildId,
+        channelId: listener.channelId,
+      }),
+      this.cacheRepository.saveListener(listener),
+    ]);
   }
 
   public async deleteListener(
@@ -36,6 +47,7 @@ export class DiscordListenerRepositoryImpl
       guildId: listener.guildId,
     };
     const res = await this.getRepository().delete(criteria);
+    await this.cacheRepository.deleteListener(listener);
 
     if (res.affected === 0) {
       throw new NotFoundException();
@@ -45,6 +57,9 @@ export class DiscordListenerRepositoryImpl
   public async findListenerByDTO(
     listener: DiscordTextChannelListenerDTO,
   ): Promise<DiscordListenerEntity | undefined> {
+    const cacheVal = await this.cacheRepository.findListenerByDTO(listener);
+    if (cacheVal) return cacheVal;
+
     const res = await this.getRepository().findOne({
       where: { guildId: listener.guildId, channelId: listener.channelId },
       select: { id: true, channelId: true, guildId: true },

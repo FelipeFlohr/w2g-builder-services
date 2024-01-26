@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import { DiscordMessageAuthor } from "../discord-message-author";
+import { DiscordMessageAuthor } from "../../discord-message-author";
 
 export type DiscordJsMessageOptions = {
   readonly applicationId?: string;

@@ -6,28 +6,30 @@ import { GuildFetchOptionsType } from "../client/types/guild-fetch-options.type"
 import { MessageFetchOptions } from "../client/types/message-fetch-options.type";
 import { DiscordTextChannelListenerDTO } from "../models/discord-text-channel-listener.dto";
 
-export abstract class DiscordService {
-  public abstract fetchGuilds(
+export interface DiscordService {
+  fetchGuilds(
     options?: GuildFetchOptionsType,
   ): Promise<Array<DiscordGuildInfo>>;
-  public abstract fetchGuildById(id: string): Promise<DiscordGuild | undefined>;
-  public abstract fetchTextChannels(
-    guildId: string,
-  ): Promise<Array<DiscordTextChannel>>;
-  public abstract fetchTextChannelById(
+  fetchGuildById(id: string): Promise<DiscordGuild | undefined>;
+  fetchTextChannels(guildId: string): Promise<Array<DiscordTextChannel>>;
+  fetchTextChannelById(
     guildId: string,
     channelId: string,
   ): Promise<DiscordTextChannel | undefined>;
-  public abstract fetchChannelMessages(
+  fetchChannelMessages(
     options: MessageFetchOptions,
   ): Promise<Array<DiscordMessage>>;
-  public abstract addTextChannelListener(
+  fetchMessageById(
+    guildId: string,
+    channelId: string,
+    messageId: string,
+  ): Promise<DiscordMessage | undefined>;
+  addTextChannelListener(
     listener: DiscordTextChannelListenerDTO,
   ): Promise<void>;
-  public abstract listenerExists(
-    listener: DiscordTextChannelListenerDTO,
-  ): Promise<boolean>;
-  public abstract deleteListener(
-    listener: DiscordTextChannelListenerDTO,
-  ): Promise<void>;
+  listenerExists(listener: DiscordTextChannelListenerDTO): Promise<boolean>;
+  deleteListener(listener: DiscordTextChannelListenerDTO): Promise<void>;
+  createDelimitationMessage(message: DiscordMessage): Promise<void>;
 }
+
+export const DiscordService = Symbol("DiscordService");

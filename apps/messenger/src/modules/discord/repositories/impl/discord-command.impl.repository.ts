@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { DiscordSlashCommand } from "../../client/business/discord-slash-command";
 import { DiscordCommandRepository } from "../discord-command.repository";
 import { DiscordService } from "../../services/discord.service";
@@ -6,6 +6,8 @@ import { AddListenerCommand } from "../../commands/add-listener.command";
 import { CollectionUtils } from "src/utils/collection-utils";
 import { HasListenerCommand } from "../../commands/has-listener.command";
 import { RemoveListenerCommand } from "../../commands/remove-listener.command";
+import { DelimitationMessageCommand } from "../../commands/delimitation-message.command";
+import { LoggerUtils } from "src/utils/logger-utils";
 
 @Injectable()
 export class DiscordCommandRepositoryImpl
@@ -14,8 +16,8 @@ export class DiscordCommandRepositoryImpl
   public readonly commands: DiscordSlashCommand[];
   private readonly service: DiscordService;
 
-  private static readonly logger = new Logger(
-    DiscordCommandRepositoryImpl.name,
+  private static readonly logger = LoggerUtils.from(
+    DiscordCommandRepositoryImpl,
   );
 
   public constructor(@Inject(DiscordService) service: DiscordService) {
@@ -32,8 +34,14 @@ export class DiscordCommandRepositoryImpl
     const addListener = new AddListenerCommand(this.service);
     const hasListener = new HasListenerCommand(this.service);
     const removeListener = new RemoveListenerCommand(this.service);
+    const delimitationMessage = new DelimitationMessageCommand(this.service);
 
-    this.commands.push(addListener, hasListener, removeListener);
+    this.commands.push(
+      addListener,
+      hasListener,
+      removeListener,
+      delimitationMessage,
+    );
   }
 
   private validateDuplicatedCommands(): void {

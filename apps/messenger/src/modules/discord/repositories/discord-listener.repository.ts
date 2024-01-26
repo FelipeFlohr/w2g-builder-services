@@ -10,3 +10,6 @@ export interface DiscordListenerRepository {
 }
 
 export const DiscordListenerRepository = Symbol("DiscordListenerRepository");
+export const DiscordListenerCacheRepository = Symbol(
+  "DiscordListenerCacheRepository",
+);

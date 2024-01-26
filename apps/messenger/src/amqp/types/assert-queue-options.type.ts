@@ -1,6 +1,4 @@
-import { AMQPMessage } from "../business/amqp-message";
-
-export type AssertQueueOptions<T> = {
+export type AssertQueueOptions = {
   readonly name: string;
   readonly autodelete?: boolean;
   readonly deadLetterExchange?: string;
@@ -11,5 +9,4 @@ export type AssertQueueOptions<T> = {
   readonly maxLength?: number;
   readonly maxPriority?: number;
   readonly messageTtl?: number;
-  readonly onMessage: (msg: AMQPMessage<T>) => Promise<void>;
 };

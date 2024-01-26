@@ -9,7 +9,7 @@ export class TypeUtils {
 }
 
 export type ClassType<T> = {
-  new (): T;
+  new (...args: any): T;
 };
 
 export interface Equatable<T> {

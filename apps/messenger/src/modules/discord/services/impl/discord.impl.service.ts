@@ -11,20 +11,24 @@ import { DiscordMessage } from "../../client/business/discord-message";
 import { DiscordTextChannel } from "../../client/business/discord-text-channel";
 import { DiscordTextChannelListenerDTO } from "../../models/discord-text-channel-listener.dto";
 import { DiscordListenerRepository } from "../../repositories/discord-listener.repository";
+import { DiscordDelimitationMessageRepository } from "../../repositories/discord-delimitation-message.repository";
 
 @Injectable()
-export class DiscordServiceImpl extends DiscordService {
+export class DiscordServiceImpl implements DiscordService {
   private readonly clientService: DiscordClientService;
   private readonly listenerRepository: DiscordListenerRepository;
+  private readonly delimitationRepository: DiscordDelimitationMessageRepository;
 
   public constructor(
     @Inject(DiscordClientService) clientService: DiscordClientService,
     @Inject(DiscordListenerRepository)
     listenerRepository: DiscordListenerRepository,
+    @Inject(DiscordDelimitationMessageRepository)
+    delimitationRepository: DiscordDelimitationMessageRepository,
   ) {
-    super();
     this.clientService = clientService;
     this.listenerRepository = listenerRepository;
+    this.delimitationRepository = delimitationRepository;
   }
 
   public async fetchGuilds(
@@ -87,6 +91,17 @@ export class DiscordServiceImpl extends DiscordService {
     return [];
   }
 
+  public async fetchMessageById(
+    guildId: string,
+    channelId: string,
+    messageId: string,
+  ): Promise<DiscordMessage | undefined> {
+    const channel = await this.fetchTextChannelById(guildId, channelId);
+    if (channel) {
+      return await channel.fetchMessageById(messageId);
+    }
+  }
+
   public async addTextChannelListener(
     listener: DiscordTextChannelListenerDTO,
   ): Promise<void> {
@@ -104,5 +119,11 @@ export class DiscordServiceImpl extends DiscordService {
     listener: DiscordTextChannelListenerDTO,
   ): Promise<void> {
     await this.listenerRepository.deleteListener(listener);
+  }
+
+  public async createDelimitationMessage(
+    message: DiscordMessage,
+  ): Promise<void> {
+    await this.delimitationRepository.saveDelimitation(message.toDTO());
   }
 }

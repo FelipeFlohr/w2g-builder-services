@@ -1,7 +1,7 @@
 import { Message, PartialMessage } from "discord.js";
 import { DiscordMessage } from "../discord-message";
 import { DiscordMessageAuthor } from "../discord-message-author";
-import { DiscordJsMessageOptions } from "../types/discord-js-message-options.type";
+import { DiscordJsMessageOptions } from "./types/discord-js-message-options.type";
 import { DiscordJsMessageAuthorImpl } from "./discord-js-message-author.impl";
 import { TypeUtils } from "src/utils/type-utils";
 import { DiscordMessageDTO } from "src/modules/discord/models/discord-message.dto";
@@ -22,7 +22,7 @@ export class DiscordJsMessageImpl implements DiscordMessage {
   public readonly guildId: string;
   public readonly channelId: string;
   public isFetched: boolean;
-  private readonly message: Message<true>;
+  private readonly message: Message;
 
   public constructor(options: DiscordJsMessageOptions) {
     this.applicationId = options.applicationId;
@@ -66,7 +66,7 @@ export class DiscordJsMessageImpl implements DiscordMessage {
   }
 
   public static fromJsMessage(
-    message: Message<boolean> | PartialMessage,
+    message: Message | PartialMessage,
   ): DiscordJsMessageImpl | undefined {
     if (!message.partial) {
       return this.fromJsFetchedMessage(message as Message<true>);
@@ -101,10 +101,6 @@ export class DiscordJsMessageImpl implements DiscordMessage {
   }
 
   private isMessageFetched(): boolean {
-    return (
-      this.message.content === "" ||
-      this.message.author.banner === undefined ||
-      this.message.author.accentColor === undefined
-    );
+    return !this.message.partial;
   }
 }

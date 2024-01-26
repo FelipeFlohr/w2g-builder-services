@@ -1,9 +1,8 @@
 import { AMQPQueue } from "../amqp-queue";
 import { Replies } from "amqplib";
-import { AMQPMessage } from "../amqp-message";
 import { RabbitMQQueueOptions } from "src/amqp/types/rabbitmq-queue-options.type";
 
-export class RabbitMQQueueImpl<T> implements AMQPQueue<T> {
+export class RabbitMQQueueImpl implements AMQPQueue {
   public readonly name: string;
   public readonly autodelete?: boolean;
   public readonly deadLetterExchange?: string;
@@ -14,10 +13,9 @@ export class RabbitMQQueueImpl<T> implements AMQPQueue<T> {
   public readonly maxLength?: number;
   public readonly maxPriority?: number;
   public readonly messageTtl?: number;
-  public readonly onMessage: (msg: AMQPMessage<T>) => Promise<void>;
   private readonly queue: Replies.AssertQueue;
 
-  public constructor(options: RabbitMQQueueOptions<T>) {
+  public constructor(options: RabbitMQQueueOptions) {
     this.name = options.name;
     this.autodelete = options.autodelete;
     this.deadLetterExchange = options.deadLetterExchange;
@@ -28,7 +26,6 @@ export class RabbitMQQueueImpl<T> implements AMQPQueue<T> {
     this.maxLength = options.maxLength;
     this.maxPriority = options.maxPriority;
     this.messageTtl = options.messageTtl;
-    this.onMessage = options.onMessage;
     this.queue = options.queue;
   }
 }

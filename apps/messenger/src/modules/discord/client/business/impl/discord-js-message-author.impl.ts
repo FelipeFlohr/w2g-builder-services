@@ -1,6 +1,6 @@
 import { User } from "discord.js";
 import { DiscordMessageAuthor } from "../discord-message-author";
-import { DiscordJsMessageAuthorOptions } from "../types/discord-js-message-author-options.type";
+import { DiscordJsMessageAuthorOptions } from "./types/discord-js-message-author-options.type";
 import { TypeUtils } from "src/utils/type-utils";
 import { DiscordMessageAuthorDTO } from "src/modules/discord/models/discord-message-author.dto";
 
@@ -60,6 +60,10 @@ export class DiscordJsMessageAuthorImpl implements DiscordMessageAuthor {
       ),
       globalName: TypeUtils.parseNullToUndefined(user.globalName),
     });
+  }
+
+  public isApplicationAuthor(): boolean {
+    return this.user.client.user.id === this.user.id;
   }
 
   public toDTO(): DiscordMessageAuthorDTO {

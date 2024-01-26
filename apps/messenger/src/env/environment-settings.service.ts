@@ -1,11 +1,13 @@
+import { ApplicationSettingsType } from "./types/application-settings.type";
 import { DatabaseSettingsType } from "./types/database-settings.type";
-import { RabbitMQSetingsType } from "./types/rabbitmq-settings.type";
+import { RabbitMQSettingsType } from "./types/rabbitmq-settings.type";
+import { RedisSettingsType } from "./types/redis-settings.type";
 
 export interface EnvironmentSettingsService {
-  readonly port: number;
-  readonly nodeEnv: "development" | "production";
-  readonly rabbitMqSettings: RabbitMQSetingsType;
-  readonly databaseSettings: DatabaseSettingsType;
+  readonly application: ApplicationSettingsType;
+  readonly rabbitMq: RabbitMQSettingsType;
+  readonly database: DatabaseSettingsType;
+  readonly redis: RedisSettingsType;
   readonly discordToken: string;
 }
 

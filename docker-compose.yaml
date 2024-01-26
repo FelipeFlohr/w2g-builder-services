@@ -1,27 +1,32 @@
 version: "3.9"
 name: "w2g-builder-services"
 services:
-    rabbitmq:
-        image: rabbitmq:3.12-management
-        container_name: w2g-builder-rabbitmq-1
-        restart: always
-        ports:
-            - 5672:5672
-            - 15672:15672
-        volumes:
-            - ./docker-volume/rabbitmq:/var/lib/rabbitmq/
-        environment:
-            - RABBITMQ_DEFAULT_USER=admin
-            - RABBITMQ_DEFAULT_PASS=123
-    messenger-postgres:
-        container_name: messenger-postgres-1
-        image: postgres:16
-        restart: always
-        ports:
-            - 5432:5432
-        environment:
-            POSTGRES_USER: admin
-            POSTGRES_PASSWORD: 123
-            POSTGRES_DB: messenger-db
-        volumes:
-            - ./docker-volume/messenger-postgres:/var/lib/postgresql/data
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: w2g-builder-rabbitmq-1
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./docker-volume/rabbitmq:/var/lib/rabbitmq/
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=123
+  messenger-postgres:
+    container_name: messenger-postgres-1
+    image: postgres:16
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: messenger-db
+    volumes:
+      - ./docker-volume/messenger-postgres:/var/lib/postgresql/data
+  messenger-redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    restart: always

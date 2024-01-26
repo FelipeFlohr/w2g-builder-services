@@ -1,6 +1,6 @@
 import { ChannelIsNotTextChannelError } from "src/modules/discord/errors/channel-is-not-text-channel.error";
 import { DiscordTextChannel } from "../discord-text-channel";
-import { DiscordJsTextChannelOptions } from "../types/discord-js-text-channel-options.type";
+import { DiscordJsTextChannelOptions } from "./types/discord-js-text-channel-options.type";
 import { DiscordJsChannelImpl } from "./discord-js-channel.impl";
 import { TypeUtils } from "src/utils/type-utils";
 import { TextChannel } from "discord.js";
@@ -12,6 +12,8 @@ import { DiscordMessage } from "../discord-message";
 import { DiscordJsMessageImpl } from "./discord-js-message.impl";
 import { MessageFetchOptions } from "../types/message-fetch-options.type";
 import { CollectionUtils } from "src/utils/collection-utils";
+import { DiscordAPIErrorHandler } from "../handlers/discord-api-error.handler";
+import { LoggerUtils } from "src/utils/logger-utils";
 
 export class DiscordJsTextChannelImpl
   extends DiscordJsChannelImpl
@@ -21,6 +23,8 @@ export class DiscordJsTextChannelImpl
   public readonly parent?: DiscordParentCategory;
   public readonly rateLimitPerUser?: number;
   public override readonly channel: TextChannel;
+
+  private static readonly logger = LoggerUtils.from(DiscordJsTextChannelImpl);
 
   public constructor(options: DiscordJsTextChannelOptions) {
     super(options);
@@ -35,14 +39,24 @@ export class DiscordJsTextChannelImpl
   public async fetchMessageById(
     id: string,
   ): Promise<DiscordMessage | undefined> {
-    const message = await this.channel.messages.fetch(id);
-    return DiscordJsMessageImpl.fromJsFetchedMessage(message);
+    try {
+      const message = await this.channel.messages.fetch(id);
+      return DiscordJsMessageImpl.fromJsFetchedMessage(message);
+    } catch (e) {
+      DiscordAPIErrorHandler.handleDiscordJsErrors(
+        e,
+        DiscordJsTextChannelImpl.logger,
+      );
+
+      DiscordJsTextChannelImpl.logger.error(e);
+      throw e;
+    }
   }
 
   public async fetchMessages(
     options?: MessageFetchOptions,
   ): Promise<DiscordMessage[]> {
-    const messages = await CollectionUtils.fetchCollection<DiscordMessage>(
+    return await CollectionUtils.fetchCollection<DiscordMessage>(
       {
         maxPossibleRecordsToFetch: 100,
         maxRecords: options?.amount,
@@ -60,7 +74,6 @@ export class DiscordJsTextChannelImpl
         );
       },
     );
-    return messages;
   }
 
   public override toDTO(): DiscordTextChannelDTO {

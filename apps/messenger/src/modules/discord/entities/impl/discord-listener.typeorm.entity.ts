@@ -19,6 +19,7 @@ export class DiscordListenerTypeORMEntity
     name: "DLI_GUIID",
     type: "varchar",
     length: 256,
+    nullable: false,
   })
   public guildId: string;
 
@@ -26,6 +27,7 @@ export class DiscordListenerTypeORMEntity
     name: "DLI_CHAID",
     type: "varchar",
     length: 256,
+    nullable: false,
   })
   public channelId: string;
 }

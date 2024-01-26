@@ -3,6 +3,7 @@ import { AssertQueueOptions } from "../types/assert-queue-options.type";
 import { BindQueueToExchangeOptions } from "../types/bind-queue-to-exchange-options.type";
 import { AMQPBinding } from "./amqp-binding";
 import { AMQPExchange } from "./amqp-exchange";
+import { AMQPMessage } from "./amqp-message";
 import { AMQPQueue } from "./amqp-queue";
 
 export interface AMQPChannel {
@@ -10,9 +11,19 @@ export interface AMQPChannel {
   readonly jsonSerialization?: boolean;
   readonly name?: string;
   readonly publishTimeoutMs?: number;
-  assertQueue<T>(options: AssertQueueOptions<T>): Promise<AMQPQueue<T>>;
+  assertQueue(options: AssertQueueOptions): Promise<AMQPQueue>;
   assertExchange(options: AssertExchangeOptions): Promise<AMQPExchange>;
-  bindQueueToExchange<T>(
-    options: BindQueueToExchangeOptions<T>,
-  ): Promise<AMQPBinding<T>>;
+  bindQueueToExchange(
+    options: BindQueueToExchangeOptions,
+  ): Promise<AMQPBinding>;
+  listenQueue<T>(
+    queue: AMQPQueue,
+    onMessage: (msg: AMQPMessage<T>) => Promise<void>,
+  ): Promise<void>;
+  sendMessage<T>(queue: AMQPQueue, msg: T): Promise<void>;
+  sendMessage<T>(
+    exchange: AMQPExchange,
+    routingKey: string,
+    msg: T,
+  ): Promise<void>;
 }

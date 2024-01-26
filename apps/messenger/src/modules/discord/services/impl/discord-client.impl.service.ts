@@ -1,7 +1,6 @@
 import {
   Inject,
   Injectable,
-  Logger,
   OnModuleDestroy,
   OnModuleInit,
   forwardRef,
@@ -21,6 +20,8 @@ import { DiscordCommandRepository } from "../../repositories/discord-command.rep
 import { DiscordSlashCommandHandler } from "../../handlers/discord-slash-command.handler";
 import { DiscordJsSlashCommandInteractionImpl } from "../../client/business/impl/discord-js-slash-command-interaction.impl";
 import { CollectionUtils } from "src/utils/collection-utils";
+import { DiscordAMQPService } from "../../amqp/discord-amqp.service";
+import { LoggerUtils } from "src/utils/logger-utils";
 
 @Injectable()
 export class DiscordClientServiceImpl
@@ -31,12 +32,11 @@ export class DiscordClientServiceImpl
   private readonly service: DiscordService;
   private readonly commandsRepository: DiscordCommandRepository;
   private readonly commandHandler: DiscordSlashCommandHandler;
+  private readonly amqpService: DiscordAMQPService;
   private _textChannelListener: DiscordTextChannelListener;
   private _client: LoggedDiscordClient;
 
-  private static readonly logger: Logger = new Logger(
-    DiscordClientServiceImpl.name,
-  );
+  private static readonly logger = LoggerUtils.from(DiscordClientServiceImpl);
 
   public constructor(
     @Inject(DiscordNetworkHandler) networkHandler: DiscordNetworkHandler,
@@ -46,12 +46,14 @@ export class DiscordClientServiceImpl
     commandsRepository: DiscordCommandRepository,
     @Inject(DiscordSlashCommandHandler)
     commandHandler: DiscordSlashCommandHandler,
+    @Inject(DiscordAMQPService) amqpService: DiscordAMQPService,
   ) {
     this.networkHandler = networkHandler;
     this.envService = envService;
     this.service = service;
     this.commandsRepository = commandsRepository;
     this.commandHandler = commandHandler;
+    this.amqpService = amqpService;
   }
 
   public async onModuleInit() {
@@ -84,7 +86,7 @@ export class DiscordClientServiceImpl
         const guildFetched = await guild.fetch();
         await guildFetched.removeAllCommands();
 
-        CollectionUtils.asyncForEach(
+        await CollectionUtils.asyncForEach(
           this.commandsRepository.commands,
           async (command) => {
             await guildFetched.addCommand(command);
@@ -105,7 +107,9 @@ export class DiscordClientServiceImpl
 
       const chatInteraction =
         DiscordJsSlashCommandInteractionImpl.fromJsInteraction(interaction);
-      this.commandHandler.handleSlashCommandByInteraction(chatInteraction);
+      await this.commandHandler.handleSlashCommandByInteraction(
+        chatInteraction,
+      );
     });
   }
 
@@ -120,7 +124,7 @@ export class DiscordClientServiceImpl
       const messageParsed = DiscordJsMessageImpl.fromJsFetchedMessage(
         message as Message<true>,
       );
-      this.textChannelListener.onMessageCreated(messageParsed);
+      await this.textChannelListener.onMessageCreated(messageParsed);
     });
   }
 
@@ -128,7 +132,7 @@ export class DiscordClientServiceImpl
     client.on("messageDelete", async (message) => {
       const messageParsed = DiscordJsMessageImpl.fromJsMessage(message);
       if (messageParsed) {
-        this.textChannelListener.onMessageDeleted(messageParsed);
+        await this.textChannelListener.onMessageDeleted(messageParsed);
       }
     });
   }
@@ -137,7 +141,7 @@ export class DiscordClientServiceImpl
     client.on("messageUpdate", async (message) => {
       const messageParsed = DiscordJsMessageImpl.fromJsMessage(message);
       if (messageParsed) {
-        this.textChannelListener.onMessageDeleted(messageParsed);
+        await this.textChannelListener.onMessageEdited(messageParsed);
       }
     });
   }
@@ -149,7 +153,10 @@ export class DiscordClientServiceImpl
       client,
       this.envService.discordToken,
     );
-    this._textChannelListener = new DiscordJsTextChannelListener(this.service);
+    this._textChannelListener = new DiscordJsTextChannelListener(
+      this.service,
+      this.amqpService,
+    );
 
     return await (this._client as LoggedDiscordJsClientImpl).getClientAsTrue();
   }

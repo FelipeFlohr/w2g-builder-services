@@ -1,14 +1,14 @@
 import { DiscordAPIError, Guild, NonThreadGuildBasedChannel } from "discord.js";
 import { DiscordGuild } from "../discord-guild";
-import { DiscordJsGuildOptions } from "../types/discord-js-guild-options.type";
+import { DiscordJsGuildOptions } from "./types/discord-js-guild-options.type";
 import { DiscordChannel } from "../discord-channel";
 import { DiscordJsChannelImpl } from "./discord-js-channel.impl";
 import { DiscordGuildDTO } from "src/modules/discord/models/discord-guild.dto";
 import { DiscordErrorCodeEnum } from "src/utils/discord-error-code.enum";
-import { Logger } from "@nestjs/common";
 import { DiscordAPIErrorHandler } from "../handlers/discord-api-error.handler";
 import { DiscordSlashCommand } from "../discord-slash-command";
 import { DiscordJsSlashCommandImpl } from "./discord-js-slash-command.impl";
+import { LoggerUtils } from "src/utils/logger-utils";
 
 export class DiscordJsGuildImpl implements DiscordGuild {
   public readonly applicationId?: string;
@@ -22,12 +22,12 @@ export class DiscordJsGuildImpl implements DiscordGuild {
   public readonly large: boolean;
   private readonly guild: Guild;
 
-  private static readonly logger = new Logger(DiscordJsGuildImpl.name);
+  private static readonly logger = LoggerUtils.from(DiscordJsGuildImpl);
 
   public constructor(options: DiscordJsGuildOptions) {
     this.applicationId = options.applicationId;
     this.memberCount = options.memberCount;
-    this.available = options.avaiable;
+    this.available = options.available;
     this.createdAt = options.createdAt;
     this.id = options.id;
     this.joinedAt = options.joinedAt;
@@ -39,7 +39,7 @@ export class DiscordJsGuildImpl implements DiscordGuild {
 
   public static fromGuild(guild: Guild): DiscordJsGuildImpl {
     return new DiscordJsGuildImpl({
-      avaiable: guild.available,
+      available: guild.available,
       createdAt: guild.createdAt,
       id: guild.id,
       joinedAt: guild.joinedAt,
