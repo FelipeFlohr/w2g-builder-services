@@ -71,6 +71,15 @@ export class RedisCacheServiceImpl implements CacheService, OnModuleInit {
     return res > 0;
   }
 
+  public async getKeys(pattern: string, parsed = true): Promise<string[]> {
+    if (parsed) {
+      pattern = this.getParsedKey(pattern);
+    }
+
+    const keys = await this.client.keys(pattern);
+    return keys.map((key) => key.replace(this.getCacheKeyPrefix(), ""));
+  }
+
   private createClient(
     url: URL,
   ): Promise<RedisClientType<RedisModules, RedisFunctions, RedisScripts>> {

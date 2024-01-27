@@ -7,9 +7,7 @@ export interface DiscordListenerRepository {
   findListenerByDTO(
     listener: DiscordTextChannelListenerDTO,
   ): Promise<DiscordListenerEntity | undefined>;
+  findAllListeners(): Promise<Array<DiscordListenerEntity>>;
 }
 
 export const DiscordListenerRepository = Symbol("DiscordListenerRepository");
-export const DiscordListenerCacheRepository = Symbol(
-  "DiscordListenerCacheRepository",
-);

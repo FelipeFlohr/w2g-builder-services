@@ -78,6 +78,17 @@ export class CollectionUtils {
     }
   }
 
+  public static removeDuplicated<T extends Equatable<T>>(array: Array<T>) {
+    const res: Array<T> = [];
+    for (const item of array) {
+      if (res.every((i) => !i.equals(item))) {
+        res.push(item);
+      }
+    }
+
+    return res;
+  }
+
   private constructor() {}
 
   private static lastFetchReturnedRecords<T>(

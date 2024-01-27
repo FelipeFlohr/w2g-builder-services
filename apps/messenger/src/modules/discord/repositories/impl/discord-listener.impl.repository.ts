@@ -1,8 +1,5 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import {
-  DiscordListenerCacheRepository,
-  DiscordListenerRepository,
-} from "../discord-listener.repository";
+import { DiscordListenerRepository } from "../discord-listener.repository";
 import { MessengerBaseTypeORMRepository } from "src/database/base/impl/messenger-base-typeorm.repository";
 import { DiscordListenerTypeORMEntity } from "../../entities/impl/discord-listener.typeorm.entity";
 import { DatabaseService } from "src/database/database.service";
@@ -10,6 +7,8 @@ import { DiscordListenerEntity } from "../../entities/discord-listener.entity";
 import { TypeUtils } from "src/utils/type-utils";
 import { DiscordTextChannelListenerDTO } from "../../models/discord-text-channel-listener.dto";
 import { FindOptionsWhere } from "typeorm";
+import { DiscordListenerCacheRepository } from "../discord-listener-cache.repository";
+import { CollectionUtils } from "src/utils/collection-utils";
 
 @Injectable()
 export class DiscordListenerRepositoryImpl
@@ -65,5 +64,19 @@ export class DiscordListenerRepositoryImpl
       select: { id: true, channelId: true, guildId: true },
     });
     return TypeUtils.parseNullToUndefined(res);
+  }
+
+  public async findAllListeners(): Promise<DiscordListenerEntity[]> {
+    const cachedListeners = await this.cacheRepository.findAllListeners();
+    const cachedListenersId = cachedListeners.map((listener) => listener.id);
+
+    const res = await this.getRepository()
+      .createQueryBuilder("dli")
+      .where("dli.id NOT IN (:...listenersId)", {
+        listenersId: cachedListenersId,
+      })
+      .getMany();
+
+    return CollectionUtils.removeDuplicated([...cachedListeners, ...res]);
   }
 }

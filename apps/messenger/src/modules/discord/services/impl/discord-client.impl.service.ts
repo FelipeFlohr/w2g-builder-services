@@ -75,6 +75,10 @@ export class DiscordClientServiceImpl
     await (this.client as LoggedDiscordJsClientImpl).client.destroy();
   }
 
+  private async cacheAllMessagesAfterDelimitation(): Promise<void> {
+    const listeners = await 
+  }
+
   private async setupSlashCommands(): Promise<void> {
     try {
       const guildInfos = await this.service.fetchGuilds();

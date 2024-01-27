@@ -30,4 +30,8 @@ export class DiscordListenerTypeORMEntity
     nullable: false,
   })
   public channelId: string;
+
+  public equals(val: DiscordListenerEntity): boolean {
+    return val.id === this.id;
+  }
 }
