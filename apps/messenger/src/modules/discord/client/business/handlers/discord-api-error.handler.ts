@@ -8,10 +8,7 @@ export class DiscordAPIErrorHandler {
   }
 
   private static handleNumberTypeCoerce(e: any, logger: Logger): void {
-    if (
-      e instanceof DiscordAPIError &&
-      e.code === DiscordErrorCodeEnum.NUMBER_TYPE_COERCE
-    ) {
+    if (e instanceof DiscordAPIError && e.code === DiscordErrorCodeEnum.NUMBER_TYPE_COERCE) {
       logger.error(e);
       throw new UnprocessableEntityException(e.message);
     }

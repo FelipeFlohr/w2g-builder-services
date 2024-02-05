@@ -6,10 +6,7 @@ import { LoggedDiscordJsClientImpl } from "../../client/impl/logged-discord-js-c
 
 @Injectable()
 export class DiscordNetworkHandlerImpl implements DiscordNetworkHandler {
-  public async login(
-    client: DiscordClient,
-    token: string,
-  ): Promise<LoggedDiscordClient> {
+  public async login(client: DiscordClient, token: string): Promise<LoggedDiscordClient> {
     const clientLogged = await client.login(token);
     return LoggedDiscordJsClientImpl.fromClient(clientLogged);
   }

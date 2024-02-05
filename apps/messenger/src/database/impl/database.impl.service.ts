@@ -12,6 +12,7 @@ import { DiscordDelimitationMessageTypeORMEntity } from "src/modules/discord/ent
 import { Migration31705869159816 } from "../migrations/1705869159816-migration3";
 import { LoggerUtils } from "src/utils/logger-utils";
 import { Migration41706220115643 } from "../migrations/1706220115643-migration4";
+import { Migration51706976795330 } from "../migrations/1706976795330-migration5";
 
 @Injectable()
 export class DatabaseServiceImpl implements OnModuleInit {
@@ -20,9 +21,7 @@ export class DatabaseServiceImpl implements OnModuleInit {
 
   private static readonly logger = LoggerUtils.from(DatabaseServiceImpl);
 
-  public constructor(
-    @Inject(EnvironmentSettingsService) envService: EnvironmentSettingsService,
-  ) {
+  public constructor(@Inject(EnvironmentSettingsService) envService: EnvironmentSettingsService) {
     this.envService = envService;
     this.datasource = new DataSource({
       type: "postgres",
@@ -42,6 +41,7 @@ export class DatabaseServiceImpl implements OnModuleInit {
         Migration21705866336900,
         Migration31705869159816,
         Migration41706220115643,
+        Migration51706976795330,
       ],
       synchronize: envService.application.env === "development",
       logger: new TypeORMLogger("all"),
@@ -60,7 +60,5 @@ export class DatabaseServiceImpl implements OnModuleInit {
   }
 }
 
-const service = new DatabaseServiceImpl(
-  EnvironmentSettingsServiceImpl.getInstance(),
-);
+const service = new DatabaseServiceImpl(EnvironmentSettingsServiceImpl.getInstance());
 export const datasource = service.datasource;

@@ -15,19 +15,14 @@ export class AddListenerCommand extends DiscordJsSlashCommandImpl {
     this.service = service;
   }
 
-  public async onInteraction(
-    interaction: DiscordSlashCommandInteraction,
-  ): Promise<void> {
+  public async onInteraction(interaction: DiscordSlashCommandInteraction): Promise<void> {
     if (interaction.guildId) {
-      const listener = new DiscordTextChannelListenerDTO(
-        interaction.guildId,
-        interaction.channelId,
-      );
+      const listener = new DiscordTextChannelListenerDTO(interaction.guildId, interaction.channelId);
 
       if (await this.service.listenerExists(listener)) {
         await interaction.reply("Listener already exists on this channel.");
       } else {
-        await this.service.addTextChannelListener(listener);
+        await this.service.saveTextChannelListener(listener);
         await interaction.reply("Listener added to channel.");
       }
     } else {

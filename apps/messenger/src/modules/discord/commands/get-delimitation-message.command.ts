@@ -1,15 +1,15 @@
+import { StringUtils } from "src/utils/string-utils";
 import { DiscordSlashCommandInteraction } from "../client/business/discord-slash-command-interaction";
 import { DiscordJsSlashCommandImpl } from "../client/business/impl/discord-js-slash-command.impl";
-import { DiscordTextChannelListenerDTO } from "../models/discord-text-channel-listener.dto";
 import { DiscordService } from "../services/discord.service";
 
-export class RemoveListenerCommand extends DiscordJsSlashCommandImpl {
+export class GetDelimitationMessageCommand extends DiscordJsSlashCommandImpl {
   private readonly service: DiscordService;
 
   public constructor(service: DiscordService) {
     super({
-      name: "removelistener",
-      description: "Removes the listener from this channel",
+      name: "getdelimitationmessage",
+      description: "Retrieves the link of the delimitation message",
       dmPermission: false,
     });
     this.service = service;
@@ -17,13 +17,15 @@ export class RemoveListenerCommand extends DiscordJsSlashCommandImpl {
 
   public async onInteraction(interaction: DiscordSlashCommandInteraction): Promise<void> {
     if (interaction.guildId) {
-      const listener = new DiscordTextChannelListenerDTO(interaction.guildId, interaction.channelId);
+      const url = await this.service.getDelimitationMessageLinkByGuildAndChannelId(
+        interaction.guildId,
+        interaction.channelId,
+      );
 
-      if (await this.service.listenerExists(listener)) {
-        await this.service.deleteListener(listener);
-        await interaction.reply("Deleted listener from channel");
+      if (StringUtils.isNotBlank(url)) {
+        await interaction.reply(url);
       } else {
-        await interaction.reply("No listener was found.");
+        await interaction.reply("No delimitation message found on this channel.");
       }
     } else {
       await this.guildDoesNotExistsInteraction(interaction);

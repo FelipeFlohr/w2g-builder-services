@@ -6,17 +6,13 @@ import { Inject } from "@nestjs/common";
 import { DatabaseService } from "src/database/database.service";
 import { ClassType } from "src/utils/type-utils";
 
-export abstract class MessengerBaseTypeORMRepository<
-  T extends MessengerBaseEntity,
-> implements MessengerBaseRepository<T>
+export abstract class MessengerBaseTypeORMRepository<T extends MessengerBaseEntity<T>>
+  implements MessengerBaseRepository<T>
 {
   public readonly clazz: ClassType<T>;
   protected readonly databaseService: DatabaseServiceImpl;
 
-  protected constructor(
-    @Inject(DatabaseService) databaseService: DatabaseService,
-    clazz: ClassType<T>,
-  ) {
+  protected constructor(@Inject(DatabaseService) databaseService: DatabaseService, clazz: ClassType<T>) {
     this.databaseService = databaseService as DatabaseServiceImpl;
     this.clazz = clazz;
   }

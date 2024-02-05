@@ -12,19 +12,13 @@ export class CollectionUtils {
    */
   public static async fetchCollection<T>(
     options: FetchCollectionOptions,
-    fetchFunc: (
-      amountToFetch: number,
-      lastItemFetched: T | undefined,
-    ) => Promise<Array<T>>,
+    fetchFunc: (amountToFetch: number, lastItemFetched: T | undefined) => Promise<Array<T>>,
   ): Promise<Array<T>> {
     let records: Array<T> = [];
     let lastFetchedRecords: Array<T> = [];
 
     do {
-      lastFetchedRecords = await fetchFunc(
-        this.remainingItemsToFetch(options, records),
-        records[records.length - 1],
-      );
+      lastFetchedRecords = await fetchFunc(this.remainingItemsToFetch(options, records), records[records.length - 1]);
       records = [...records, ...lastFetchedRecords];
     } while (
       this.lastFetchReturnedRecords(lastFetchedRecords) &&
@@ -34,10 +28,7 @@ export class CollectionUtils {
     return records;
   }
 
-  public static arrayHasDuplicatedItems<T extends Equatable<T>>(
-    arr: Array<T>,
-    val: T,
-  ) {
+  public static arrayHasDuplicatedItems<T extends Equatable<T>>(arr: Array<T>, val: T) {
     const results = arr.filter((i) => i.equals(val));
     return results.length > 1;
   }
@@ -89,11 +80,20 @@ export class CollectionUtils {
     return res;
   }
 
+  public static isEmpty<T>(array?: Array<T>): boolean {
+    if (array) {
+      return array.length === 0;
+    }
+    return true;
+  }
+
+  public static isNotEmpty<T>(array?: Array<T>): boolean {
+    return !this.isEmpty(array);
+  }
+
   private constructor() {}
 
-  private static lastFetchReturnedRecords<T>(
-    lastFetchedRecords: Array<T>,
-  ): boolean {
+  private static lastFetchReturnedRecords<T>(lastFetchedRecords: Array<T>): boolean {
     return lastFetchedRecords.length > 0;
   }
 
@@ -102,22 +102,15 @@ export class CollectionUtils {
     records: Array<T>,
     lastFetchedRecords: Array<T>,
   ): boolean {
-    return (
-      options.maxRecords === records.length ||
-      lastFetchedRecords.length < options.maxPossibleRecordsToFetch
-    );
+    return options.maxRecords === records.length || lastFetchedRecords.length < options.maxPossibleRecordsToFetch;
   }
 
-  private static remainingItemsToFetch<T>(
-    options: FetchCollectionOptions,
-    records: Array<T>,
-  ): number {
+  private static remainingItemsToFetch<T>(options: FetchCollectionOptions, records: Array<T>): number {
     if (options.maxRecords == undefined) {
       return options.maxPossibleRecordsToFetch;
     }
 
-    const nextFetchWillBypassLimit =
-      records.length + options.maxPossibleRecordsToFetch > options.maxRecords;
+    const nextFetchWillBypassLimit = records.length + options.maxPossibleRecordsToFetch > options.maxRecords;
     if (nextFetchWillBypassLimit) {
       return options.maxRecords - records.length;
     }

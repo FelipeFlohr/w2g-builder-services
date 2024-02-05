@@ -2,9 +2,7 @@ import { Column } from "typeorm";
 import { MessengerBaseEntity } from "../messenger-base.entity";
 import { PostgresTypesHelper } from "src/database/helpers/postgres-types.helper";
 
-export abstract class MessengerBaseTypeORMEntity
-  implements MessengerBaseEntity
-{
+export abstract class MessengerBaseTypeORMEntity<T> implements MessengerBaseEntity<T> {
   @Column({
     name: "CREATED_AT",
     default: PostgresTypesHelper.CURRENT_TIMESTAMP_DEFAULT,
@@ -28,4 +26,6 @@ export abstract class MessengerBaseTypeORMEntity
     nullable: false,
   })
   public version: number;
+
+  public abstract equals(val: T): boolean;
 }

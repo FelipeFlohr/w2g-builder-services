@@ -16,6 +16,7 @@ export class DiscordMessageDTO {
   public readonly url: string;
   public readonly guildId: string;
   public readonly channelId: string;
+  public readonly deleted: boolean;
 
   public constructor(options: DiscordMessageDTOOptions) {
     this.applicationId = options.applicationId;
@@ -32,5 +33,6 @@ export class DiscordMessageDTO {
     this.url = options.url;
     this.guildId = options.guildId;
     this.channelId = options.channelId;
+    this.deleted = options.deleted;
   }
 }

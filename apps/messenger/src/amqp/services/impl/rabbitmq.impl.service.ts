@@ -17,9 +17,7 @@ export class RabbitMQServiceImpl implements AMQPService, OnModuleInit {
   private static readonly APPLICATION_CHANNEL_NAME = "messenger-channel";
   private static readonly RABBITMQ_TIMEOUT = 15 * 1000;
 
-  public constructor(
-    @Inject(EnvironmentSettingsService) env: EnvironmentSettingsService,
-  ) {
+  public constructor(@Inject(EnvironmentSettingsService) env: EnvironmentSettingsService) {
     this.env = env;
   }
 

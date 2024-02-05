@@ -7,9 +7,7 @@ export class ChannelIsNotTextChannelError extends InternalServerErrorException {
     super(ChannelIsNotTextChannelError.getMessage(channel));
   }
 
-  private static getMessage(
-    channel: DiscordChannel | DiscordJsChannelImpl,
-  ): string {
+  private static getMessage(channel: DiscordChannel | DiscordJsChannelImpl): string {
     if (channel instanceof DiscordJsChannelImpl) {
       return `Channel is not text channel. Object: ${channel.channel}`;
     }

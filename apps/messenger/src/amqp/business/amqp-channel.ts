@@ -13,17 +13,8 @@ export interface AMQPChannel {
   readonly publishTimeoutMs?: number;
   assertQueue(options: AssertQueueOptions): Promise<AMQPQueue>;
   assertExchange(options: AssertExchangeOptions): Promise<AMQPExchange>;
-  bindQueueToExchange(
-    options: BindQueueToExchangeOptions,
-  ): Promise<AMQPBinding>;
-  listenQueue<T>(
-    queue: AMQPQueue,
-    onMessage: (msg: AMQPMessage<T>) => Promise<void>,
-  ): Promise<void>;
+  bindQueueToExchange(options: BindQueueToExchangeOptions): Promise<AMQPBinding>;
+  listenQueue<T>(queue: AMQPQueue, onMessage: (msg: AMQPMessage<T>) => Promise<void>): Promise<void>;
   sendMessage<T>(queue: AMQPQueue, msg: T): Promise<void>;
-  sendMessage<T>(
-    exchange: AMQPExchange,
-    routingKey: string,
-    msg: T,
-  ): Promise<void>;
+  sendMessage<T>(exchange: AMQPExchange, routingKey: string, msg: T): Promise<void>;
 }

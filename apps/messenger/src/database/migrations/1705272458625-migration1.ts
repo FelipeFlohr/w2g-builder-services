@@ -13,9 +13,7 @@ export class Migration11705272458625 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_212bd5254243469d95222a190c"`,
-    );
+    await queryRunner.query(`DROP INDEX "public"."IDX_212bd5254243469d95222a190c"`);
     await queryRunner.query(`DROP TABLE "TB_DISCORD_LISTENER"`);
   }
 }

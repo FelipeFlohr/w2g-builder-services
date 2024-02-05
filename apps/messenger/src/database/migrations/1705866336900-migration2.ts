@@ -19,12 +19,8 @@ export class Migration21705866336900 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "TB_DISCORD_MESSAGE" DROP CONSTRAINT "FK_9f6e8167d55d903b8dfd18e9615"`,
-    );
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_50c5a4ec54013502a68724372e"`,
-    );
+    await queryRunner.query(`ALTER TABLE "TB_DISCORD_MESSAGE" DROP CONSTRAINT "FK_9f6e8167d55d903b8dfd18e9615"`);
+    await queryRunner.query(`DROP INDEX "public"."IDX_50c5a4ec54013502a68724372e"`);
     await queryRunner.query(`DROP TABLE "TB_DISCORD_MESSAGE"`);
     await queryRunner.query(`DROP TABLE "TB_DISCORD_MESSAGE_AUTHOR"`);
   }

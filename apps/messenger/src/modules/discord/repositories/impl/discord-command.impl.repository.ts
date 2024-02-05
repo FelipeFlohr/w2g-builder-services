@@ -8,17 +8,14 @@ import { HasListenerCommand } from "../../commands/has-listener.command";
 import { RemoveListenerCommand } from "../../commands/remove-listener.command";
 import { DelimitationMessageCommand } from "../../commands/delimitation-message.command";
 import { LoggerUtils } from "src/utils/logger-utils";
+import { GetDelimitationMessageCommand } from "../../commands/get-delimitation-message.command";
 
 @Injectable()
-export class DiscordCommandRepositoryImpl
-  implements DiscordCommandRepository, OnModuleInit
-{
+export class DiscordCommandRepositoryImpl implements DiscordCommandRepository, OnModuleInit {
   public readonly commands: DiscordSlashCommand[];
   private readonly service: DiscordService;
 
-  private static readonly logger = LoggerUtils.from(
-    DiscordCommandRepositoryImpl,
-  );
+  private static readonly logger = LoggerUtils.from(DiscordCommandRepositoryImpl);
 
   public constructor(@Inject(DiscordService) service: DiscordService) {
     this.service = service;
@@ -35,13 +32,9 @@ export class DiscordCommandRepositoryImpl
     const hasListener = new HasListenerCommand(this.service);
     const removeListener = new RemoveListenerCommand(this.service);
     const delimitationMessage = new DelimitationMessageCommand(this.service);
+    const getDelimitationMessage = new GetDelimitationMessageCommand(this.service);
 
-    this.commands.push(
-      addListener,
-      hasListener,
-      removeListener,
-      delimitationMessage,
-    );
+    this.commands.push(addListener, hasListener, removeListener, delimitationMessage, getDelimitationMessage);
   }
 
   private validateDuplicatedCommands(): void {

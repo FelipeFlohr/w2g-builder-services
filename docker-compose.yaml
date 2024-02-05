@@ -2,7 +2,7 @@ version: "3.9"
 name: "w2g-builder-services"
 services:
   rabbitmq:
-    image: rabbitmq:3.12-management
+    image: rabbitmq
     container_name: w2g-builder-rabbitmq-1
     restart: always
     ports:

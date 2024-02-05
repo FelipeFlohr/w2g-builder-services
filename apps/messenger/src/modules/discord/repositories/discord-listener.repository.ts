@@ -4,9 +4,7 @@ import { DiscordTextChannelListenerDTO } from "../models/discord-text-channel-li
 export interface DiscordListenerRepository {
   saveListener(listener: DiscordTextChannelListenerDTO): Promise<void>;
   deleteListener(listener: DiscordTextChannelListenerDTO): Promise<void>;
-  findListenerByDTO(
-    listener: DiscordTextChannelListenerDTO,
-  ): Promise<DiscordListenerEntity | undefined>;
+  findListenerByDTO(listener: DiscordTextChannelListenerDTO): Promise<DiscordListenerEntity | undefined>;
   findAllListeners(): Promise<Array<DiscordListenerEntity>>;
 }
 

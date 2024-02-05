@@ -13,13 +13,12 @@ export class DelimitationMessageCommand extends DiscordJsSlashCommandImpl {
 
   private static readonly messageIdParameterName = "messageid";
 
-  private static readonly messageIdParameter =
-    new DiscordJsSlashCommandParameterImpl({
-      name: DelimitationMessageCommand.messageIdParameterName,
-      description: "ID of the message to mark as delimitation",
-      required: true,
-      type: DiscordParameterTypeEnum.STRING,
-    });
+  private static readonly messageIdParameter = new DiscordJsSlashCommandParameterImpl({
+    name: DelimitationMessageCommand.messageIdParameterName,
+    description: "ID of the message to mark as delimitation",
+    required: true,
+    type: DiscordParameterTypeEnum.STRING,
+  });
 
   public constructor(service: DiscordService) {
     super({
@@ -31,30 +30,19 @@ export class DelimitationMessageCommand extends DiscordJsSlashCommandImpl {
     this.service = service;
   }
 
-  public async onInteraction(
-    interaction: DiscordSlashCommandInteraction,
-  ): Promise<void> {
+  public async onInteraction(interaction: DiscordSlashCommandInteraction): Promise<void> {
     if (interaction.guildId) {
-      const listener = new DiscordTextChannelListenerDTO(
-        interaction.guildId,
-        interaction.channelId,
-      );
+      const listener = new DiscordTextChannelListenerDTO(interaction.guildId, interaction.channelId);
 
       if (await this.service.listenerExists(listener)) {
-        const messageId = interaction.data[
-          DelimitationMessageCommand.messageIdParameterName
-        ] as string;
-        const message = await this.getMessageByMessageId(
-          interaction.guildId,
-          interaction.channelId,
-          messageId,
-        );
+        const messageId = interaction.data[DelimitationMessageCommand.messageIdParameterName] as string;
+        const message = await this.getMessageByMessageId(interaction.guildId, interaction.channelId, messageId);
 
         if (message == undefined) {
           await interaction.reply("No message found with given ID.");
         } else {
           try {
-            await this.service.createDelimitationMessage(message);
+            await this.service.saveDelimitationMessage(message);
             await interaction.reply("Created delimitation message.");
           } catch (e) {
             if (e instanceof MessageIsAlreadyDelimitationError) {

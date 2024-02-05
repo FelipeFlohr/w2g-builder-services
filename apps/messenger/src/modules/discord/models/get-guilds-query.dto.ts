@@ -21,8 +21,7 @@ export class GetGuildsQueryDTO {
   public readonly before?: string;
 
   @ApiProperty({
-    description:
-      "Limits the amount of records to be fetched. No value means that it will retrieve all the guilds",
+    description: "Limits the amount of records to be fetched. No value means that it will retrieve all the guilds",
     format: "integer",
     required: false,
   })

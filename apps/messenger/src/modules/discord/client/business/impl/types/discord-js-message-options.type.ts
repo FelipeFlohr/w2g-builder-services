@@ -17,4 +17,5 @@ export type DiscordJsMessageOptions = {
   readonly guildId: string;
   readonly channelId: string;
   readonly message: Message<true>;
+  readonly deleted?: boolean;
 };

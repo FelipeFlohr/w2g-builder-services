@@ -4,9 +4,7 @@ import { DiscordTextChannelListenerDTO } from "../../models/discord-text-channel
 import { DiscordService } from "../../services/discord.service";
 import { DiscordTextChannelListener } from "../discord-text-channel-listener";
 
-export class DiscordJsTextChannelListener
-  implements DiscordTextChannelListener
-{
+export class DiscordJsTextChannelListener implements DiscordTextChannelListener {
   private readonly service: DiscordService;
   private readonly amqp: DiscordAMQPService;
 
@@ -18,26 +16,35 @@ export class DiscordJsTextChannelListener
   public async onMessageCreated(message: DiscordMessage): Promise<void> {
     if (await this.listenerExists(message)) {
       const messageFetched = await message.fetch();
-      await this.amqp.sendCreatedMessage(messageFetched.toDTO());
+      const messageDTO = messageFetched.toDTO();
+
+      await this.service.saveMessage(messageDTO, true);
+      await this.amqp.sendCreatedMessage(messageDTO);
     }
   }
 
   public async onMessageDeleted(message: DiscordMessage): Promise<void> {
     if (await this.listenerExists(message)) {
       const messageFetched = await message.fetch();
-      await this.amqp.sendDeletedMessage(messageFetched.toDTO());
+      const messageDTO = messageFetched.toDTO();
+
+      await this.service.softDeleteMessage(messageDTO);
+      await this.amqp.sendDeletedMessage(messageDTO);
     }
   }
 
   public async onMessageEdited(message: DiscordMessage): Promise<void> {
-    // throw new Error("Method not implemented.");
+    if (await this.listenerExists(message)) {
+      const messageFetched = await message.fetch();
+      const messageDTO = messageFetched.toDTO();
+
+      await this.service.updateMessage(messageDTO);
+      await this.amqp.sendUpdatedMessage(messageDTO);
+    }
   }
 
   private async listenerExists(message: DiscordMessage): Promise<boolean> {
-    const listener = new DiscordTextChannelListenerDTO(
-      message.guildId,
-      message.channelId,
-    );
+    const listener = new DiscordTextChannelListenerDTO(message.guildId, message.channelId);
     return await this.service.listenerExists(listener);
   }
 }

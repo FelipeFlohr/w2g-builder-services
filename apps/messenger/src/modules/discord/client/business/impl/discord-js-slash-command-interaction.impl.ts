@@ -5,18 +5,14 @@ import { DiscordJsSlashCommandInteractionOptions } from "./types/discord-js-slas
 import { DiscordErrorCodeEnum } from "src/utils/discord-error-code.enum";
 import { LoggerUtils } from "src/utils/logger-utils";
 
-export class DiscordJsSlashCommandInteractionImpl
-  implements DiscordSlashCommandInteraction
-{
+export class DiscordJsSlashCommandInteractionImpl implements DiscordSlashCommandInteraction {
   public readonly channelId: string;
   public readonly guildId?: string;
   public readonly commandName: string;
   public readonly data: Record<string, unknown>;
   private readonly interaction: ChatInputCommandInteraction;
 
-  private static readonly logger = LoggerUtils.from(
-    DiscordJsSlashCommandInteractionImpl,
-  );
+  private static readonly logger = LoggerUtils.from(DiscordJsSlashCommandInteractionImpl);
 
   public constructor(options: DiscordJsSlashCommandInteractionOptions) {
     this.channelId = options.channelId;
@@ -30,10 +26,7 @@ export class DiscordJsSlashCommandInteractionImpl
     try {
       await this.interaction.reply(message);
     } catch (e) {
-      if (
-        e instanceof DiscordAPIError &&
-        e.code === DiscordErrorCodeEnum.UNKNOWN_INTERACTION
-      ) {
+      if (e instanceof DiscordAPIError && e.code === DiscordErrorCodeEnum.UNKNOWN_INTERACTION) {
         DiscordJsSlashCommandInteractionImpl.logger.error(e);
         return;
       }
@@ -41,9 +34,7 @@ export class DiscordJsSlashCommandInteractionImpl
     }
   }
 
-  public static fromJsInteraction(
-    interaction: ChatInputCommandInteraction,
-  ): DiscordJsSlashCommandInteractionImpl {
+  public static fromJsInteraction(interaction: ChatInputCommandInteraction): DiscordJsSlashCommandInteractionImpl {
     const data: Record<string, unknown> = {};
     for (const dataJs of interaction.options.data) {
       data[dataJs.name] = dataJs.value;

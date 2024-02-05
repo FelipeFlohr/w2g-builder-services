@@ -1,8 +1,4 @@
-import {
-  ApiProperty,
-  ApiPropertyOptional,
-  getSchemaPath,
-} from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { DiscordTextChannelDTOOptions } from "../types/discord-text-channel-dto-options.type";
 import { DiscordChannelDTO } from "./discord-channel.dto";
 import { ApiPropertiesUtils } from "src/utils/api-properties-utils";

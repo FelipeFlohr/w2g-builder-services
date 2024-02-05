@@ -25,9 +25,7 @@ export class DiscordJsGuildInfoImpl implements DiscordGuildInfo {
     this.authGuild = options.authGuild;
   }
 
-  public static fromOAuth2Guild(
-    discordJsGuild: OAuth2Guild,
-  ): DiscordJsGuildInfoImpl {
+  public static fromOAuth2Guild(discordJsGuild: OAuth2Guild): DiscordJsGuildInfoImpl {
     return new DiscordJsGuildInfoImpl({
       authGuild: discordJsGuild,
       createdAt: discordJsGuild.createdAt,

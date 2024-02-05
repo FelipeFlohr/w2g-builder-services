@@ -1,14 +1,7 @@
 import { MessengerBaseTypeORMEntity } from "src/database/base/impl/messenger-base-typeorm.entity";
 import { DiscordMessageEntity } from "../discord-message.entity";
 import { DiscordMessageAuthorEntity } from "../discord-message-author.entity";
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from "typeorm";
+import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { DiscordMessageAuthorTypeORMEntity } from "./discord-message-author.typeorm.entity";
 import { DiscordDelimitationMessageEntity } from "../discord-delimitation-message.entity";
 import { DiscordDelimitationMessageTypeORMEntity } from "./discord-delimitation-message.typeorm.entity";
@@ -18,7 +11,7 @@ import { DiscordDelimitationMessageTypeORMEntity } from "./discord-delimitation-
 })
 @Index(["messageId"], { unique: true })
 export class DiscordMessageTypeORMEntity
-  extends MessengerBaseTypeORMEntity
+  extends MessengerBaseTypeORMEntity<DiscordMessageEntity>
   implements DiscordMessageEntity
 {
   @PrimaryGeneratedColumn({
@@ -34,14 +27,11 @@ export class DiscordMessageTypeORMEntity
   })
   public applicationId?: string;
 
-  @OneToOne(
-    () => DiscordMessageAuthorTypeORMEntity,
-    (author) => author.message,
-    {
-      nullable: false,
-      cascade: true,
-    },
-  )
+  @OneToOne(() => DiscordMessageAuthorTypeORMEntity, (author) => author.message, {
+    nullable: false,
+    cascade: true,
+    onDelete: "CASCADE",
+  })
   @JoinColumn({
     name: "DME_DMAID",
   })
@@ -144,9 +134,18 @@ export class DiscordMessageTypeORMEntity
   })
   public messageCreatedAt: Date;
 
-  @OneToOne(
-    () => DiscordDelimitationMessageTypeORMEntity,
-    (delimitation) => delimitation.message,
-  )
+  @Column({
+    name: "DME_DEL",
+    type: "boolean",
+    nullable: false,
+    default: false,
+  })
+  public deleted: boolean;
+
+  @OneToOne(() => DiscordDelimitationMessageTypeORMEntity, (delimitation) => delimitation.message)
   public delimitation?: DiscordDelimitationMessageEntity;
+
+  public equals(val: DiscordMessageEntity): boolean {
+    return this.id === val.id;
+  }
 }

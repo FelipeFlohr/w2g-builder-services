@@ -30,19 +30,13 @@ export class GetMessagesQueryDTO {
   public readonly before?: string;
 
   @ApiProperty({
-    description:
-      "Limits the amount of records to be fetched. No value means that it will retrieve all the messages",
+    description: "Limits the amount of records to be fetched. No value means that it will retrieve all the messages",
     format: "integer",
     required: false,
   })
   public readonly limit?: number;
 
-  public constructor(
-    after?: string,
-    around?: string,
-    before?: string,
-    limit?: number,
-  ) {
+  public constructor(after?: string, around?: string, before?: string, limit?: number) {
     this.after = after;
     this.around = around;
     this.before = before;

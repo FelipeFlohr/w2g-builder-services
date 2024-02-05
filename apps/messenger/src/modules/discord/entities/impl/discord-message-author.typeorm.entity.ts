@@ -9,7 +9,7 @@ import { DiscordMessageAuthorTypeORMOptions } from "../types/discord-message-aut
   name: "TB_DISCORD_MESSAGE_AUTHOR",
 })
 export class DiscordMessageAuthorTypeORMEntity
-  extends MessengerBaseTypeORMEntity
+  extends MessengerBaseTypeORMEntity<DiscordMessageAuthorEntity>
   implements DiscordMessageAuthorEntity
 {
   @PrimaryGeneratedColumn({
@@ -125,5 +125,9 @@ export class DiscordMessageAuthorTypeORMEntity
       this.system = options.system;
       this.username = options.username;
     }
+  }
+
+  public equals(val: DiscordMessageAuthorEntity): boolean {
+    return this.id === val.id;
   }
 }

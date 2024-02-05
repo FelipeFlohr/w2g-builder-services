@@ -15,7 +15,7 @@ export class DiscordListenerRepositoryImpl
   extends MessengerBaseTypeORMRepository<DiscordListenerTypeORMEntity>
   implements DiscordListenerRepository
 {
-  private readonly cacheRepository: DiscordListenerRepository;
+  private readonly cacheRepository: DiscordListenerCacheRepository;
 
   public constructor(
     @Inject(DatabaseService) databaseService: DatabaseService,
@@ -26,9 +26,7 @@ export class DiscordListenerRepositoryImpl
     this.cacheRepository = cacheRepository;
   }
 
-  public async saveListener(
-    listener: DiscordTextChannelListenerDTO,
-  ): Promise<void> {
+  public async saveListener(listener: DiscordTextChannelListenerDTO): Promise<void> {
     await Promise.all([
       this.getRepository().save({
         guildId: listener.guildId,
@@ -38,9 +36,7 @@ export class DiscordListenerRepositoryImpl
     ]);
   }
 
-  public async deleteListener(
-    listener: DiscordTextChannelListenerDTO,
-  ): Promise<void> {
+  public async deleteListener(listener: DiscordTextChannelListenerDTO): Promise<void> {
     const criteria: FindOptionsWhere<DiscordListenerTypeORMEntity> = {
       channelId: listener.channelId,
       guildId: listener.guildId,
@@ -53,11 +49,9 @@ export class DiscordListenerRepositoryImpl
     }
   }
 
-  public async findListenerByDTO(
-    listener: DiscordTextChannelListenerDTO,
-  ): Promise<DiscordListenerEntity | undefined> {
+  public async findListenerByDTO(listener: DiscordTextChannelListenerDTO): Promise<DiscordListenerEntity | undefined> {
     const cacheVal = await this.cacheRepository.findListenerByDTO(listener);
-    if (cacheVal) return cacheVal;
+    if (cacheVal) return await this.findEntityByChannelAndGuildId(cacheVal.channelId, cacheVal.guildId);
 
     const res = await this.getRepository().findOne({
       where: { guildId: listener.guildId, channelId: listener.channelId },
@@ -68,15 +62,51 @@ export class DiscordListenerRepositoryImpl
 
   public async findAllListeners(): Promise<DiscordListenerEntity[]> {
     const cachedListeners = await this.cacheRepository.findAllListeners();
-    const cachedListenersId = cachedListeners.map((listener) => listener.id);
+    const cachedListenersChannelIds = cachedListeners.map((listener) => listener.channelId);
+    const cachedListenerGuildIds = cachedListeners.map((listener) => listener.guildId);
 
-    const res = await this.getRepository()
-      .createQueryBuilder("dli")
-      .where("dli.id NOT IN (:...listenersId)", {
-        listenersId: cachedListenersId,
-      })
-      .getMany();
+    let queryBuilder = this.getRepository().createQueryBuilder("dli");
+    if (CollectionUtils.isNotEmpty(cachedListenersChannelIds) && CollectionUtils.isNotEmpty(cachedListenerGuildIds)) {
+      queryBuilder = queryBuilder.where("dli.channelId NOT IN (:...channelsId) AND dli.guildId NOT IN (:...guildsId)", {
+        channelsId: cachedListenersChannelIds,
+        guildsId: cachedListenerGuildIds,
+      });
+    }
+    const res = await queryBuilder.getMany();
 
-    return CollectionUtils.removeDuplicated([...cachedListeners, ...res]);
+    const cachedListenersEntity = await CollectionUtils.asyncMap(
+      cachedListeners,
+      async (listener) => await this.findEntityByChannelAndGuildId(listener.channelId, listener.guildId),
+    );
+    const cachedListenersEntityNotNull = cachedListenersEntity.filter(
+      (entity) => entity != undefined,
+    ) as Array<DiscordListenerEntity>;
+    return CollectionUtils.removeDuplicated([...cachedListenersEntityNotNull, ...res]);
+  }
+
+  private async findEntityByChannelAndGuildId(
+    channelId: string,
+    guildId: string,
+  ): Promise<DiscordListenerEntity | undefined> {
+    const res = await this.getRepository().findOne({
+      select: {
+        channelId: false,
+        createdAt: true,
+        guildId: false,
+        id: true,
+        updatedAt: true,
+        version: true,
+      },
+      where: {
+        channelId: channelId,
+        guildId: guildId,
+      },
+    });
+
+    if (res) {
+      res.channelId = channelId;
+      res.guildId = guildId;
+      return res;
+    }
   }
 }

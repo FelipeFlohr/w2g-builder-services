@@ -18,9 +18,7 @@ export abstract class DiscordJsSlashCommandImpl implements DiscordSlashCommand {
     this.parameters = options.parameters;
   }
 
-  public abstract onInteraction(
-    interaction: DiscordSlashCommandInteraction,
-  ): Promise<void>;
+  public abstract onInteraction(interaction: DiscordSlashCommandInteraction): Promise<void>;
 
   public toSlashCommand(): SlashCommandBuilder {
     const slashBuilder = new SlashCommandBuilder()
@@ -51,35 +49,21 @@ export abstract class DiscordJsSlashCommandImpl implements DiscordSlashCommand {
     return this.name === val.name;
   }
 
-  protected async guildDoesNotExistsInteraction(
-    interaction: DiscordSlashCommandInteraction,
-  ): Promise<void> {
+  protected async guildDoesNotExistsInteraction(interaction: DiscordSlashCommandInteraction): Promise<void> {
     await interaction.reply("Guild not found");
   }
 
-  private buildIntegerParameter(
-    slashBuilder: SlashCommandBuilder,
-    parameter: DiscordSlashCommandParameter,
-  ): void {
+  private buildIntegerParameter(slashBuilder: SlashCommandBuilder, parameter: DiscordSlashCommandParameter): void {
     slashBuilder.addIntegerOption((builder) => {
-      builder
-        .setDescription(parameter.description)
-        .setName(parameter.name)
-        .setRequired(parameter.required);
+      builder.setDescription(parameter.description).setName(parameter.name).setRequired(parameter.required);
 
       return builder;
     });
   }
 
-  private buildStringParameter(
-    slashBuilder: SlashCommandBuilder,
-    parameter: DiscordSlashCommandParameter,
-  ): void {
+  private buildStringParameter(slashBuilder: SlashCommandBuilder, parameter: DiscordSlashCommandParameter): void {
     slashBuilder.addStringOption((builder) => {
-      builder
-        .setDescription(parameter.description)
-        .setName(parameter.name)
-        .setRequired(parameter.required);
+      builder.setDescription(parameter.description).setName(parameter.name).setRequired(parameter.required);
 
       return builder;
     });

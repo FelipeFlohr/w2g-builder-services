@@ -6,18 +6,14 @@ import { RedisSettingsType } from "../types/redis-settings.type";
 import { ApplicationSettingsType } from "../types/application-settings.type";
 import { LoggerUtils } from "src/utils/logger-utils";
 
-export class EnvironmentSettingsServiceImpl
-  implements EnvironmentSettingsService
-{
+export class EnvironmentSettingsServiceImpl implements EnvironmentSettingsService {
   public readonly application: ApplicationSettingsType;
   public readonly rabbitMq: RabbitMQSettingsType;
   public readonly database: DatabaseSettingsType;
   public readonly redis: RedisSettingsType;
   public readonly discordToken: string;
 
-  private static readonly logger = LoggerUtils.from(
-    EnvironmentSettingsServiceImpl,
-  );
+  private static readonly logger = LoggerUtils.from(EnvironmentSettingsServiceImpl);
   private static instance: EnvironmentSettingsServiceImpl;
 
   public constructor() {
@@ -33,9 +29,7 @@ export class EnvironmentSettingsServiceImpl
   public static getInstance(): EnvironmentSettingsServiceImpl {
     if (this.instance == undefined) {
       this.instance = new EnvironmentSettingsServiceImpl();
-      EnvironmentSettingsServiceImpl.logger.debug(
-        `Initialized ${EnvironmentSettingsServiceImpl.name}`,
-      );
+      EnvironmentSettingsServiceImpl.logger.debug(`Initialized ${EnvironmentSettingsServiceImpl.name}`);
     }
     return this.instance;
   }
@@ -76,9 +70,7 @@ export class EnvironmentSettingsServiceImpl
   }
 
   private parseNodeEnv(): "development" | "production" {
-    return process.env.NODE_ENV === "development"
-      ? "development"
-      : "production";
+    return process.env.NODE_ENV === "development" ? "development" : "production";
   }
 
   private parseInt(variable: string): number | undefined {
@@ -94,9 +86,7 @@ export class EnvironmentSettingsServiceImpl
       return val;
     }
 
-    throw new Error(
-      `Variable ${variable} must be an integer. The found value was: ${val}`,
-    );
+    throw new Error(`Variable ${variable} must be an integer. The found value was: ${val}`);
   }
 
   private parseString(variable: string): string | undefined {
@@ -112,8 +102,6 @@ export class EnvironmentSettingsServiceImpl
       return val;
     }
 
-    throw new Error(
-      `Variable ${variable} must be a string. The found value was: ${val}`,
-    );
+    throw new Error(`Variable ${variable} must be a string. The found value was: ${val}`);
   }
 }

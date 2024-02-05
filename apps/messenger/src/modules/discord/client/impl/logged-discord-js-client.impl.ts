@@ -12,23 +12,16 @@ import { DiscordErrorCodeEnum } from "src/utils/discord-error-code.enum";
 import { DiscordAPIErrorHandler } from "../business/handlers/discord-api-error.handler";
 import { LoggerUtils } from "src/utils/logger-utils";
 
-export class LoggedDiscordJsClientImpl
-  extends DiscordJsClientImpl
-  implements LoggedDiscordClient
-{
+export class LoggedDiscordJsClientImpl extends DiscordJsClientImpl implements LoggedDiscordClient {
   private static readonly logger = LoggerUtils.from(LoggedDiscordJsClientImpl);
   private static readonly MAX_GUILD_FETCH = 200;
 
-  public static async fromClient(
-    client: DiscordClient,
-  ): Promise<LoggedDiscordClient> {
+  public static async fromClient(client: DiscordClient): Promise<LoggedDiscordClient> {
     const jsClient = await (client as DiscordJsClientImpl).getClientAsTrue();
     return new LoggedDiscordJsClientImpl(jsClient);
   }
 
-  public async fetchGuilds(
-    options?: GuildFetchOptionsType,
-  ): Promise<Array<DiscordGuildInfo>> {
+  public async fetchGuilds(options?: GuildFetchOptionsType): Promise<Array<DiscordGuildInfo>> {
     return await CollectionUtils.fetchCollection(
       {
         maxPossibleRecordsToFetch: LoggedDiscordJsClientImpl.MAX_GUILD_FETCH,
@@ -50,17 +43,11 @@ export class LoggedDiscordJsClientImpl
       const guild = await this.client.guilds.fetch(id);
       return DiscordJsGuildImpl.fromGuild(guild);
     } catch (e) {
-      if (
-        e instanceof DiscordAPIError &&
-        e.code === DiscordErrorCodeEnum.UNKNOWN_GUILD
-      ) {
+      if (e instanceof DiscordAPIError && e.code === DiscordErrorCodeEnum.UNKNOWN_GUILD) {
         LoggedDiscordJsClientImpl.logger.error(e);
         return;
       }
-      DiscordAPIErrorHandler.handleDiscordJsErrors(
-        e,
-        LoggedDiscordJsClientImpl.logger,
-      );
+      DiscordAPIErrorHandler.handleDiscordJsErrors(e, LoggedDiscordJsClientImpl.logger);
 
       throw e;
     }

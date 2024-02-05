@@ -4,8 +4,6 @@ import { DiscordClient } from "./discord-client";
 import { GuildFetchOptionsType } from "./types/guild-fetch-options.type";
 
 export interface LoggedDiscordClient extends DiscordClient {
-  fetchGuilds(
-    options?: GuildFetchOptionsType,
-  ): Promise<Array<DiscordGuildInfo>>;
+  fetchGuilds(options?: GuildFetchOptionsType): Promise<Array<DiscordGuildInfo>>;
   fetchGuildById(id: string): Promise<DiscordGuild | undefined>;
 }

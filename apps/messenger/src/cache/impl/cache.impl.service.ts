@@ -1,13 +1,7 @@
 import { Inject, OnModuleInit } from "@nestjs/common";
 import { CacheService } from "../cache.service";
 import { EnvironmentSettingsService } from "src/env/environment-settings.service";
-import {
-  RedisClientType,
-  RedisFunctions,
-  RedisModules,
-  RedisScripts,
-  createClient,
-} from "redis";
+import { RedisClientType, RedisFunctions, RedisModules, RedisScripts, createClient } from "redis";
 import { TypeUtils } from "src/utils/type-utils";
 import { LoggerUtils } from "src/utils/logger-utils";
 
@@ -17,9 +11,7 @@ export class RedisCacheServiceImpl implements CacheService, OnModuleInit {
   private readonly logger = LoggerUtils.from(RedisCacheServiceImpl);
   private client: RedisClientType<RedisModules, RedisFunctions, RedisScripts>;
 
-  public constructor(
-    @Inject(EnvironmentSettingsService) env: EnvironmentSettingsService,
-  ) {
+  public constructor(@Inject(EnvironmentSettingsService) env: EnvironmentSettingsService) {
     this.env = env;
     this.prefix = this.getCacheKeyPrefix();
   }
@@ -80,9 +72,7 @@ export class RedisCacheServiceImpl implements CacheService, OnModuleInit {
     return keys.map((key) => key.replace(this.getCacheKeyPrefix(), ""));
   }
 
-  private createClient(
-    url: URL,
-  ): Promise<RedisClientType<RedisModules, RedisFunctions, RedisScripts>> {
+  private createClient(url: URL): Promise<RedisClientType<RedisModules, RedisFunctions, RedisScripts>> {
     this.logger.debug("Creating Redis instance.");
 
     return new Promise(async (res, rej) => {
@@ -101,9 +91,7 @@ export class RedisCacheServiceImpl implements CacheService, OnModuleInit {
   }
 
   private getCacheKeyPrefix(): string {
-    return `${this.env.application.name.toUpperCase()}|${
-      this.env.database.name
-    }|`;
+    return `${this.env.application.name.toUpperCase()}|${this.env.database.name}|`;
   }
 
   private serialize<T>(obj: T): string | undefined {

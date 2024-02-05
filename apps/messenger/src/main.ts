@@ -9,9 +9,7 @@ import { LoggerUtils } from "./utils/logger-utils";
 async function bootstrap() {
   const logger = LoggerUtils.from(NestApplication);
   const app = await NestFactory.create(AppModule);
-  const envService: EnvironmentSettingsService = app.get(
-    EnvironmentSettingsService,
-  );
+  const envService: EnvironmentSettingsService = app.get(EnvironmentSettingsService);
 
   const swagger = new DocumentBuilder()
     .setTitle("W2G Messenger Bot")

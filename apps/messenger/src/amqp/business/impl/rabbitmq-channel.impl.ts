@@ -45,9 +45,7 @@ export class RabbitMQChannelImpl implements AMQPChannel {
         maxPriority: options.maxPriority,
         messageTtl: options.messageTtl,
       });
-      RabbitMQChannelImpl.logger.log(
-        `RabbitMQ queue created. Queue name: ${options.name}`,
-      );
+      RabbitMQChannelImpl.logger.log(`RabbitMQ queue created. Queue name: ${options.name}`);
 
       return new RabbitMQQueueImpl({
         name: options.name,
@@ -63,26 +61,18 @@ export class RabbitMQChannelImpl implements AMQPChannel {
         messageTtl: options.messageTtl,
       });
     } catch (e) {
-      RabbitMQChannelImpl.logger.fatal(
-        `Failed to create RabbitMQ queue. Queue name: ${options.name}`,
-      );
+      RabbitMQChannelImpl.logger.fatal(`Failed to create RabbitMQ queue. Queue name: ${options.name}`);
       throw e;
     }
   }
 
-  public async assertExchange(
-    options: AssertExchangeOptions,
-  ): Promise<AMQPExchange> {
+  public async assertExchange(options: AssertExchangeOptions): Promise<AMQPExchange> {
     try {
-      const exchange = await this.channel.assertExchange(
-        options.name,
-        options.type,
-        {
-          autoDelete: options.autoDelete,
-          durable: options.durable,
-          internal: options.internal,
-        },
-      );
+      const exchange = await this.channel.assertExchange(options.name, options.type, {
+        autoDelete: options.autoDelete,
+        durable: options.durable,
+        internal: options.internal,
+      });
       RabbitMQChannelImpl.logger.log(
         `RabbitMQ exchange created. Exchange name: ${options.name} | Type: ${options.type}`,
       );
@@ -103,9 +93,7 @@ export class RabbitMQChannelImpl implements AMQPChannel {
     }
   }
 
-  public async bindQueueToExchange(
-    options: BindQueueToExchangeOptions,
-  ): Promise<AMQPBinding> {
+  public async bindQueueToExchange(options: BindQueueToExchangeOptions): Promise<AMQPBinding> {
     try {
       let pattern: string;
       if (options.pattern) {
@@ -119,11 +107,7 @@ export class RabbitMQChannelImpl implements AMQPChannel {
         pattern = "";
       }
 
-      await this.channel.bindQueue(
-        options.queue.name,
-        options.exchange.name,
-        pattern,
-      );
+      await this.channel.bindQueue(options.queue.name, options.exchange.name, pattern);
       RabbitMQChannelImpl.logger.log(
         `Bind RabbitMQ queue to exchange. Queue name: ${options.queue.name} | Exchange name: ${options.exchange.name}`,
       );
@@ -141,10 +125,7 @@ export class RabbitMQChannelImpl implements AMQPChannel {
     }
   }
 
-  public async listenQueue<T>(
-    queue: AMQPQueue,
-    onMessage: (msg: AMQPMessage<T>) => Promise<void>,
-  ): Promise<void> {
+  public async listenQueue<T>(queue: AMQPQueue, onMessage: (msg: AMQPMessage<T>) => Promise<void>): Promise<void> {
     try {
       await this.channel.consume(queue.name, async (msg) => {
         if (msg) {
@@ -169,85 +150,52 @@ export class RabbitMQChannelImpl implements AMQPChannel {
           }
         }
       });
-      RabbitMQChannelImpl.logger.log(
-        `RabbitMQ consumer created. Consumer queue name: ${queue.name}`,
-      );
+      RabbitMQChannelImpl.logger.log(`RabbitMQ consumer created. Consumer queue name: ${queue.name}`);
     } catch (e) {
-      RabbitMQChannelImpl.logger.fatal(
-        `Failed to create RabbitMQ consumer. Consumer queue name: ${queue.name}`,
-      );
+      RabbitMQChannelImpl.logger.fatal(`Failed to create RabbitMQ consumer. Consumer queue name: ${queue.name}`);
       throw e;
     }
   }
 
   public sendMessage<T>(queue: AMQPQueue, msg: T): Promise<void>;
-  public sendMessage<T>(
-    exchange: AMQPExchange,
-    routingKey: string,
-    msg: T,
-  ): Promise<void>;
+  public sendMessage<T>(exchange: AMQPExchange, routingKey: string, msg: T): Promise<void>;
   public async sendMessage<T>(
     queueOrExchange: AMQPQueue | AMQPExchange,
     msgOrRoutingKey: T | string,
     msg?: string,
   ): Promise<void> {
     if (msg == undefined) {
-      return await this.sendMessageWithoutRoutingKey(
-        queueOrExchange,
-        msgOrRoutingKey,
-      );
+      return await this.sendMessageWithoutRoutingKey(queueOrExchange, msgOrRoutingKey);
     }
 
-    return await this.sendMessageWithRoutingKey(
-      queueOrExchange as AMQPExchange,
-      msgOrRoutingKey as string,
-      msg,
-    );
+    return await this.sendMessageWithRoutingKey(queueOrExchange as AMQPExchange, msgOrRoutingKey as string, msg);
   }
 
-  private sendMessageWithRoutingKey<T>(
-    exchange: AMQPExchange,
-    routingKey: string,
-    msg: T,
-  ): Promise<void> {
+  private sendMessageWithRoutingKey<T>(exchange: AMQPExchange, routingKey: string, msg: T): Promise<void> {
     const jsonBuffer = Buffer.from(JSON.stringify(msg));
 
     return new Promise((res, rej) => {
-      this.channel.publish(
-        exchange.name,
-        routingKey,
-        jsonBuffer,
-        { contentType: "application/json" },
-        (err) => {
-          if (err) {
-            rej(err);
-            return;
-          }
-          res();
-        },
-      );
+      this.channel.publish(exchange.name, routingKey, jsonBuffer, { contentType: "application/json" }, (err) => {
+        if (err) {
+          rej(err);
+          return;
+        }
+        res();
+      });
     });
   }
 
-  private sendMessageWithoutRoutingKey<T>(
-    queue: AMQPQueue,
-    msg: T,
-  ): Promise<void> {
+  private sendMessageWithoutRoutingKey<T>(queue: AMQPQueue, msg: T): Promise<void> {
     const jsonBuffer = Buffer.from(JSON.stringify(msg));
 
     return new Promise((res, rej) => {
-      this.channel.sendToQueue(
-        queue.name,
-        jsonBuffer,
-        { contentType: "application/json" },
-        (err) => {
-          if (err) {
-            rej(err);
-            return;
-          }
-          res();
-        },
-      );
+      this.channel.sendToQueue(queue.name, jsonBuffer, { contentType: "application/json" }, (err) => {
+        if (err) {
+          rej(err);
+          return;
+        }
+        res();
+      });
     });
   }
 }

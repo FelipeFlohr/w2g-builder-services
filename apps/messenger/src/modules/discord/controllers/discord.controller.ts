@@ -9,10 +9,7 @@ export interface DiscordController {
   getGuilds(query?: GetGuildsQueryDTO): Promise<Array<DiscordGuildInfoDTO>>;
   getGuild(id: string): Promise<DiscordGuildDTO>;
   getTextChannels(guildId: string): Promise<Array<DiscordTextChannelDTO>>;
-  getTextChannelById(
-    guildId: string,
-    channelId: string,
-  ): Promise<DiscordTextChannelDTO>;
+  getTextChannelById(guildId: string, channelId: string): Promise<DiscordTextChannelDTO>;
   getMessagesFromTextChannel(
     guildId: string,
     channelId: string,

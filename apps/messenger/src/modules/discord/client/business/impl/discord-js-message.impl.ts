@@ -21,6 +21,7 @@ export class DiscordJsMessageImpl implements DiscordMessage {
   public readonly url: string;
   public readonly guildId: string;
   public readonly channelId: string;
+  public readonly deleted: boolean;
   public isFetched: boolean;
   private readonly message: Message;
 
@@ -40,12 +41,11 @@ export class DiscordJsMessageImpl implements DiscordMessage {
     this.message = options.message;
     this.guildId = options.guildId;
     this.channelId = options.channelId;
+    this.deleted = options.deleted ?? false;
     this.isFetched = this.isMessageFetched();
   }
 
-  public static fromJsFetchedMessage(
-    message: Message<true>,
-  ): DiscordJsMessageImpl {
+  public static fromJsFetchedMessage(message: Message<true>): DiscordJsMessageImpl {
     return new DiscordJsMessageImpl({
       author: DiscordJsMessageAuthorImpl.fromJsAuthor(message.author),
       cleanContent: message.cleanContent,
@@ -65,9 +65,7 @@ export class DiscordJsMessageImpl implements DiscordMessage {
     });
   }
 
-  public static fromJsMessage(
-    message: Message | PartialMessage,
-  ): DiscordJsMessageImpl | undefined {
+  public static fromJsMessage(message: Message | PartialMessage): DiscordJsMessageImpl | undefined {
     if (!message.partial) {
       return this.fromJsFetchedMessage(message as Message<true>);
     }
@@ -89,6 +87,7 @@ export class DiscordJsMessageImpl implements DiscordMessage {
       position: this.position,
       channelId: this.channelId,
       guildId: this.guildId,
+      deleted: this.deleted,
     });
   }
 

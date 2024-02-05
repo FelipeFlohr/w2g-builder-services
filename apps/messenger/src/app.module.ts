@@ -6,13 +6,7 @@ import { AMQPModule } from "./amqp/amqp.module";
 import { CacheModule } from "./cache/cache.module";
 
 @Module({
-  imports: [
-    EnvironmentSettingsModule,
-    CacheModule,
-    DatabaseModule,
-    AMQPModule,
-    DiscordModule,
-  ],
+  imports: [EnvironmentSettingsModule, CacheModule, DatabaseModule, AMQPModule, DiscordModule],
   controllers: [],
   providers: [],
 })

@@ -1,7 +1,7 @@
 import { MessengerBaseEntity } from "src/database/base/messenger-base.entity";
 import { DiscordMessageEntity } from "./discord-message.entity";
 
-export interface DiscordMessageAuthorEntity extends MessengerBaseEntity {
+export interface DiscordMessageAuthorEntity extends MessengerBaseEntity<DiscordMessageAuthorEntity> {
   id: number;
   avatarPngUrl?: string;
   bannerPngUrl?: string;

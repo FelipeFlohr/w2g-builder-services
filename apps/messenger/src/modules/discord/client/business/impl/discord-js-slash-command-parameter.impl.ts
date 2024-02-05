@@ -2,9 +2,7 @@ import { DiscordSlashCommandParameter } from "../discord-slash-command-parameter
 import { DiscordParameterTypeEnum } from "../types/discord-parameter-type.enum";
 import { DiscordJsSlashCommandParameterOptions } from "./types/discord-js-slash-command-parameter.options";
 
-export class DiscordJsSlashCommandParameterImpl
-  implements DiscordSlashCommandParameter
-{
+export class DiscordJsSlashCommandParameterImpl implements DiscordSlashCommandParameter {
   public readonly description: string;
   public readonly name: string;
   public readonly required: boolean;

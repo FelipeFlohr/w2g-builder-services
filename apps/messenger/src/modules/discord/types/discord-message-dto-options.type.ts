@@ -15,4 +15,5 @@ export type DiscordMessageDTOOptions = {
   readonly url: string;
   readonly guildId: string;
   readonly channelId: string;
+  readonly deleted: boolean;
 };

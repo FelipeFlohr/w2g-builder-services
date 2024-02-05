@@ -2,7 +2,7 @@ import { MessengerBaseEntity } from "src/database/base/messenger-base.entity";
 import { DiscordMessageAuthorEntity } from "./discord-message-author.entity";
 import { DiscordDelimitationMessageEntity } from "./discord-delimitation-message.entity";
 
-export interface DiscordMessageEntity extends MessengerBaseEntity {
+export interface DiscordMessageEntity extends MessengerBaseEntity<DiscordMessageEntity> {
   id: number;
   applicationId?: string;
   author: DiscordMessageAuthorEntity;
@@ -19,4 +19,5 @@ export interface DiscordMessageEntity extends MessengerBaseEntity {
   channelId: string;
   delimitation?: DiscordDelimitationMessageEntity;
   messageCreatedAt: Date;
+  deleted: boolean;
 }

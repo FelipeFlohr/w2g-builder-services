@@ -9,21 +9,15 @@ export class HasListenerCommand extends DiscordJsSlashCommandImpl {
   public constructor(service: DiscordService) {
     super({
       name: "haslistener",
-      description:
-        "Returns a message saying if there is an active listener on this channel",
+      description: "Returns a message saying if there is an active listener on this channel",
       dmPermission: false,
     });
     this.service = service;
   }
 
-  public async onInteraction(
-    interaction: DiscordSlashCommandInteraction,
-  ): Promise<void> {
+  public async onInteraction(interaction: DiscordSlashCommandInteraction): Promise<void> {
     if (interaction.guildId) {
-      const listener = new DiscordTextChannelListenerDTO(
-        interaction.guildId,
-        interaction.channelId,
-      );
+      const listener = new DiscordTextChannelListenerDTO(interaction.guildId, interaction.channelId);
 
       if (await this.service.listenerExists(listener)) {
         await interaction.reply("Listener found in this channel.");

@@ -1,9 +1,4 @@
-import {
-  Channel,
-  GuildBasedChannel,
-  NonThreadGuildBasedChannel,
-  TextChannel,
-} from "discord.js";
+import { Channel, GuildBasedChannel, NonThreadGuildBasedChannel, TextChannel } from "discord.js";
 import { DiscordChannel } from "../discord-channel";
 import { DiscordJsChannelOptions } from "./types/discord-js-channel-options.type";
 import { DiscordChannelDTO } from "src/modules/discord/models/discord-channel.dto";
@@ -27,9 +22,7 @@ export class DiscordJsChannelImpl implements DiscordChannel {
     this.channel = options.channel;
   }
 
-  public static fromJsChannel(
-    channel: NonThreadGuildBasedChannel | GuildBasedChannel,
-  ): DiscordJsChannelImpl {
+  public static fromJsChannel(channel: NonThreadGuildBasedChannel | GuildBasedChannel): DiscordJsChannelImpl {
     return new DiscordJsChannelImpl({
       channel: channel,
       createdAt: channel.createdAt ?? new Date(),

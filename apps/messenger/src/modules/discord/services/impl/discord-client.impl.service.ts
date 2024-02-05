@@ -1,10 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  OnModuleDestroy,
-  OnModuleInit,
-  forwardRef,
-} from "@nestjs/common";
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit, forwardRef } from "@nestjs/common";
 import { DiscordNetworkHandler } from "../../handlers/discord-network.handler";
 import { DiscordClientService } from "../discord-client.service";
 import { EnvironmentSettingsService } from "src/env/environment-settings.service";
@@ -22,11 +16,11 @@ import { DiscordJsSlashCommandInteractionImpl } from "../../client/business/impl
 import { CollectionUtils } from "src/utils/collection-utils";
 import { DiscordAMQPService } from "../../amqp/discord-amqp.service";
 import { LoggerUtils } from "src/utils/logger-utils";
+import { StringUtils } from "src/utils/string-utils";
+import { DiscordMessage } from "../../client/business/discord-message";
 
 @Injectable()
-export class DiscordClientServiceImpl
-  implements DiscordClientService, OnModuleInit, OnModuleDestroy
-{
+export class DiscordClientServiceImpl implements DiscordClientService, OnModuleInit, OnModuleDestroy {
   private readonly networkHandler: DiscordNetworkHandler;
   private readonly envService: EnvironmentSettingsService;
   private readonly service: DiscordService;
@@ -59,14 +53,16 @@ export class DiscordClientServiceImpl
   public async onModuleInit() {
     try {
       const jsClient = await this.login();
-      await this.setupSlashCommands();
       this.setupCommandHandler(jsClient);
-      await this.setupTextChannelListeners(jsClient);
+      await Promise.all([
+        this.setupTextChannelListeners(jsClient),
+        this.cacheAllMessagesAfterDelimitation(),
+        this.setupSlashCommands(),
+      ]);
+
       DiscordClientServiceImpl.logger.log("Logged into Discord");
     } catch (e) {
-      DiscordClientServiceImpl.logger.fatal(
-        `Error while logging on Discord: ${e}`,
-      );
+      DiscordClientServiceImpl.logger.fatal(`Error while logging on Discord: ${e}`);
       throw e;
     }
   }
@@ -76,7 +72,29 @@ export class DiscordClientServiceImpl
   }
 
   private async cacheAllMessagesAfterDelimitation(): Promise<void> {
-    const listeners = await 
+    const messages = await this.service.fetchDelimitationMessagesWithListener();
+    await CollectionUtils.asyncForEach(messages, async (message) => {
+      const messages = await this.service.fetchChannelMessages({
+        channelId: message.channelId,
+        guildId: message.guildId,
+        after: message.discordMessageId,
+        limit: 1500,
+      });
+      await this.upsertMessagesInDatabase(messages);
+
+      DiscordClientServiceImpl.logger.debug(
+        `Cached ${messages.length} ${StringUtils.pluralHandler(messages.length, "message")} for guild ${
+          message.guildId
+        }`,
+      );
+    });
+  }
+
+  private async upsertMessagesInDatabase(messages: Array<DiscordMessage>): Promise<void> {
+    await CollectionUtils.asyncForEach(messages, async (message) => {
+      await this.service.saveMessage(message.toDTO());
+      await this.amqpService.sendBootstrapMessage(message.toDTO());
+    });
   }
 
   private async setupSlashCommands(): Promise<void> {
@@ -90,12 +108,9 @@ export class DiscordClientServiceImpl
         const guildFetched = await guild.fetch();
         await guildFetched.removeAllCommands();
 
-        await CollectionUtils.asyncForEach(
-          this.commandsRepository.commands,
-          async (command) => {
-            await guildFetched.addCommand(command);
-          },
-        );
+        await CollectionUtils.asyncForEach(this.commandsRepository.commands, async (command) => {
+          await guildFetched.addCommand(command);
+        });
       });
     } catch (e) {
       DiscordClientServiceImpl.logger.fatal(e);
@@ -109,11 +124,8 @@ export class DiscordClientServiceImpl
     client.on("interactionCreate", async (interaction) => {
       if (!interaction.isChatInputCommand()) return;
 
-      const chatInteraction =
-        DiscordJsSlashCommandInteractionImpl.fromJsInteraction(interaction);
-      await this.commandHandler.handleSlashCommandByInteraction(
-        chatInteraction,
-      );
+      const chatInteraction = DiscordJsSlashCommandInteractionImpl.fromJsInteraction(interaction);
+      await this.commandHandler.handleSlashCommandByInteraction(chatInteraction);
     });
   }
 
@@ -125,9 +137,7 @@ export class DiscordClientServiceImpl
 
   private setupMessageCreated(client: Client<true>) {
     client.on("messageCreate", async (message) => {
-      const messageParsed = DiscordJsMessageImpl.fromJsFetchedMessage(
-        message as Message<true>,
-      );
+      const messageParsed = DiscordJsMessageImpl.fromJsFetchedMessage(message as Message<true>);
       await this.textChannelListener.onMessageCreated(messageParsed);
     });
   }
@@ -153,14 +163,8 @@ export class DiscordClientServiceImpl
   private async login(): Promise<Client<true>> {
     const client = new DiscordJsClientImpl();
 
-    this._client = await this.networkHandler.login(
-      client,
-      this.envService.discordToken,
-    );
-    this._textChannelListener = new DiscordJsTextChannelListener(
-      this.service,
-      this.amqpService,
-    );
+    this._client = await this.networkHandler.login(client, this.envService.discordToken);
+    this._textChannelListener = new DiscordJsTextChannelListener(this.service, this.amqpService);
 
     return await (this._client as LoggedDiscordJsClientImpl).getClientAsTrue();
   }

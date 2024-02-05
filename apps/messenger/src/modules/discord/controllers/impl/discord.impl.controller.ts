@@ -1,33 +1,16 @@
-import {
-  ApiExtraModels,
-  ApiResponse,
-  ApiTags,
-  getSchemaPath,
-} from "@nestjs/swagger";
+import { ApiExtraModels, ApiResponse, ApiTags, getSchemaPath } from "@nestjs/swagger";
 import { DiscordGuildInfoDTO } from "../../models/discord-guild-info.dto";
 import { DiscordGuildDTO } from "../../models/discord-guild.dto";
 import { DiscordMessageDTO } from "../../models/discord-message.dto";
 import { DiscordTextChannelDTO } from "../../models/discord-text-channel.dto";
 import { GetGuildsQueryDTO } from "../../models/get-guilds-query.dto";
 import { DiscordController } from "../discord.controller";
-import {
-  Controller,
-  Get,
-  Inject,
-  NotFoundException,
-  Param,
-  Query,
-} from "@nestjs/common";
+import { Controller, Get, Inject, NotFoundException, Param, Query } from "@nestjs/common";
 import { DiscordService } from "../../services/discord.service";
 import { GetMessagesQueryDTO } from "../../models/get-messages-query.dto";
 
 @ApiTags("Discord")
-@ApiExtraModels(
-  DiscordGuildInfoDTO,
-  DiscordGuildDTO,
-  DiscordTextChannelDTO,
-  DiscordMessageDTO,
-)
+@ApiExtraModels(DiscordGuildInfoDTO, DiscordGuildDTO, DiscordTextChannelDTO, DiscordMessageDTO)
 @Controller("discord")
 export class DiscordControllerImpl implements DiscordController {
   private readonly service: DiscordService;
@@ -45,9 +28,7 @@ export class DiscordControllerImpl implements DiscordController {
       },
     },
   })
-  public async getGuilds(
-    @Query() query?: GetGuildsQueryDTO | undefined,
-  ): Promise<DiscordGuildInfoDTO[]> {
+  public async getGuilds(@Query() query?: GetGuildsQueryDTO | undefined): Promise<DiscordGuildInfoDTO[]> {
     return await this.service.fetchGuilds(query);
   }
 
@@ -79,9 +60,7 @@ export class DiscordControllerImpl implements DiscordController {
       },
     },
   })
-  public async getTextChannels(
-    @Param("guildId") guildId: string,
-  ): Promise<DiscordTextChannelDTO[]> {
+  public async getTextChannels(@Param("guildId") guildId: string): Promise<DiscordTextChannelDTO[]> {
     return await this.service.fetchTextChannels(guildId);
   }
 

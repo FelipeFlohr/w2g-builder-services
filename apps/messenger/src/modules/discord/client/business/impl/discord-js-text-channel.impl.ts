@@ -15,10 +15,7 @@ import { CollectionUtils } from "src/utils/collection-utils";
 import { DiscordAPIErrorHandler } from "../handlers/discord-api-error.handler";
 import { LoggerUtils } from "src/utils/logger-utils";
 
-export class DiscordJsTextChannelImpl
-  extends DiscordJsChannelImpl
-  implements DiscordTextChannel
-{
+export class DiscordJsTextChannelImpl extends DiscordJsChannelImpl implements DiscordTextChannel {
   public readonly lastMessageId?: string;
   public readonly parent?: DiscordParentCategory;
   public readonly rateLimitPerUser?: number;
@@ -36,26 +33,19 @@ export class DiscordJsTextChannelImpl
     }
   }
 
-  public async fetchMessageById(
-    id: string,
-  ): Promise<DiscordMessage | undefined> {
+  public async fetchMessageById(id: string): Promise<DiscordMessage | undefined> {
     try {
       const message = await this.channel.messages.fetch(id);
       return DiscordJsMessageImpl.fromJsFetchedMessage(message);
     } catch (e) {
-      DiscordAPIErrorHandler.handleDiscordJsErrors(
-        e,
-        DiscordJsTextChannelImpl.logger,
-      );
+      DiscordAPIErrorHandler.handleDiscordJsErrors(e, DiscordJsTextChannelImpl.logger);
 
       DiscordJsTextChannelImpl.logger.error(e);
       throw e;
     }
   }
 
-  public async fetchMessages(
-    options?: MessageFetchOptions,
-  ): Promise<DiscordMessage[]> {
+  public async fetchMessages(options?: MessageFetchOptions): Promise<DiscordMessage[]> {
     return await CollectionUtils.fetchCollection<DiscordMessage>(
       {
         maxPossibleRecordsToFetch: 100,
@@ -63,15 +53,16 @@ export class DiscordJsTextChannelImpl
       },
       async (amount, lastItem) => {
         const messages = await this.channel.messages.fetch({
-          after: options?.after,
+          after: lastItem == undefined ? options?.after : lastItem.id,
           around: options?.around,
-          before: options?.before ?? lastItem?.id,
+          before: options?.before,
           cache: true,
           limit: amount,
         });
-        return messages.map((item) =>
-          DiscordJsMessageImpl.fromJsFetchedMessage(item),
-        );
+        const messagesParsed = messages
+          .map((item) => DiscordJsMessageImpl.fromJsFetchedMessage(item))
+          .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        return messagesParsed;
       },
     );
   }
@@ -116,9 +107,7 @@ export class DiscordJsTextChannelImpl
         name: channel.name,
         url: channel.url,
         viewable: channel.viewable,
-        lastMessageId: TypeUtils.parseNullToUndefined(
-          channel.channel.lastMessageId,
-        ),
+        lastMessageId: TypeUtils.parseNullToUndefined(channel.channel.lastMessageId),
         parent: parentCategory,
         rateLimitPerUser: channel.channel.rateLimitPerUser,
       });

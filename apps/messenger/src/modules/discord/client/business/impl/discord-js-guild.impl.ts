@@ -56,40 +56,28 @@ export class DiscordJsGuildImpl implements DiscordGuild {
     const guilds = await this.guild.channels.fetch();
     return guilds
       .filter((guild) => guild != null)
-      .map((guild) =>
-        DiscordJsChannelImpl.fromJsChannel(guild as NonThreadGuildBasedChannel),
-      );
+      .map((guild) => DiscordJsChannelImpl.fromJsChannel(guild as NonThreadGuildBasedChannel));
   }
 
-  public async fetchChannelById(
-    id: string,
-  ): Promise<DiscordChannel | undefined> {
+  public async fetchChannelById(id: string): Promise<DiscordChannel | undefined> {
     try {
       const guild = await this.guild.channels.fetch(id);
       if (guild) {
         return DiscordJsChannelImpl.fromJsChannel(guild);
       }
     } catch (e) {
-      if (
-        e instanceof DiscordAPIError &&
-        e.code === DiscordErrorCodeEnum.UNKNOWN_CHANNEL
-      ) {
+      if (e instanceof DiscordAPIError && e.code === DiscordErrorCodeEnum.UNKNOWN_CHANNEL) {
         DiscordJsGuildImpl.logger.error(e);
         return;
       }
 
-      DiscordAPIErrorHandler.handleDiscordJsErrors(
-        e,
-        DiscordJsGuildImpl.logger,
-      );
+      DiscordAPIErrorHandler.handleDiscordJsErrors(e, DiscordJsGuildImpl.logger);
       throw e;
     }
   }
 
   public async addCommand(command: DiscordSlashCommand): Promise<void> {
-    await this.guild.commands.create(
-      (command as DiscordJsSlashCommandImpl).toSlashCommand(),
-    );
+    await this.guild.commands.create((command as DiscordJsSlashCommandImpl).toSlashCommand());
   }
 
   public async removeAllCommands(): Promise<void> {

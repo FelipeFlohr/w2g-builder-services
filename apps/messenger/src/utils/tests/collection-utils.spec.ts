@@ -28,10 +28,7 @@ describe("CollectionUtils", () => {
         maxRecords: MAX_RECORDS,
       },
       async (amount) => {
-        return array.splice(
-          0,
-          amount > arrayCopy.length ? array.length : amount,
-        );
+        return array.splice(0, amount > arrayCopy.length ? array.length : amount);
       },
     );
     expect(fetchedCollection.length).toBe(arrayCopy.length);

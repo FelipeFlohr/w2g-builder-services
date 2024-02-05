@@ -7,7 +7,7 @@ import { MessengerBaseTypeORMEntity } from "src/database/base/impl/messenger-bas
 })
 @Index(["guildId", "channelId"], { unique: true })
 export class DiscordListenerTypeORMEntity
-  extends MessengerBaseTypeORMEntity
+  extends MessengerBaseTypeORMEntity<DiscordListenerEntity>
   implements DiscordListenerEntity
 {
   @PrimaryGeneratedColumn({
