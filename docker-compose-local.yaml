@@ -62,5 +62,10 @@ services:
         condition: service_healthy
     env_file:
       - ./apps/messenger/.env
+    environment:
+      - APP_PORT=3000
+      - RABBITMQ_HOST=host.docker.internal
+      - DATABASE_HOST=host.docker.internal
+      - REDIS_HOST=host.docker.internal
     ports:
       - "3000:3000"
