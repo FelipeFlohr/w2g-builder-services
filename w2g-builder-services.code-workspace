@@ -7,6 +7,10 @@
 		{
 			"path": "apps/messenger",
 			"name": "Messenger Bot"
+		},
+		{
+			"path": "apps/builder",
+			"name": "Builder"
 		}
 	],
 	"settings": {}

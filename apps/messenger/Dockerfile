@@ -9,4 +9,5 @@ WORKDIR /project
 COPY --from=builder /project/dist ./dist
 COPY package*.json .
 RUN npm install --omit=dev
+EXPOSE 3000:3000
 ENTRYPOINT [ "npm", "run", "start:prod" ]

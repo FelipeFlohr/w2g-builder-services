@@ -4,12 +4,13 @@
 	- Postgres
 	- Redis
 - Discord Watch2Gether Builder (faz as consultas no bot e monta o que foi pedido)
-    - Spring com Java
-    - Mongo (para salvar o que foi retornado)
+    - Spring com Kotlin
+	- MSSQL (para gravar as mensagens)
+    - Mongo (para loggar os W2G criados)
 - Discord Watch2Gether View (cria uma página com os vídeos e os players)
 	- Angular (talvez)
 - Social Media Downloader (aplicação que baixa vídeo de redes sociais)
-	- Spring com Kotlin
+	- Spring com Java (ou qualquer tecnologia que possibilite facilmente baixar vídeos de redes sociais)
 - API File Storage (aplicação que devolve uma URL para o download de um arquivo)
 	- Spring com Java
 	- Postgres

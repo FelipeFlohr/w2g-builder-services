@@ -2,7 +2,7 @@ version: "3.9"
 name: "w2g-builder-services"
 services:
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:3.12-management
     container_name: w2g-builder-rabbitmq-1
     restart: always
     ports:
@@ -34,7 +34,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'",
+          "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'",
         ]
       interval: 1s
       timeout: 3s
@@ -69,3 +69,24 @@ services:
       - REDIS_HOST=host.docker.internal
     ports:
       - "3000:3000"
+  builder-postgres:
+    container_name: builder-postgres-1
+    image: postgres:16
+    restart: always
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: builder-db
+    volumes:
+      - ./docker-volume/builder-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'",
+        ]
+      interval: 1s
+      timeout: 3s
+      retries: 3
