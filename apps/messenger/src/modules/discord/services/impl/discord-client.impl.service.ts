@@ -16,8 +16,6 @@ import { DiscordJsSlashCommandInteractionImpl } from "../../client/business/impl
 import { CollectionUtils } from "src/utils/collection-utils";
 import { DiscordAMQPService } from "../../amqp/discord-amqp.service";
 import { LoggerUtils } from "src/utils/logger-utils";
-import { StringUtils } from "src/utils/string-utils";
-import { DiscordMessage } from "../../client/business/discord-message";
 
 @Injectable()
 export class DiscordClientServiceImpl implements DiscordClientService, OnModuleInit, OnModuleDestroy {
@@ -54,11 +52,7 @@ export class DiscordClientServiceImpl implements DiscordClientService, OnModuleI
     try {
       const jsClient = await this.login();
       this.setupCommandHandler(jsClient);
-      await Promise.all([
-        this.setupTextChannelListeners(jsClient),
-        this.cacheAllMessagesAfterDelimitation(),
-        this.setupSlashCommands(),
-      ]);
+      await Promise.all([this.setupTextChannelListeners(jsClient), this.cacheAllMessagesAfterDelimitation()]);
 
       DiscordClientServiceImpl.logger.log("Logged into Discord");
     } catch (e) {
@@ -71,33 +65,7 @@ export class DiscordClientServiceImpl implements DiscordClientService, OnModuleI
     await (this.client as LoggedDiscordJsClientImpl).client.destroy();
   }
 
-  private async cacheAllMessagesAfterDelimitation(): Promise<void> {
-    const messages = await this.service.fetchDelimitationMessagesWithListener();
-    await CollectionUtils.asyncForEach(messages, async (message) => {
-      const messages = await this.service.fetchChannelMessages({
-        channelId: message.channelId,
-        guildId: message.guildId,
-        after: message.discordMessageId,
-        limit: 1500,
-      });
-      await this.upsertMessagesInDatabase(messages);
-
-      DiscordClientServiceImpl.logger.debug(
-        `Cached ${messages.length} ${StringUtils.pluralHandler(messages.length, "message")} for guild ${
-          message.guildId
-        }`,
-      );
-    });
-  }
-
-  private async upsertMessagesInDatabase(messages: Array<DiscordMessage>): Promise<void> {
-    await CollectionUtils.asyncForEach(messages, async (message) => {
-      await this.service.saveMessage(message.toDTO());
-      await this.amqpService.sendBootstrapMessage(message.toDTO());
-    });
-  }
-
-  private async setupSlashCommands(): Promise<void> {
+  public async setupSlashCommands(): Promise<void> {
     try {
       const guildInfos = await this.service.fetchGuilds();
       DiscordClientServiceImpl.logger.log(
@@ -118,6 +86,22 @@ export class DiscordClientServiceImpl implements DiscordClientService, OnModuleI
     }
 
     DiscordClientServiceImpl.logger.log("Added slash commands to all guilds.");
+  }
+
+  private async cacheAllMessagesAfterDelimitation(): Promise<void> {
+    const messages = await this.service.fetchDelimitationMessagesWithListener();
+    await CollectionUtils.asyncForEach(messages, async (message) => {
+      const messageEntity = await this.service.fetchMessageById(
+        message.guildId,
+        message.channelId,
+        message.discordMessageId,
+      );
+      if (messageEntity) {
+        await this.service.sendDelimitationMessageViaAMQP(messageEntity.toDTO());
+      }
+
+      await this.service.cacheChannelMessages(true, message);
+    });
   }
 
   private setupCommandHandler(client: Client<true>): void {

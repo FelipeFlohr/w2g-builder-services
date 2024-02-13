@@ -4,6 +4,7 @@ import { DiscordMessage } from "../client/business/discord-message";
 import { DiscordTextChannel } from "../client/business/discord-text-channel";
 import { GuildFetchOptionsType } from "../client/types/guild-fetch-options.type";
 import { MessageFetchOptions } from "../client/types/message-fetch-options.type";
+import { DiscordDelimitationMessageEntity } from "../entities/discord-delimitation-message.entity";
 import { DiscordDelimitationMessageWithListenerDTO } from "../models/discord-delimitation-message-with-listener.dto";
 import { DiscordMessageAuthorDTO } from "../models/discord-message-author.dto";
 import { DiscordMessageDTO } from "../models/discord-message.dto";
@@ -29,6 +30,17 @@ export interface DiscordService {
   updateMessageAuthorById(authorId: number, authorDTO: DiscordMessageAuthorDTO): Promise<void>;
   saveAuthor(author: DiscordMessageAuthorDTO): Promise<number>;
   getDelimitationMessageLinkByGuildAndChannelId(guildId: string, channelId: string): Promise<string | undefined>;
+  getDelimitationMessageByGuildAndChannelId(
+    guildId: string,
+    channelId: string,
+  ): Promise<DiscordDelimitationMessageEntity>;
+  setupSlashCommands(): Promise<void>;
+  cacheChannelMessages(
+    isBootstrap: boolean,
+    delimitationMessage: DiscordDelimitationMessageWithListenerDTO,
+  ): Promise<void>;
+  cacheChannelMessages(guildId: string, channelId: string, isBootstrap: boolean): Promise<void>;
+  sendDelimitationMessageViaAMQP(message: DiscordMessageDTO): Promise<void>;
 }
 
 export const DiscordService = Symbol("DiscordService");

@@ -15,4 +15,5 @@ export interface DiscordController {
     channelId: string,
     options?: GetMessagesQueryDTO,
   ): Promise<Array<DiscordMessageDTO>>;
+  setupSlashCommands(): Promise<void>;
 }

@@ -1,13 +1,13 @@
 package dev.felipeflohr.w2gservices.builder.entities
 
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
-import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToOne
+import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import java.util.Date
 
@@ -15,7 +15,8 @@ import java.util.Date
 @Table(name = "TB_DISCORD_MESSAGE_AUTHOR")
 class DiscordMessageAuthorEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DISCORD_MESSAGE_AUTHOR")
+    @SequenceGenerator(name = "DISCORD_MESSAGE_AUTHOR", sequenceName = "\"DISCORD_MESSAGE_AUTHOR_PK\"")
     @Column(name = "DMA_ID")
     var id: Long? = null,
 
@@ -46,6 +47,6 @@ class DiscordMessageAuthorEntity(
     @Column(name = "DMA_USERNAME", nullable = false)
     var username: String,
 
-    @OneToOne(mappedBy = "author", cascade = [CascadeType.ALL])
+    @OneToOne(mappedBy = "author")
     var message: DiscordMessageEntity?,
 ) : BuilderBaseEntity()

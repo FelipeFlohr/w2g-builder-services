@@ -33,6 +33,7 @@ data class DiscordMessageDTO(
             channelId = channelId,
             author = author.toEntity(),
             id = null,
+            delimitationMessage = null,
         )
     }
 }

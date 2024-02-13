@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
+import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import java.util.Date
 
@@ -17,7 +18,8 @@ import java.util.Date
 @Table(name = "TB_DISCORD_MESSAGE")
 class DiscordMessageEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DISCORD_MESSAGE")
+    @SequenceGenerator(name = "DISCORD_MESSAGE", sequenceName = "\"DISCORD_MESSAGE_PK\"")
     @Column(name = "DME_ID")
     var id: Long? = null,
 
@@ -31,7 +33,7 @@ class DiscordMessageEntity(
     @Column(name = "DME_MSG_CREATED_AT")
     var messageCreatedAt: Date,
 
-    @Column(name = "DME_MSGID", length = 32, nullable = false)
+    @Column(name = "DME_MSGID", length = 32, nullable = false, unique = true)
     var messageId: String,
 
     @Column(name = "DME_PINNED", nullable = false)
@@ -51,4 +53,7 @@ class DiscordMessageEntity(
 
     @Column(name = "DME_CHAID", length = 64, nullable = false)
     var channelId: String,
+
+    @OneToOne(mappedBy = "message")
+    var delimitationMessage: DiscordDelimitationMessageEntity?,
 ) : BuilderBaseEntity()

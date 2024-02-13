@@ -13,12 +13,14 @@ export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit 
   private messagesUpdatedQueue: AMQPQueue;
   private messagesDeletedQueue: AMQPQueue;
   private messagesBootstrapQueue: AMQPQueue;
+  private messagesDelimitationQueue: AMQPQueue;
   private messagesExchange: AMQPExchange;
 
   private static readonly MESSAGES_CREATED_QUEUE_NAME = "messages.created";
   private static readonly MESSAGES_UPDATED_QUEUE_NAME = "messages.updated";
   private static readonly MESSAGES_DELETED_QUEUE_NAME = "messages.deleted";
   private static readonly MESSAGES_BOOTSTRAP_QUEUE_NAME = "messages.bootstrap";
+  private static readonly MESSAGES_DELIMITATION_QUEUE_NAME = "messages.delimitation";
   private static readonly MESSAGES_EXCHANGE_NAME = "messages.ex";
 
   public constructor(@Inject(AMQPService) amqpService: AMQPService) {
@@ -61,6 +63,14 @@ export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit 
     );
   }
 
+  public async sendDelimitationMessage(message: DiscordMessageDTO): Promise<void> {
+    await this.amqpService.channel.sendMessage(
+      this.messagesExchange,
+      DiscordAMQPServiceImpl.MESSAGES_DELIMITATION_QUEUE_NAME,
+      message,
+    );
+  }
+
   private async setupAmqp(): Promise<void> {
     this.messagesCreatedQueue = await this.amqpService.channel.assertQueue({
       name: DiscordAMQPServiceImpl.MESSAGES_CREATED_QUEUE_NAME,
@@ -73,6 +83,9 @@ export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit 
     });
     this.messagesBootstrapQueue = await this.amqpService.channel.assertQueue({
       name: DiscordAMQPServiceImpl.MESSAGES_BOOTSTRAP_QUEUE_NAME,
+    });
+    this.messagesDelimitationQueue = await this.amqpService.channel.assertQueue({
+      name: DiscordAMQPServiceImpl.MESSAGES_DELIMITATION_QUEUE_NAME,
     });
     this.messagesExchange = await this.amqpService.channel.assertExchange({
       name: DiscordAMQPServiceImpl.MESSAGES_EXCHANGE_NAME,
@@ -94,6 +107,10 @@ export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit 
       }),
       this.amqpService.channel.bindQueueToExchange({
         queue: this.messagesBootstrapQueue,
+        exchange: this.messagesExchange,
+      }),
+      this.amqpService.channel.bindQueueToExchange({
+        queue: this.messagesDelimitationQueue,
         exchange: this.messagesExchange,
       }),
     ]);

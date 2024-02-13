@@ -5,7 +5,7 @@ import { DiscordMessageDTO } from "../../models/discord-message.dto";
 import { DiscordTextChannelDTO } from "../../models/discord-text-channel.dto";
 import { GetGuildsQueryDTO } from "../../models/get-guilds-query.dto";
 import { DiscordController } from "../discord.controller";
-import { Controller, Get, Inject, NotFoundException, Param, Query } from "@nestjs/common";
+import { Controller, Get, HttpCode, Inject, NotFoundException, Param, Post, Query } from "@nestjs/common";
 import { DiscordService } from "../../services/discord.service";
 import { GetMessagesQueryDTO } from "../../models/get-messages-query.dto";
 
@@ -105,5 +105,11 @@ export class DiscordControllerImpl implements DiscordController {
       limit: options?.limit,
     });
     return messages.map((message) => message.toDTO());
+  }
+
+  @Post("/setupSlashCommands")
+  @HttpCode(204)
+  public async setupSlashCommands(): Promise<void> {
+    return await this.service.setupSlashCommands();
   }
 }

@@ -18,23 +18,24 @@ class MessagesAMQPConfiguration {
     companion object {
         const val MESSAGES_EXCHANGE = "messages.ex"
         const val MESSAGES_BOOTSTRAP = "messages.bootstrap"
+        const val MESSAGES_DELIMITATION = "messages.delimitation"
         const val MESSAGES_CREATED = "messages.created"
-        const val MESSAGES_DELETED = "messages.deleted"
         const val MESSAGES_UPDATED = "messages.updated"
+        const val MESSAGES_DELETED = "messages.deleted"
     }
 
     @Bean
-    fun createRabbitAdmin(connection: ConnectionFactory): RabbitAdmin {
+    fun rabbitAdmin(connection: ConnectionFactory): RabbitAdmin {
         return RabbitAdmin(connection)
     }
 
     @Bean
-    fun createMessageConverter(): Jackson2JsonMessageConverter {
+    fun rabbitMessageConverter(): Jackson2JsonMessageConverter {
         return Jackson2JsonMessageConverter()
     }
 
     @Bean
-    fun createRabbitTemplate(connection: ConnectionFactory, messageConverter: Jackson2JsonMessageConverter): RabbitTemplate {
+    fun rabbitTemplate(connection: ConnectionFactory, messageConverter: Jackson2JsonMessageConverter): RabbitTemplate {
         val rabbitTemplate = RabbitTemplate(connection)
         rabbitTemplate.messageConverter = messageConverter
         return rabbitTemplate
@@ -46,58 +47,71 @@ class MessagesAMQPConfiguration {
     }
 
     @Bean
-    fun getMessagesExchange(): TopicExchange {
+    fun messagesExchange(): TopicExchange {
         return TopicExchange(MESSAGES_EXCHANGE)
     }
 
     @Bean
-    fun getMessagesBootstrapQueue(): Queue {
+    fun messagesBootstrapQueue(): Queue {
         return Queue(MESSAGES_BOOTSTRAP)
     }
 
     @Bean
-    fun getMessagesCreatedQueue(): Queue {
+    fun messagesDelimitationQueue(): Queue {
+        return Queue(MESSAGES_DELIMITATION)
+    }
+
+    @Bean
+    fun messagesCreatedQueue(): Queue {
         return Queue(MESSAGES_CREATED)
     }
 
     @Bean
-    fun getMessagesDeletedQueue(): Queue {
+    fun messagesDeletedQueue(): Queue {
         return Queue(MESSAGES_DELETED)
     }
 
     @Bean
-    fun getMessagesUpdatedQueue(): Queue {
+    fun messagesUpdatedQueue(): Queue {
         return Queue(MESSAGES_UPDATED)
     }
 
     @Bean
-    fun getMessagesBootstrapBinding(exchange: TopicExchange): Binding {
+    fun messagesBootstrapBinding(exchange: TopicExchange): Binding {
         return BindingBuilder
-            .bind(getMessagesBootstrapQueue())
+            .bind(messagesBootstrapQueue())
             .to(exchange)
             .with(MESSAGES_UPDATED)
     }
 
     @Bean
-    fun getMessagesCreatedBinding(exchange: TopicExchange): Binding {
+    fun messagesDelimitationBinding(exchange: TopicExchange): Binding {
         return BindingBuilder
-            .bind(getMessagesCreatedQueue())
+            .bind(messagesDelimitationQueue())
+            .to(exchange)
+            .with(MESSAGES_DELIMITATION)
+    }
+
+    @Bean
+    fun messagesCreatedBinding(exchange: TopicExchange): Binding {
+        return BindingBuilder
+            .bind(messagesCreatedQueue())
             .to(exchange)
             .with(MESSAGES_CREATED)
     }
 
     @Bean
-    fun getMessagesDeletedBinding(exchange: TopicExchange): Binding {
+    fun messagesDeletedBinding(exchange: TopicExchange): Binding {
         return BindingBuilder
-            .bind(getMessagesDeletedQueue())
+            .bind(messagesDeletedQueue())
             .to(exchange)
             .with(MESSAGES_DELETED)
     }
 
     @Bean
-    fun getMessagesUpdatedBinding(exchange: TopicExchange): Binding {
+    fun messagesUpdatedBinding(exchange: TopicExchange): Binding {
         return BindingBuilder
-            .bind(getMessagesUpdatedQueue())
+            .bind(messagesUpdatedQueue())
             .to(exchange)
             .with(MESSAGES_UPDATED)
     }

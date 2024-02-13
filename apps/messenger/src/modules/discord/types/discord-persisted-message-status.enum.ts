@@ -1,0 +1,5 @@
+export enum DiscordPersistedMessageStatusEnum {
+  MESSAGE_CREATED,
+  MESSAGE_EXISTS_BUT_SAME_CONTENT,
+  MESSAGE_EXISTS_BUT_DIFFERENT_CONTENT,
+}

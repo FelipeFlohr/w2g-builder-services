@@ -5,6 +5,7 @@ export interface DiscordAMQPService {
   sendUpdatedMessage(message: DiscordMessageDTO): Promise<void>;
   sendDeletedMessage(message: DiscordMessageDTO): Promise<void>;
   sendBootstrapMessage(message: DiscordMessageDTO): Promise<void>;
+  sendDelimitationMessage(message: DiscordMessageDTO): Promise<void>;
 }
 
 export const DiscordAMQPService = Symbol("DiscordAMQPService");

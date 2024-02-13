@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, forwardRef } from "@nestjs/common";
+import { Inject, Injectable, forwardRef } from "@nestjs/common";
 import { DiscordMessageDTO } from "../../models/discord-message.dto";
 import { DiscordMessageRepository } from "../discord-message.repository";
 import { MessengerBaseTypeORMRepository } from "src/database/base/impl/messenger-base-typeorm.repository";
@@ -8,6 +8,8 @@ import { QueryFailedError } from "typeorm";
 import { MessageIsAlreadyDelimitationError } from "../../errors/message-is-already-delimitation.error";
 import { TypeUtils } from "src/utils/type-utils";
 import { DiscordService } from "../../services/discord.service";
+import { DiscordPersistedMessageStatusEnum } from "../../types/discord-persisted-message-status.enum";
+import { DiscordMessageWithContentDTO } from "../../models/discord-message-with-content.dto";
 
 @Injectable()
 export class DiscordMessageRepositoryImpl
@@ -79,6 +81,37 @@ export class DiscordMessageRepositoryImpl
       .execute();
   }
 
+  public async upsertMessage(message: DiscordMessageDTO): Promise<DiscordPersistedMessageStatusEnum> {
+    const msgWithContent = await this.findMessageWithContentOnDatabaseByMessageId(message);
+    if (msgWithContent) {
+      if (message.content === msgWithContent.content) {
+        return DiscordPersistedMessageStatusEnum.MESSAGE_EXISTS_BUT_SAME_CONTENT;
+      }
+      await this.updateMessage(message);
+      return DiscordPersistedMessageStatusEnum.MESSAGE_EXISTS_BUT_DIFFERENT_CONTENT;
+    }
+
+    await this.saveMessage(message, true);
+    return DiscordPersistedMessageStatusEnum.MESSAGE_CREATED;
+  }
+
+  private async findMessageWithContentOnDatabaseByMessageId(
+    message: DiscordMessageDTO,
+  ): Promise<DiscordMessageWithContentDTO | undefined> {
+    const res = await this.getRepository()
+      .createQueryBuilder()
+      .select("dme.id", "messageId")
+      .addSelect("dme.messageId", "discordMessageId")
+      .addSelect("dme.content", "content")
+      .from(DiscordMessageTypeORMEntity, "dme")
+      .where("dme.messageId = :messageId", { messageId: message.id })
+      .limit(1)
+      .getRawOne();
+    if (res) {
+      return res;
+    }
+  }
+
   private async findMessageIdOnDatabaseByMessageId(message: DiscordMessageDTO): Promise<number | undefined> {
     const res = await this.getRepository().findOne({
       select: {
@@ -122,21 +155,5 @@ export class DiscordMessageRepositoryImpl
       }
       throw e;
     }
-  }
-
-  private async findAuthorIdByMessageId(messageId: number): Promise<number> {
-    const res = await this.getRepository().findOne({
-      select: {
-        authorId: true,
-      },
-      where: {
-        id: messageId,
-      },
-    });
-
-    if (res) {
-      return res.authorId;
-    }
-    throw new NotFoundException();
   }
 }

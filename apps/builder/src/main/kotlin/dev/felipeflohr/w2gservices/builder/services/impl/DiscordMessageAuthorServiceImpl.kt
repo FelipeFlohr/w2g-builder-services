@@ -1,7 +1,6 @@
 package dev.felipeflohr.w2gservices.builder.services.impl
 
 import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageAuthorDTO
-import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageAuthorEntity
 import dev.felipeflohr.w2gservices.builder.repositories.DiscordMessageAuthorRepository
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageAuthorService
 import kotlinx.coroutines.Dispatchers
@@ -12,11 +11,23 @@ import org.springframework.stereotype.Service
 @Service
 class DiscordMessageAuthorServiceImpl(
     @Autowired
-    private val authorRepository: DiscordMessageAuthorRepository
+    private val repository: DiscordMessageAuthorRepository
 ) : DiscordMessageAuthorService {
-    override suspend fun saveAuthor(author: DiscordMessageAuthorDTO): DiscordMessageAuthorEntity {
-        return withContext(Dispatchers.IO) {
-            return@withContext authorRepository.saveAndFlush(author.toEntity())
+    override suspend fun deleteAuthorsByIds(ids: List<Long>) {
+        withContext(Dispatchers.IO) {
+            repository.deleteAuthorsByIds(ids)
+        }
+    }
+
+    override suspend fun updateAuthor(author: DiscordMessageAuthorDTO) {
+        withContext(Dispatchers.IO) {
+            repository.updateAuthor(author)
+        }
+    }
+
+    override suspend fun deleteAuthorByAuthorId(authorId: String) {
+        withContext(Dispatchers.IO) {
+            repository.deleteAuthorByAuthorId(authorId)
         }
     }
 }
