@@ -38,8 +38,7 @@ class DiscordMessageCustomRepositoryImpl(
         return query.executeUpdate()
     }
 
-    override fun deleteMessagesByGuildIdReturningAuthorIds(guildId: String): List<Long> {
-        val messagesToDelete = getMessagesToDeleteByGuildId(guildId)
+    override fun deleteMessagesByIdListReturningAuthorIds(messagesToDelete: List<MessageToDeleteDTO>): List<Long> {
         val messagesToDeleteIds = messagesToDelete.map { message -> message.messageId }
         val authorsToDeleteIds = messagesToDelete.map { message -> message.authorId }
         val deleteQuerySql = """
@@ -54,7 +53,7 @@ class DiscordMessageCustomRepositoryImpl(
         return authorsToDeleteIds
     }
 
-    private fun getMessagesToDeleteByGuildId(guildId: String): List<MessageToDeleteDTO> {
+    override fun getMessagesToDeleteByGuildId(guildId: String): List<MessageToDeleteDTO> {
         val messagesToDeleteSql = """
             select new ${MessageToDeleteDTO::class.java.name}(
                 dme.id as id, 

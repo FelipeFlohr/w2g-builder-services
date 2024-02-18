@@ -5,6 +5,7 @@ import { AMQPQueue } from "src/amqp/business/amqp-queue";
 import { AMQPExchange } from "src/amqp/business/amqp-exchange";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { AMQPExchangeTypeEnum } from "src/amqp/types/amqp-exchange-type.enum";
+import { DiscordDelimitationMessageDTO } from "../../models/discord-delimitation-message.dto";
 
 @Injectable()
 export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit {
@@ -63,7 +64,7 @@ export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit 
     );
   }
 
-  public async sendDelimitationMessage(message: DiscordMessageDTO): Promise<void> {
+  public async sendDelimitationMessage(message: DiscordDelimitationMessageDTO): Promise<void> {
     await this.amqpService.channel.sendMessage(
       this.messagesExchange,
       DiscordAMQPServiceImpl.MESSAGES_DELIMITATION_QUEUE_NAME,

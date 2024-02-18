@@ -6,6 +6,7 @@ export class DiscordDelimitationMessageWithListenerDTO {
   public readonly guildId: string;
   public readonly messageId: number;
   public readonly discordMessageId: string;
+  public readonly delimitationCreatedAt: Date;
 
   public constructor(options: DiscordDelimitationMessageWithListenerOptions) {
     this.delimitationId = options.delimitationId;
@@ -13,5 +14,6 @@ export class DiscordDelimitationMessageWithListenerDTO {
     this.guildId = options.guildId;
     this.messageId = options.messageId;
     this.discordMessageId = options.discordMessageId;
+    this.delimitationCreatedAt = options.delimitationCreatedAt;
   }
 }

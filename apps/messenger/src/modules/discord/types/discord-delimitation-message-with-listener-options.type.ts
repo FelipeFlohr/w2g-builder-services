@@ -4,4 +4,5 @@ export type DiscordDelimitationMessageWithListenerOptions = {
   readonly guildId: string;
   readonly messageId: number;
   readonly discordMessageId: string;
+  readonly delimitationCreatedAt: Date;
 };

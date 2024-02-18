@@ -1,18 +1,30 @@
 version: "3.9"
 name: "w2g-builder-services"
 services:
+  nginx-no-dependencies: &nginx-no-dependencies
+    image: nginx:alpine
+    ports:
+      - 80:80
+    volumes:
+      - ./apps/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  nginx-dependencies:
+    <<: *nginx-no-dependencies
+    depends_on:
+      messenger-app:
+        condition: service_healthy
+      file-storage-app:
+        condition: service_healthy
   rabbitmq:
     image: rabbitmq:3.12-management
     container_name: w2g-builder-rabbitmq-1
     restart: always
+    env_file:
+      - ./env/rabbitmq/env/.env.rabbitmq
     ports:
       - 5672:5672
       - 15672:15672
     volumes:
       - ./docker-volume/rabbitmq:/var/lib/rabbitmq/
-    environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=123
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 5s
@@ -22,12 +34,10 @@ services:
     container_name: messenger-postgres-1
     image: postgres:16
     restart: always
+    env_file:
+      - ./env/builder/env/.env.builder-postgres
     ports:
       - 5432:5432
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: 123
-      POSTGRES_DB: messenger-db
     volumes:
       - ./docker-volume/messenger-postgres:/var/lib/postgresql/data
     healthcheck:
@@ -53,6 +63,11 @@ services:
     build:
       context: ./apps/messenger
       dockerfile: Dockerfile
+    env_file:
+      - ./env/messenger/env/.env.messenger
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - NODE_ENV=PRODUCTION
     depends_on:
       messenger-redis:
         condition: service_healthy
@@ -60,20 +75,22 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    env_file:
-      - ./apps/messenger/.env
-    ports:
+    expose:
       - "3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
   builder-postgres:
     container_name: builder-postgres-1
     image: postgres:16
+    env_file:
+      - ./env/builder/env/.env.builder-postgres
     restart: always
     ports:
       - 5433:5432
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: 123
-      POSTGRES_DB: builder-db
     volumes:
       - ./docker-volume/builder-postgres:/var/lib/postgresql/data
     healthcheck:
@@ -85,3 +102,50 @@ services:
       interval: 1s
       timeout: 3s
       retries: 3
+  file-storage-postgres:
+    container_name: file-storage-postgres-1
+    image: postgres:16
+    restart: always
+    env_file:
+      - ./env/file-storage/env/.env.file-storage-postgres
+    ports:
+      - 5434:5432
+    volumes:
+      - ./docker-volume/file-storage-db-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'",
+        ]
+      interval: 1s
+      timeout: 3s
+      retries: 3
+  file-storage-local-s3:
+    container_name: file-storage-local-s3-1
+    image: localstack/localstack:s3-latest
+    restart: always
+    ports:
+      - "127.0.0.1:4566:4566"
+      - "127.0.0.1:4510-4559:4510-4559"
+    volumes:
+      - "./docker-volume/file-storage-local-s3:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+  file-storage-app:
+    build:
+      context: ./apps/file-storage
+      dockerfile: Dockerfile
+    env_file:
+      - ./env/file-storage/env/.env.file-storage
+    restart: always
+    expose:
+      - 8000:8080
+    depends_on:
+      file-storage-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 5s

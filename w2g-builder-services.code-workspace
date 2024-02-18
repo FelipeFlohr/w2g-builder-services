@@ -11,6 +11,10 @@
 		{
 			"path": "apps/builder",
 			"name": "Builder"
+		},
+		{
+			"path": "apps/file-storage",
+			"name": "File Storage"
 		}
 	],
 	"settings": {}

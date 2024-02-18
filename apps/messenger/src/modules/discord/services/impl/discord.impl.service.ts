@@ -22,6 +22,7 @@ import { DiscordDelimitationMessageEntity } from "../../entities/discord-delimit
 import { StringUtils } from "src/utils/string-utils";
 import { CollectionUtils } from "src/utils/collection-utils";
 import { DiscordPersistedMessageStatusEnum } from "../../types/discord-persisted-message-status.enum";
+import { DiscordDelimitationMessageDTO } from "../../models/discord-delimitation-message.dto";
 
 @Injectable()
 export class DiscordServiceImpl implements DiscordService {
@@ -127,8 +128,8 @@ export class DiscordServiceImpl implements DiscordService {
 
   public async saveDelimitationMessage(message: DiscordMessage): Promise<void> {
     const messageDTO = message.toDTO();
-    await this.delimitationRepository.saveDelimitation(messageDTO);
-    await this.amqpService.sendDelimitationMessage(messageDTO);
+    const delimitationMessage = await this.delimitationRepository.saveDelimitation(messageDTO);
+    await this.amqpService.sendDelimitationMessage(delimitationMessage);
   }
 
   public async saveMessage(message: DiscordMessageDTO, forceCreation?: boolean): Promise<number> {
@@ -233,7 +234,7 @@ export class DiscordServiceImpl implements DiscordService {
     });
   }
 
-  public async sendDelimitationMessageViaAMQP(message: DiscordMessageDTO): Promise<void> {
+  public async sendDelimitationMessageViaAMQP(message: DiscordDelimitationMessageDTO): Promise<void> {
     await this.amqpService.sendDelimitationMessage(message);
   }
 }

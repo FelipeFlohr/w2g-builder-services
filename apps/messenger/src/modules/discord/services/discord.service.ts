@@ -6,6 +6,7 @@ import { GuildFetchOptionsType } from "../client/types/guild-fetch-options.type"
 import { MessageFetchOptions } from "../client/types/message-fetch-options.type";
 import { DiscordDelimitationMessageEntity } from "../entities/discord-delimitation-message.entity";
 import { DiscordDelimitationMessageWithListenerDTO } from "../models/discord-delimitation-message-with-listener.dto";
+import { DiscordDelimitationMessageDTO } from "../models/discord-delimitation-message.dto";
 import { DiscordMessageAuthorDTO } from "../models/discord-message-author.dto";
 import { DiscordMessageDTO } from "../models/discord-message.dto";
 import { DiscordTextChannelListenerDTO } from "../models/discord-text-channel-listener.dto";
@@ -40,7 +41,7 @@ export interface DiscordService {
     delimitationMessage: DiscordDelimitationMessageWithListenerDTO,
   ): Promise<void>;
   cacheChannelMessages(guildId: string, channelId: string, isBootstrap: boolean): Promise<void>;
-  sendDelimitationMessageViaAMQP(message: DiscordMessageDTO): Promise<void>;
+  sendDelimitationMessageViaAMQP(message: DiscordDelimitationMessageDTO): Promise<void>;
 }
 
 export const DiscordService = Symbol("DiscordService");

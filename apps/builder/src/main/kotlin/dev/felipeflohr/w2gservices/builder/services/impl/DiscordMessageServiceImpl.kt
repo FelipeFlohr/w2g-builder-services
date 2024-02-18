@@ -1,6 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.services.impl
 
 import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
+import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 import dev.felipeflohr.w2gservices.builder.repositories.DiscordMessageRepository
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageAuthorService
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
@@ -8,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.Collections
+import java.util.*
 
 @Service
 class DiscordMessageServiceImpl(
@@ -24,7 +25,8 @@ class DiscordMessageServiceImpl(
         withContext(Dispatchers.IO) {
             if (!fetchedGuildIds.contains(message.guildId)) {
                 fetchedGuildIds.addLast(message.guildId)
-                val messagesDeleted = repository.deleteMessagesByGuildIdReturningAuthorIds(message.guildId)
+                val messagesToDelete = repository.getMessagesToDeleteByGuildId(message.guildId)
+                val messagesDeleted = repository.deleteMessagesByIdListReturningAuthorIds(messagesToDelete)
                 authorService.deleteAuthorsByIds(messagesDeleted)
             }
 
@@ -55,6 +57,12 @@ class DiscordMessageServiceImpl(
         withContext(Dispatchers.IO) {
             authorService.updateAuthor(message.author)
             repository.updateMessage(message)
+        }
+    }
+
+    override suspend fun getMessageByMessageId(messageId: String): DiscordMessageEntity? {
+        return withContext(Dispatchers.IO) {
+            repository.getMessageByMessageId(messageId)
         }
     }
 

@@ -16,6 +16,7 @@ import { DiscordJsSlashCommandInteractionImpl } from "../../client/business/impl
 import { CollectionUtils } from "src/utils/collection-utils";
 import { DiscordAMQPService } from "../../amqp/discord-amqp.service";
 import { LoggerUtils } from "src/utils/logger-utils";
+import { DiscordDelimitationMessageDTO } from "../../models/discord-delimitation-message.dto";
 
 @Injectable()
 export class DiscordClientServiceImpl implements DiscordClientService, OnModuleInit, OnModuleDestroy {
@@ -97,7 +98,9 @@ export class DiscordClientServiceImpl implements DiscordClientService, OnModuleI
         message.discordMessageId,
       );
       if (messageEntity) {
-        await this.service.sendDelimitationMessageViaAMQP(messageEntity.toDTO());
+        await this.service.sendDelimitationMessageViaAMQP(
+          new DiscordDelimitationMessageDTO(message.delimitationCreatedAt, messageEntity.toDTO()),
+        );
       }
 
       await this.service.cacheChannelMessages(true, message);

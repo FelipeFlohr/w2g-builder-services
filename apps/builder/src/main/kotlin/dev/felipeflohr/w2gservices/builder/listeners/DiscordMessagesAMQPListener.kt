@@ -1,6 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.listeners
 
 import dev.felipeflohr.w2gservices.builder.configurations.MessagesAMQPConfiguration
+import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
 import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
 import dev.felipeflohr.w2gservices.builder.services.DiscordDelimitationMessageService
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
@@ -47,7 +48,7 @@ class DiscordMessagesAMQPListener(
         priority = DELIMITATION_LISTENER_PRIORITY,
         executor = VIRTUAL_THREAD_EXECUTOR
     )
-    fun delimitationMessage(message: Message<DiscordMessageDTO>) {
+    fun delimitationMessage(message: Message<DiscordDelimitationMessageDTO>) {
         runBlocking {
             delimitationService.saveDelimitationMessage(message.payload)
         }

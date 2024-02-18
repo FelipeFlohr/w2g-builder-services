@@ -1,8 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.services.impl
 
-import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
+import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
 import dev.felipeflohr.w2gservices.builder.entities.DiscordDelimitationMessageEntity
-import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 import dev.felipeflohr.w2gservices.builder.repositories.DiscordDelimitationMessageRepository
 import dev.felipeflohr.w2gservices.builder.services.DiscordDelimitationMessageService
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
@@ -19,21 +18,23 @@ class DiscordDelimitationMessageServiceImpl(
     @Autowired
     private val repository: DiscordDelimitationMessageRepository,
 ) : DiscordDelimitationMessageService {
-    override suspend fun saveDelimitationMessage(message: DiscordMessageDTO) {
-        val persistedMessage = messageService.getMessageIdByDiscordMessageId(message.id)
-        val messageEntity: DiscordMessageEntity
-
+    override suspend fun saveDelimitationMessage(delimitation: DiscordDelimitationMessageDTO) {
+        val persistedMessage = messageService.getMessageByMessageId(delimitation.message.id)
         if (persistedMessage != null) {
             withContext(Dispatchers.IO) {
-                repository.deleteDelimitationMessageByMessageId(persistedMessage)
+                repository.deleteDelimitationMessageByMessageId(persistedMessage.id as Long)
             }
-            messageEntity = message.toEntity()
-            messageEntity.id = persistedMessage
+        }
+        val entity = if (persistedMessage != null) {
+            DiscordDelimitationMessageEntity(
+                id = null,
+                message = persistedMessage,
+                delimitationCreatedAt = delimitation.createdAt
+            )
         } else {
-            messageEntity = message.toEntity()
+            DiscordDelimitationMessageEntity.toEntity(delimitation)
         }
 
-        val entity = DiscordDelimitationMessageEntity(message = messageEntity)
         withContext(Dispatchers.IO) {
             repository.save(entity)
         }

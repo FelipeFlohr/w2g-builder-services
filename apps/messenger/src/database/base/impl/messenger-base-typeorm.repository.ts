@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { ObjectLiteral, Repository } from "typeorm";
 import { MessengerBaseEntity } from "../messenger-base.entity";
 import { MessengerBaseRepository } from "../messenger-base.repository";
 import { DatabaseServiceImpl } from "src/database/impl/database.impl.service";
@@ -17,7 +17,12 @@ export abstract class MessengerBaseTypeORMRepository<T extends MessengerBaseEnti
     this.clazz = clazz;
   }
 
-  protected getRepository(): Repository<T> {
+  protected getRepository(): Repository<T>;
+  protected getRepository<U extends ObjectLiteral>(clazz: ClassType<U>): Repository<U>;
+  protected getRepository<U extends ObjectLiteral>(clazz?: ClassType<U>): Repository<T> | Repository<U> {
+    if (clazz) {
+      return this.databaseService.datasource.getRepository(clazz);
+    }
     return this.databaseService.datasource.getRepository(this.clazz);
   }
 }

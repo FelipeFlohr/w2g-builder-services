@@ -1,1 +1,10 @@
 /docker-volume
+
+# .env files
+env/builder/env/.env.builder
+env/builder/env/.env.builder-postgres
+env/file-storage/env/.env.file-storage
+env/file-storage/env/.env.file-storage-postgres
+env/messenger/env/.env.messenger
+env/messenger/env/.env.messenger-postgres
+env/rabbitmq/env/.env.rabbitmq

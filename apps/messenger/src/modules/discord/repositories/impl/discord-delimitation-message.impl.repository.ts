@@ -9,6 +9,7 @@ import { DiscordService } from "../../services/discord.service";
 import { DiscordDelimitationMessageWithListenerOptions } from "../../types/discord-delimitation-message-with-listener-options.type";
 import { DiscordMessageTypeORMEntity } from "../../entities/impl/discord-message.typeorm.entity";
 import { DiscordDelimitationMessageEntity } from "../../entities/discord-delimitation-message.entity";
+import { DiscordPersistedDelimitationMessageDTO } from "../../models/discord-persisted-delimitation-message.dto";
 
 @Injectable()
 export class DiscordDelimitationMessageRepositoryImpl
@@ -25,7 +26,7 @@ export class DiscordDelimitationMessageRepositoryImpl
     this.service = service;
   }
 
-  public async saveDelimitation(message: DiscordMessageDTO): Promise<number> {
+  public async saveDelimitation(message: DiscordMessageDTO): Promise<DiscordPersistedDelimitationMessageDTO> {
     if (await this.delimitationMessageExistsByGuildAndChannelId(message.guildId, message.channelId)) {
       await this.deleteDelimitationByGuildAndChannelId(message.guildId, message.channelId);
     }
@@ -35,13 +36,15 @@ export class DiscordDelimitationMessageRepositoryImpl
       messageId: messageId,
     });
     await this.service.cacheChannelMessages(message.guildId, message.channelId, false);
-    return res.id;
+
+    return new DiscordPersistedDelimitationMessageDTO(res.id, res.createdAt, message);
   }
 
   public async getDelimitationMessagesWithListener(): Promise<DiscordDelimitationMessageWithListenerDTO[]> {
     const res = (await this.getRepository()
       .createQueryBuilder("ddm")
       .select("ddm.messageId", "messageId")
+      .addSelect("ddm.createdAt", "delimitationCreatedAt")
       .addSelect("ddm.id", "delimitationId")
       .addSelect("dme.channelId", "channelId")
       .addSelect("dme.guildId", "guildId")
@@ -62,19 +65,19 @@ export class DiscordDelimitationMessageRepositoryImpl
   }
 
   public async deleteDelimitationByGuildAndChannelId(guildId: string, channelId: string): Promise<void> {
-    const msgSubquery = this.getRepository()
-      .createQueryBuilder()
+    const msgSubquery = this.getRepository(DiscordMessageTypeORMEntity)
+      .createQueryBuilder("dme")
       .select("dme.id")
-      .from(DiscordMessageTypeORMEntity, "dme")
-      .where("dme.guildId = :guildId and dme.channelId = :channelId", { guildId, channelId })
-      .limit(1);
+      .where("dme.guildId = :guildId and dme.channelId = :channelId", { guildId, channelId });
 
-    await this.getRepository()
+    const query = this.getRepository()
       .createQueryBuilder()
       .delete()
-      .from(DiscordDelimitationMessageTypeORMEntity)
-      .where(`messageId = (${msgSubquery.getQuery()})`, { guildId, channelId })
-      .execute();
+      .from(DiscordDelimitationMessageTypeORMEntity, "ddm")
+      .where(`messageId in (${msgSubquery.getQuery()})`, { guildId, channelId })
+      .setParameters(msgSubquery.getParameters());
+
+    await query.execute();
   }
 
   public async getDelimitationMessageLinkByGuildAndChannelId(
@@ -96,14 +99,18 @@ export class DiscordDelimitationMessageRepositoryImpl
     guildId: string,
     channelId: string,
   ): Promise<DiscordDelimitationMessageEntity> {
-    return await this.getRepository()
-      .createQueryBuilder()
-      .select()
-      .from(DiscordDelimitationMessageTypeORMEntity, "ddm")
-      .leftJoinAndSelect("ddm.message", "dme")
-      .leftJoinAndSelect("dme.author", "dma")
-      .where("dme.guildId = :guildId and dme.channelId = :channelId", { guildId: guildId, channelId: channelId })
-      .limit(1)
-      .execute();
+    return (await this.getRepository().findOne({
+      relations: {
+        message: {
+          author: true,
+        },
+      },
+      where: {
+        message: {
+          guildId: guildId,
+          channelId: channelId,
+        },
+      },
+    })) as DiscordDelimitationMessageEntity;
   }
 }
