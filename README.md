@@ -10,7 +10,7 @@
 - Discord Watch2Gether View (cria uma página com os vídeos e os players)
 	- Angular (talvez)
 - Social Media Downloader (aplicação que baixa vídeo de redes sociais)
-	- Spring com Java (ou qualquer tecnologia que possibilite facilmente baixar vídeos de redes sociais)
+	- Nest.js
 - API File Storage (aplicação que devolve uma URL para o download de um arquivo)
 	- Spring com Java
 	- Postgres

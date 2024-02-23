@@ -8,3 +8,4 @@ env/file-storage/env/.env.file-storage-postgres
 env/messenger/env/.env.messenger
 env/messenger/env/.env.messenger-postgres
 env/rabbitmq/env/.env.rabbitmq
+env/downloader/env/.env.downloader

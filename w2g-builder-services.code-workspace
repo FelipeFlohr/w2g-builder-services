@@ -5,12 +5,24 @@
 			"name": "Root"
 		},
 		{
+			"path": "env",
+			"name": "Environment variables"
+		},
+		{
+			"path": "apps/nginx",
+			"name": "Nginx"
+		},
+		{
 			"path": "apps/messenger",
 			"name": "Messenger Bot"
 		},
 		{
 			"path": "apps/builder",
 			"name": "Builder"
+		},
+		{
+			"path": "apps/downloader",
+			"name": "Downloader"
 		},
 		{
 			"path": "apps/file-storage",
