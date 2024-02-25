@@ -10,8 +10,8 @@ import { URLUtils } from "src/utils/url-utils";
 
 @Injectable()
 export class TwitterService extends VideoDownloader {
-  public readonly platform: SocialMediaEnum = SocialMediaEnum.TWITTER;
-  protected override logger: Logger = LoggerUtils.from(TwitterService);
+  public override readonly platform: SocialMediaEnum = SocialMediaEnum.TWITTER;
+  protected override readonly logger: Logger = LoggerUtils.from(TwitterService);
   private readonly twitterPrefixes = [
     "https://x.com",
     "https://www.x.com",

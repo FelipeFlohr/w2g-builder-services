@@ -5,13 +5,20 @@ import { VideoFileDTO } from "src/modules/downloader/models/video-file.dto";
 import { VideoMetadataDTO } from "src/modules/downloader/models/video-metadata.dto";
 import { YoutubeDlService } from "src/modules/youtube-dl/services/youtube-dl.service";
 import { LoggerUtils } from "src/utils/logger-utils";
-import { InstagramVideoMetadataDTO } from "../models/instagram-video-metadata.dto";
+import { FacebookVideoMetadataDTO } from "../models/facebook-video-metadata.dto";
 
 @Injectable()
-export class InstagramService extends VideoDownloader {
-  public override readonly platform: SocialMediaEnum = SocialMediaEnum.INSTAGRAM;
-  protected override readonly logger: Logger = LoggerUtils.from(InstagramService);
-  private readonly instagramPrefixes = ["https://instagram.com", "https://www.instagram.com"] as const;
+export class FacebookService extends VideoDownloader {
+  public override readonly platform: SocialMediaEnum = SocialMediaEnum.FACEBOOK;
+  protected override readonly logger: Logger = LoggerUtils.from(FacebookService);
+  private readonly facebookPrefixes = [
+    "https://www.facebook.com",
+    "https://facebook.com",
+    "https://m.facebook",
+    "https://www.m.facebook",
+    "https://www.fb.watch",
+    "https://fb.watch",
+  ] as const;
 
   public constructor(@Inject(YoutubeDlService) private readonly youtubeDlService: YoutubeDlService) {
     super();
@@ -22,10 +29,10 @@ export class InstagramService extends VideoDownloader {
   }
 
   public override async getMetadata(url: string): Promise<VideoMetadataDTO> {
-    return await this.youtubeDlService.getMetadata(url, InstagramVideoMetadataDTO, this.platform);
+    return await this.youtubeDlService.getMetadata(url, FacebookVideoMetadataDTO, this.platform);
   }
 
   public override isDownloadableVideo(url: string): boolean {
-    return this.validateVideoIsDownloadable(this.instagramPrefixes, url);
+    return this.validateVideoIsDownloadable(this.facebookPrefixes, url);
   }
 }

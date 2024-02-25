@@ -7,6 +7,7 @@ import { TwitterModule } from "./modules/twitter/twitter.module";
 import { JsonSerializationModule } from "./modules/json-serialization/json-serialization.module";
 import { YoutubeDlModule } from "./modules/youtube-dl/youtube-dl.module";
 import { InstagramModule } from "./modules/instagram/instagram.module";
+import { FacebookModule } from "./modules/facebook/facebook.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { InstagramModule } from "./modules/instagram/instagram.module";
     JsonSerializationModule,
     YoutubeDlModule,
     InstagramModule,
+    FacebookModule,
   ],
   controllers: [VideoController],
   providers: [],

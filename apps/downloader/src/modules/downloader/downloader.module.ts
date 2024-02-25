@@ -9,6 +9,8 @@ import { TwitterModule } from "../twitter/twitter.module";
 import { TwitterService } from "../twitter/services/twitter.service";
 import { InstagramService } from "../instagram/services/instagram.service";
 import { InstagramModule } from "../instagram/instagram.module";
+import { FacebookService } from "../facebook/services/facebook.service";
+import { FacebookModule } from "../facebook/facebook.module";
 
 @Module({
   controllers: [VideoController],
@@ -19,11 +21,11 @@ import { InstagramModule } from "../instagram/instagram.module";
     },
     {
       provide: DownloadersArrayProvider,
-      useFactory: (downloader1, downloader2, downloader3) => [downloader1, downloader2, downloader3],
-      inject: [YoutubeService, TwitterService, InstagramService],
+      useFactory: (...downloaders) => [...downloaders],
+      inject: [YoutubeService, TwitterService, InstagramService, FacebookService],
     },
   ],
-  imports: [YoutubeModule, TwitterModule, InstagramModule],
+  imports: [YoutubeModule, TwitterModule, InstagramModule, FacebookModule],
   exports: [DownloaderService],
 })
 export class DownloaderModule {}
