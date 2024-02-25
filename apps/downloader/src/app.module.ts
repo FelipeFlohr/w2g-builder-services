@@ -3,9 +3,19 @@ import { VideoController } from "./modules/downloader/controllers/video.controll
 import { DownloaderModule } from "./modules/downloader/downloader.module";
 import { EnvironmentModule } from "./env/environment.module";
 import { YoutubeModule } from "./modules/youtube/youtube.module";
+import { TwitterModule } from "./modules/twitter/twitter.module";
+import { JsonSerializationModule } from "./modules/json-serialization/json-serialization.module";
+import { YoutubeDlModule } from "./modules/youtube-dl/youtube-dl.module";
 
 @Module({
-  imports: [DownloaderModule, YoutubeModule, EnvironmentModule],
+  imports: [
+    DownloaderModule,
+    YoutubeModule,
+    EnvironmentModule,
+    TwitterModule,
+    JsonSerializationModule,
+    YoutubeDlModule,
+  ],
   controllers: [VideoController],
   providers: [],
 })

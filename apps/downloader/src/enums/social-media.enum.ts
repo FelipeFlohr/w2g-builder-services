@@ -1,6 +1,6 @@
 export enum SocialMediaEnum {
-  YOUTUBE,
-  INSTAGRAM,
-  FACEBOOK,
-  TWITTER,
+  YOUTUBE = "Youtube",
+  INSTAGRAM = "Instagram",
+  FACEBOOK = "Facebook",
+  TWITTER = "Twitter",
 }

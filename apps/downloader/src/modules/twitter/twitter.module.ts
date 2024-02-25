@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
-import { YoutubeService } from "./services/youtube.service";
+import { TwitterService } from "./services/twitter.service";
 import { YoutubeDlModule } from "../youtube-dl/youtube-dl.module";
 
 @Module({
-  providers: [YoutubeService],
+  providers: [TwitterService],
   imports: [YoutubeDlModule],
-  exports: [YoutubeService],
+  exports: [TwitterService],
 })
-export class YoutubeModule {}
+export class TwitterModule {}

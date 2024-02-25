@@ -19,5 +19,6 @@
     "noFallthroughCasesInSwitch": false,
     "noImplicitReturns": false,
     "strictPropertyInitialization": false,
+    "noImplicitOverride": true
   }
 }

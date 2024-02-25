@@ -21,4 +21,12 @@ export class VideoController {
 
     return new StreamableFile(video.stream);
   }
+
+  @Get("/metadata")
+  public async getMetadata(@Query("url") url?: string) {
+    if (url == undefined || url.trim() == "") {
+      throw new VideoNotFoundError("");
+    }
+    return await this.service.getVideoMetadata(url);
+  }
 }
