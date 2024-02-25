@@ -1,6 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { SocialMediaEnum } from "src/enums/social-media.enum";
-import { EnvironmentService } from "src/env/services/environment.service";
 import { VideoFileDTO } from "src/modules/downloader/models/video-file.dto";
 import { LoggerUtils } from "src/utils/logger-utils";
 import { VideoDownloader } from "src/modules/downloader/models/video-downloader";
@@ -12,7 +11,6 @@ import { YoutubeDlService } from "src/modules/youtube-dl/services/youtube-dl.ser
 export class YoutubeService extends VideoDownloader {
   public override readonly platform: SocialMediaEnum = SocialMediaEnum.YOUTUBE;
   protected override readonly logger = LoggerUtils.from(YoutubeService);
-  private readonly env: EnvironmentService;
   private readonly youtubeDlService: YoutubeDlService;
   private readonly youtubePrefixes = [
     "https://youtu.be",
@@ -21,12 +19,8 @@ export class YoutubeService extends VideoDownloader {
     "https://www.youtube.com",
   ] as const;
 
-  public constructor(
-    @Inject(EnvironmentService) env: EnvironmentService,
-    @Inject(YoutubeDlService) youtubeDlService: YoutubeDlService,
-  ) {
+  public constructor(@Inject(YoutubeDlService) youtubeDlService: YoutubeDlService) {
     super();
-    this.env = env;
     this.youtubeDlService = youtubeDlService;
   }
 

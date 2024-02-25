@@ -7,6 +7,8 @@ import { DownloadersArrayProvider } from "./providers/downloaders-array.provider
 import { YoutubeService } from "../youtube/services/youtube.service";
 import { TwitterModule } from "../twitter/twitter.module";
 import { TwitterService } from "../twitter/services/twitter.service";
+import { InstagramService } from "../instagram/services/instagram.service";
+import { InstagramModule } from "../instagram/instagram.module";
 
 @Module({
   controllers: [VideoController],
@@ -17,11 +19,11 @@ import { TwitterService } from "../twitter/services/twitter.service";
     },
     {
       provide: DownloadersArrayProvider,
-      useFactory: (downloader1, downloader2) => [downloader1, downloader2],
-      inject: [YoutubeService, TwitterService],
+      useFactory: (downloader1, downloader2, downloader3) => [downloader1, downloader2, downloader3],
+      inject: [YoutubeService, TwitterService, InstagramService],
     },
   ],
-  imports: [YoutubeModule, TwitterModule],
+  imports: [YoutubeModule, TwitterModule, InstagramModule],
   exports: [DownloaderService],
 })
 export class DownloaderModule {}
