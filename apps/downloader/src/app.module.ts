@@ -8,6 +8,7 @@ import { JsonSerializationModule } from "./modules/json-serialization/json-seria
 import { YoutubeDlModule } from "./modules/youtube-dl/youtube-dl.module";
 import { InstagramModule } from "./modules/instagram/instagram.module";
 import { FacebookModule } from "./modules/facebook/facebook.module";
+import { HealthcheckModule } from "./modules/healthcheck/healthcheck.module";
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { FacebookModule } from "./modules/facebook/facebook.module";
     YoutubeDlModule,
     InstagramModule,
     FacebookModule,
+    HealthcheckModule,
   ],
   controllers: [VideoController],
   providers: [],

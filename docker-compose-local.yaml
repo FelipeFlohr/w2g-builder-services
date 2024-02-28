@@ -7,12 +7,15 @@ services:
       - 80:80
     volumes:
       - ./apps/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./apps/nginx/access.log:/var/log/nginx/access.log:rw
   nginx-dependencies:
     <<: *nginx-no-dependencies
     depends_on:
       messenger-app:
         condition: service_healthy
       file-storage-app:
+        condition: service_healthy
+      downloader-app:
         condition: service_healthy
   rabbitmq:
     image: rabbitmq:3.12-management
@@ -146,6 +149,20 @@ services:
         condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+  downloader-app:
+    build:
+      context: ./apps/downloader
+      dockerfile: Dockerfile
+    env_file:
+      - ./env/downloader/local/.env.downloader-local
+    expose:
+      - "3001:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/healthcheck"]
       interval: 10s
       timeout: 10s
       retries: 5
