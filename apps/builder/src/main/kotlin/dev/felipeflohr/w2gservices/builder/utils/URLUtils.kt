@@ -14,7 +14,7 @@ object URLUtils {
     )
 
     fun getUrlsFromString(str: String): Set<String> {
-        val result: MutableSet<String> = HashSet();
+        val result: MutableSet<String> = HashSet()
         val splitString = str.split(' ')
 
         for (split in splitString) {

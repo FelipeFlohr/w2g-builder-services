@@ -5,18 +5,20 @@ import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
 import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
 import dev.felipeflohr.w2gservices.builder.services.DiscordDelimitationMessageService
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.Message
 import org.springframework.stereotype.Component
+import java.util.Collections
 
 @Component
-class DiscordMessagesAMQPListener(
-    @Autowired
+class DiscordMessagesAMQPListener @Autowired constructor(
     private val messageService: DiscordMessageService,
-
-    @Autowired
     private val delimitationService: DiscordDelimitationMessageService,
 ) {
     companion object {
@@ -36,7 +38,7 @@ class DiscordMessagesAMQPListener(
         priority = BOOTSTRAP_LISTENER_PRIORITY,
         concurrency = "1"
     )
-    fun bootstrapMessage(message: Message<DiscordMessageDTO>) {
+    private fun bootstrapMessage(message: Message<DiscordMessageDTO>) {
         runBlocking {
             messageService.bootstrapMessage(message.payload)
         }
@@ -48,7 +50,7 @@ class DiscordMessagesAMQPListener(
         priority = DELIMITATION_LISTENER_PRIORITY,
         executor = VIRTUAL_THREAD_EXECUTOR
     )
-    fun delimitationMessage(message: Message<DiscordDelimitationMessageDTO>) {
+    private fun delimitationMessage(message: Message<DiscordDelimitationMessageDTO>) {
         runBlocking {
             delimitationService.saveDelimitationMessage(message.payload)
         }
@@ -59,9 +61,9 @@ class DiscordMessagesAMQPListener(
         queues = [MessagesAMQPConfiguration.MESSAGES_CREATED],
         executor = VIRTUAL_THREAD_EXECUTOR
     )
-    fun createMessage(message: Message<DiscordMessageDTO>) {
+    private fun createMessage(message: Message<DiscordMessageDTO>) {
         runBlocking {
-            messageService.saveMessage(message.payload)
+            messageService.save(message.payload)
         }
     }
 
@@ -70,9 +72,9 @@ class DiscordMessagesAMQPListener(
         queues = [MessagesAMQPConfiguration.MESSAGES_UPDATED],
         executor = VIRTUAL_THREAD_EXECUTOR
     )
-    fun updateMessage(message: Message<DiscordMessageDTO>) {
+    private fun updateMessage(message: Message<DiscordMessageDTO>) {
         runBlocking {
-            messageService.updateMessage(message.payload)
+            messageService.update(message.payload)
         }
     }
 
@@ -81,9 +83,9 @@ class DiscordMessagesAMQPListener(
         queues = [MessagesAMQPConfiguration.MESSAGES_DELETED],
         executor = VIRTUAL_THREAD_EXECUTOR
     )
-    fun deleteMessage(message: Message<DiscordMessageDTO>) {
+    private fun deleteMessage(message: Message<DiscordMessageDTO>) {
         runBlocking {
-            messageService.deleteMessage(message.payload)
+            messageService.delete(message.payload)
         }
     }
 }

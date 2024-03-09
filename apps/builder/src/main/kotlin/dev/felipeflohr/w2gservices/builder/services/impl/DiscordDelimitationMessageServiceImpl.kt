@@ -19,7 +19,7 @@ class DiscordDelimitationMessageServiceImpl(
     private val repository: DiscordDelimitationMessageRepository,
 ) : DiscordDelimitationMessageService {
     override suspend fun saveDelimitationMessage(delimitation: DiscordDelimitationMessageDTO) {
-        val persistedMessage = messageService.getMessageByMessageId(delimitation.message.id)
+        val persistedMessage = messageService.getByMessageId(delimitation.message.id)
         if (persistedMessage != null) {
             withContext(Dispatchers.IO) {
                 repository.deleteByMessageId(persistedMessage.id as Long)

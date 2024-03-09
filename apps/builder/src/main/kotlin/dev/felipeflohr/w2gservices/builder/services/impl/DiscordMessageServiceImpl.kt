@@ -5,19 +5,19 @@ import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 import dev.felipeflohr.w2gservices.builder.repositories.DiscordMessageRepository
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageAuthorService
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
+import dev.felipeflohr.w2gservices.builder.services.DownloaderService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Collections
+import kotlin.collections.ArrayList
 
 @Service
-class DiscordMessageServiceImpl(
-    @Autowired
+class DiscordMessageServiceImpl @Autowired constructor (
     private val repository: DiscordMessageRepository,
-
-    @Autowired
-    private val authorService: DiscordMessageAuthorService
+    private val authorService: DiscordMessageAuthorService,
+    private val downloaderService: DownloaderService
 ) : DiscordMessageService {
     private val fetchedGuildIds: MutableList<String> = Collections.synchronizedList(ArrayList())
 
@@ -30,21 +30,22 @@ class DiscordMessageServiceImpl(
                 authorService.deleteAuthorsByIds(messagesDeleted)
             }
 
-            saveMessage(message)
+            save(message)
         }
     }
 
-    override suspend fun saveMessage(message: DiscordMessageDTO) {
+    override suspend fun save(message: DiscordMessageDTO) {
         withContext(Dispatchers.IO) {
             if (repository.existsByMessageId(message.id)) {
-                updateMessage(message)
+                update(message)
             } else {
-                repository.save(message.toEntity())
+                val messageFlushed = repository.saveAndFlush(message.toEntity())
+                downloaderService.downloadVideosAndSave(listOf(messageFlushed))
             }
         }
     }
 
-    override suspend fun deleteMessage(message: DiscordMessageDTO) {
+    override suspend fun delete(message: DiscordMessageDTO) {
         withContext(Dispatchers.IO) {
             if (repository.existsByMessageId(message.id)) {
                 repository.deleteByMessageId(message.id)
@@ -53,14 +54,14 @@ class DiscordMessageServiceImpl(
         }
     }
 
-    override suspend fun updateMessage(message: DiscordMessageDTO) {
+    override suspend fun update(message: DiscordMessageDTO) {
         withContext(Dispatchers.IO) {
             authorService.updateAuthor(message.author)
             repository.updateMessage(message)
         }
     }
 
-    override suspend fun getMessageByMessageId(messageId: String): DiscordMessageEntity? {
+    override suspend fun getByMessageId(messageId: String): DiscordMessageEntity? {
         return withContext(Dispatchers.IO) {
             repository.getByMessageId(messageId)
         }
@@ -72,9 +73,21 @@ class DiscordMessageServiceImpl(
         }
     }
 
-    override suspend fun getAllMessagesWithNoFileReference(): List<DiscordMessageEntity> {
+    override suspend fun getAllWithNoFileReference(): List<DiscordMessageEntity> {
         return withContext(Dispatchers.IO) {
             repository.getAllByFileReferencesEmptyAndFileLogsEmpty()
+        }
+    }
+
+    override suspend fun getAllDistinctGuildIds(): Set<String> {
+        return withContext(Dispatchers.IO) {
+            repository.getAllDistinctGuildIds()
+        }
+    }
+
+    override suspend fun getAllByMessageIds(messageIds: Collection<String>): List<DiscordMessageEntity> {
+        return withContext(Dispatchers.IO) {
+            repository.getAllByMessageIdIn(messageIds)
         }
     }
 }

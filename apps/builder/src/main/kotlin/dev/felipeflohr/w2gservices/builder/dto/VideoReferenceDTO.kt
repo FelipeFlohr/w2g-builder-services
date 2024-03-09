@@ -1,12 +1,16 @@
 package dev.felipeflohr.w2gservices.builder.dto
 
+import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import java.io.Serializable
 import java.util.Date
 
+@NoArg
 data class VideoReferenceDTO(
-    val discordMessageUrl: String,
-    val messageContent: String,
-    val messageUrlContent: String?,
-    val messageCreatedAt: Date,
-    val fileStorageHashId: String?,
+    var discordMessageId: String,
+    var discordMessageUrl: String,
+    var messageContent: String,
+    var messageUrlContent: String?,
+    var messageCreatedAt: Date,
+    var fileStorageHashId: String?,
+    var logBody: String?
 ) : Serializable

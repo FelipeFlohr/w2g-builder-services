@@ -6,7 +6,7 @@ plugins {
 	kotlin("jvm") version "1.9.22"
 	kotlin("plugin.spring") version "1.9.22"
 	kotlin("plugin.jpa") version "1.9.22"
-	kotlin("plugin.noarg") version "1.9.23"
+	kotlin("plugin.noarg") version "1.9.22"
 }
 
 group = "dev.felipeflohr.w2gservices"

@@ -17,4 +17,10 @@ class MessageFileLogServiceImpl @Autowired constructor(
             repository.saveAllAndFlush(entities)
         }
     }
+
+    override suspend fun getByDiscordMessageIds(ids: Collection<Long>): List<MessageFileLogEntity> {
+        return withContext(Dispatchers.IO) {
+            repository.getAllByIdIn(ids)
+        }
+    }
 }

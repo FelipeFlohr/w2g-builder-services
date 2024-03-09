@@ -1,21 +1,23 @@
 package dev.felipeflohr.w2gservices.builder.dto
 
+import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageAuthorEntity
 import java.io.Serializable
 import java.util.Date
 
+@NoArg
 data class DiscordMessageAuthorDTO(
-    val avatarPngUrl: String?,
-    val bannerPngUrl: String?,
-    val bot: Boolean,
-    val createdAt: Date,
-    val discriminator: String,
-    val displayName: String,
-    val globalName: String?,
-    val id: String,
-    val tag: String,
-    val system: Boolean,
-    val username: String,
+    var avatarPngUrl: String?,
+    var bannerPngUrl: String?,
+    var bot: Boolean,
+    var createdAt: Date,
+    var discriminator: String,
+    var displayName: String,
+    var globalName: String?,
+    var id: String,
+    var tag: String,
+    var system: Boolean,
+    var username: String,
 ) : Serializable {
     fun toEntity(): DiscordMessageAuthorEntity {
         return DiscordMessageAuthorEntity(

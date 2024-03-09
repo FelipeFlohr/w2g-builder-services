@@ -5,8 +5,8 @@ import java.io.Serializable
 
 @NoArg
 data class DownloaderVideoBatchResponseDTO(
-    val downloaded: List<DownloaderVideoDownloadedDTO>,
-    val failure: List<DownloaderFailureDTO>
+    var downloaded: List<DownloaderVideoDownloadedDTO>,
+    var failure: List<DownloaderFailureDTO>
 ) : Serializable {
     override fun toString(): String {
         return "DownloaderVideoBatchResponseDTO(downloaded=$downloaded, failure=$failure)"

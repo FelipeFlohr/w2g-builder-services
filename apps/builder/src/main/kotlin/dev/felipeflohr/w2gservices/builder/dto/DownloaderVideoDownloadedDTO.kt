@@ -5,10 +5,10 @@ import java.io.Serializable
 
 @NoArg
 data class DownloaderVideoDownloadedDTO(
-    val url: String,
-    val fileHash: String,
-    val filename: String,
-    val mimeType: String,
+    var url: String,
+    var fileHash: String,
+    var filename: String,
+    var mimeType: String,
 ) : Serializable {
     override fun toString(): String {
         return "DownloaderVideoDownloadedDTO(url='$url', fileHash='$fileHash', filename='$filename', mimeType='$mimeType')"

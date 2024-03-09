@@ -5,8 +5,8 @@ import java.io.Serializable
 
 @NoArg
 data class DownloaderFailureDTO(
-    val url: String,
-    val error: String
+    var url: String,
+    var error: String
 ) : Serializable {
     override fun toString(): String {
         return "DownloaderFailureDTO(url='$url', error='$error')"

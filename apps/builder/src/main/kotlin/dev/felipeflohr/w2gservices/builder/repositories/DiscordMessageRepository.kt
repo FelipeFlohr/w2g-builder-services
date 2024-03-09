@@ -24,4 +24,9 @@ interface DiscordMessageRepository : JpaRepository<DiscordMessageEntity, Long>, 
     fun getByMessageId(messageId: String): DiscordMessageEntity?
 
     fun getAllByFileReferencesEmptyAndFileLogsEmpty(): List<DiscordMessageEntity>
+
+    @Query("select distinct guildId from DiscordMessageEntity")
+    fun getAllDistinctGuildIds(): Set<String>
+
+    fun getAllByMessageIdIn(messagesIds: Collection<String>): List<DiscordMessageEntity>
 }

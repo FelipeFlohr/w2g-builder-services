@@ -1,9 +1,11 @@
 package dev.felipeflohr.w2gservices.builder.dto
 
+import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import java.io.Serializable
 import java.util.Date
 
+@NoArg
 data class DiscordDelimitationMessageDTO(
-    val createdAt: Date,
-    val message: DiscordMessageDTO,
+    var createdAt: Date,
+    var message: DiscordMessageDTO,
 ) : Serializable

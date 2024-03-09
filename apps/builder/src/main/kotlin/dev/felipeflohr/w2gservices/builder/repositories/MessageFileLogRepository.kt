@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface MessageFileLogRepository : JpaRepository<MessageFileLogEntity, Long>
+interface MessageFileLogRepository : JpaRepository<MessageFileLogEntity, Long> {
+    fun getAllByIdIn(ids: Collection<Long>): List<MessageFileLogEntity>
+}

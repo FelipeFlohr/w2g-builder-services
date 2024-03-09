@@ -13,7 +13,7 @@ class BuilderCustomRepositoryImpl(
         val delimitationMessage = getDelimitationMessageByGuildId(guildId)
         val messagesAfterDelimitation = getDelimitationMessagesByGuildIdAfterDelimitationMessage(delimitationMessage)
 
-        var messages: List<DiscordBuildMessageDTO> = arrayListOf(delimitationMessage)
+        var messages: List<DiscordBuildMessageDTO> = listOf(delimitationMessage)
         messages = messages + messagesAfterDelimitation
         return messages.toSet()
     }
@@ -21,7 +21,8 @@ class BuilderCustomRepositoryImpl(
     private fun getDelimitationMessagesByGuildIdAfterDelimitationMessage(delimitation: DiscordBuildMessageDTO): List<DiscordBuildMessageDTO> {
         val sql = """
             select new ${DiscordBuildMessageDTO::class.java.name}(
-                dme.messageId as id,
+                dme.id as id,
+                dme.messageId as messageId,
                 dme.channelId as channelId,
                 dme.guildId as guildId,
                 dme.content as content,
@@ -29,7 +30,7 @@ class BuilderCustomRepositoryImpl(
                 dma.authorId as authorId,
                 dma.username as authorName,
                 dma.avatarPngUrl as authorProfilePngUrl,
-                dme.url as url
+                dme.url as url,
             )
             from DiscordMessageEntity dme
             inner join dme.author dma
@@ -42,7 +43,7 @@ class BuilderCustomRepositoryImpl(
         val query = entityManager.createQuery(sql, DiscordBuildMessageDTO::class.java)
         query.setParameter("guildId", delimitation.guildId)
         query.setParameter("createdAt", delimitation.createdAt)
-        query.setParameter("delimitationMessageId", delimitation.id)
+        query.setParameter("delimitationMessageId", delimitation.messageId)
         return query.resultList
     }
 
