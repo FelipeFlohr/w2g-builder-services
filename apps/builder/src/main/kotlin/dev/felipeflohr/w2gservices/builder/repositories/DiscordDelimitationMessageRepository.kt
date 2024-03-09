@@ -12,5 +12,5 @@ interface DiscordDelimitationMessageRepository : JpaRepository<DiscordDelimitati
     @Transactional
     @Modifying
     @Query("delete from DiscordDelimitationMessageEntity ddm where ddm.message.id = :messageId")
-    fun deleteDelimitationMessageByMessageId(messageId: Long)
+    fun deleteByMessageId(messageId: Long)
 }

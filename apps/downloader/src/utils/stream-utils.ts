@@ -1,13 +1,13 @@
 import { ReadStream, createReadStream } from "fs";
-import * as fsPromises from "fs/promises";
 import { LoggerUtils } from "./logger-utils";
+import * as fsPromises from "fs/promises";
 
 export class StreamUtils {
   private static readonly logger = LoggerUtils.from(StreamUtils);
 
   public static createDeletableReadStream(filePath: string): ReadStream {
     const stream = createReadStream(filePath);
-    stream.on("close", async () => {
+    stream.on("end", async () => {
       try {
         await fsPromises.unlink(filePath);
       } catch (e) {

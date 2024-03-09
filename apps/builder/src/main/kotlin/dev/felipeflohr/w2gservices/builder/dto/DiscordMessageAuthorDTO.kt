@@ -1,6 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.dto
 
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageAuthorEntity
+import java.io.Serializable
 import java.util.Date
 
 data class DiscordMessageAuthorDTO(
@@ -15,7 +16,7 @@ data class DiscordMessageAuthorDTO(
     val tag: String,
     val system: Boolean,
     val username: String,
-) {
+) : Serializable {
     fun toEntity(): DiscordMessageAuthorEntity {
         return DiscordMessageAuthorEntity(
             system = system,

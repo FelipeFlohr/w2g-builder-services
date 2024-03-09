@@ -7,6 +7,7 @@ export class EnvironmentService {
   public readonly appName: string;
   public readonly port: number;
   public readonly youtubeCommand: string;
+  public readonly fileStorageAddress: string;
 
   private static readonly logger = LoggerUtils.from(EnvironmentService);
   private static instance: EnvironmentService;
@@ -17,6 +18,7 @@ export class EnvironmentService {
     this.appName = this.parseStringNotNull("APP_NAME");
     this.port = this.parseIntNotNull("APP_PORT");
     this.youtubeCommand = this.parseStringNotNull("DOWNLOADER_YOUTUBE_YTDL_COMMAND");
+    this.fileStorageAddress = this.parseStringNotNull("DOWNLOADER_FILE_STORAGE_ADDRESS");
   }
 
   public static getInstance(): EnvironmentService {

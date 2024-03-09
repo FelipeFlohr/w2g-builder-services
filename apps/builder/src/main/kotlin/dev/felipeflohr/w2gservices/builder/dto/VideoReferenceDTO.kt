@@ -1,9 +1,12 @@
 package dev.felipeflohr.w2gservices.builder.dto
 
+import java.io.Serializable
 import java.util.Date
 
 data class VideoReferenceDTO(
-    val socialMediaUrl: String,
+    val discordMessageUrl: String,
+    val messageContent: String,
+    val messageUrlContent: String?,
     val messageCreatedAt: Date,
-    val mediaUrl: String,
-)
+    val fileStorageHashId: String?,
+) : Serializable

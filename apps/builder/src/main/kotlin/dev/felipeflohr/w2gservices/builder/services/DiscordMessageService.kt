@@ -10,4 +10,5 @@ interface DiscordMessageService {
     suspend fun updateMessage(message: DiscordMessageDTO)
     suspend fun getMessageByMessageId(messageId: String): DiscordMessageEntity?
     suspend fun getMessageIdByDiscordMessageId(messageId: String): Long?
+    suspend fun getAllMessagesWithNoFileReference(): List<DiscordMessageEntity>
 }

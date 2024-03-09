@@ -12,7 +12,7 @@ class DiscordMessageAuthorCustomRepositoryImpl(
     @PersistenceContext
     private val entityManager: EntityManager
 ) : DiscordMessageAuthorCustomRepository {
-    override fun updateAuthor(author: DiscordMessageAuthorDTO): Int {
+    override fun update(author: DiscordMessageAuthorDTO): Int {
         val queryString = """
             update DiscordMessageAuthorEntity 
             set avatarPngUrl = :avatarPngUrl,

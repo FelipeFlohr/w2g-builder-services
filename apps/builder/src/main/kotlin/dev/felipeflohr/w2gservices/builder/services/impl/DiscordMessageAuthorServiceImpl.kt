@@ -15,19 +15,19 @@ class DiscordMessageAuthorServiceImpl(
 ) : DiscordMessageAuthorService {
     override suspend fun deleteAuthorsByIds(ids: List<Long>) {
         withContext(Dispatchers.IO) {
-            repository.deleteAuthorsByIds(ids)
+            repository.deleteByIds(ids)
         }
     }
 
     override suspend fun updateAuthor(author: DiscordMessageAuthorDTO) {
         withContext(Dispatchers.IO) {
-            repository.updateAuthor(author)
+            repository.update(author)
         }
     }
 
     override suspend fun deleteAuthorByAuthorId(authorId: String) {
         withContext(Dispatchers.IO) {
-            repository.deleteAuthorByAuthorId(authorId)
+            repository.deleteByAuthorId(authorId)
         }
     }
 }

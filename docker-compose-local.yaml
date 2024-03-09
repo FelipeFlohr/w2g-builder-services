@@ -8,6 +8,7 @@ services:
     volumes:
       - ./apps/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./apps/nginx/access.log:/var/log/nginx/access.log:rw
+    restart: always
   nginx-dependencies:
     <<: *nginx-no-dependencies
     depends_on:
@@ -161,9 +162,13 @@ services:
       - ./env/downloader/local/.env.downloader-local
     expose:
       - "3001:3000"
+    restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/healthcheck"]
       interval: 10s
       timeout: 10s
       retries: 5
       start_period: 5s
+    depends_on:
+      file-storage-app:
+        condition: service_healthy

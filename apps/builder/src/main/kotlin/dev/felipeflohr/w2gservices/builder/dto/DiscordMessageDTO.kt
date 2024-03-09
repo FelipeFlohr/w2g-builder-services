@@ -1,6 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.dto
 
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
+import java.io.Serializable
 import java.util.Date
 
 data class DiscordMessageDTO(
@@ -19,7 +20,7 @@ data class DiscordMessageDTO(
     val guildId: String,
     val channelId: String,
     val deleted: Boolean,
-) {
+) : Serializable {
     fun toEntity(): DiscordMessageEntity {
         return DiscordMessageEntity(
             messageCreatedAt = createdAt,
@@ -34,6 +35,8 @@ data class DiscordMessageDTO(
             author = author.toEntity(),
             id = null,
             delimitationMessage = null,
+            fileLogs = null,
+            fileReferences = null,
         )
     }
 

@@ -19,14 +19,14 @@ class DiscordMessageServiceImpl(
     @Autowired
     private val authorService: DiscordMessageAuthorService
 ) : DiscordMessageService {
-    private val fetchedGuildIds: List<String> = Collections.synchronizedList(ArrayList())
+    private val fetchedGuildIds: MutableList<String> = Collections.synchronizedList(ArrayList())
 
     override suspend fun bootstrapMessage(message: DiscordMessageDTO) {
         withContext(Dispatchers.IO) {
             if (!fetchedGuildIds.contains(message.guildId)) {
                 fetchedGuildIds.addLast(message.guildId)
                 val messagesToDelete = repository.getMessagesToDeleteByGuildId(message.guildId)
-                val messagesDeleted = repository.deleteMessagesByIdListReturningAuthorIds(messagesToDelete)
+                val messagesDeleted = repository.deleteByIdListReturningAuthorIds(messagesToDelete)
                 authorService.deleteAuthorsByIds(messagesDeleted)
             }
 
@@ -36,7 +36,7 @@ class DiscordMessageServiceImpl(
 
     override suspend fun saveMessage(message: DiscordMessageDTO) {
         withContext(Dispatchers.IO) {
-            if (repository.existsMessageByMessageId(message.id)) {
+            if (repository.existsByMessageId(message.id)) {
                 updateMessage(message)
             } else {
                 repository.save(message.toEntity())
@@ -46,8 +46,8 @@ class DiscordMessageServiceImpl(
 
     override suspend fun deleteMessage(message: DiscordMessageDTO) {
         withContext(Dispatchers.IO) {
-            if (repository.existsMessageByMessageId(message.id)) {
-                repository.deleteMessageByMessageId(message.id)
+            if (repository.existsByMessageId(message.id)) {
+                repository.deleteByMessageId(message.id)
                 authorService.deleteAuthorByAuthorId(message.author.id)
             }
         }
@@ -62,13 +62,19 @@ class DiscordMessageServiceImpl(
 
     override suspend fun getMessageByMessageId(messageId: String): DiscordMessageEntity? {
         return withContext(Dispatchers.IO) {
-            repository.getMessageByMessageId(messageId)
+            repository.getByMessageId(messageId)
         }
     }
 
     override suspend fun getMessageIdByDiscordMessageId(messageId: String): Long? {
         return withContext(Dispatchers.IO) {
             return@withContext repository.getMessageIdByDiscordMessageId(messageId)
+        }
+    }
+
+    override suspend fun getAllMessagesWithNoFileReference(): List<DiscordMessageEntity> {
+        return withContext(Dispatchers.IO) {
+            repository.getAllByFileReferencesEmptyAndFileLogsEmpty()
         }
     }
 }

@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.Modifying
 interface DiscordMessageAuthorCustomRepository {
     @Transactional
     @Modifying
-    fun updateAuthor(author: DiscordMessageAuthorDTO): Int
+    fun update(author: DiscordMessageAuthorDTO): Int
 }

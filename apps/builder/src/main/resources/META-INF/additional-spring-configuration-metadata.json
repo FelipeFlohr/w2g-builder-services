@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "builder.downloader.address",
+      "type": "java.lang.String",
+      "description": "The address of the downloader application."
+    },
+    {
+      "name": "builder.file-storage.address",
+      "type": "java.lang.String",
+      "description": "The address of the file storage application."
+    }
+  ]
+}

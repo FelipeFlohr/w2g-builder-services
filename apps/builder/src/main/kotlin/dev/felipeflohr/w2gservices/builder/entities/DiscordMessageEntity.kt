@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
@@ -56,4 +57,10 @@ class DiscordMessageEntity(
 
     @OneToOne(mappedBy = "message")
     var delimitationMessage: DiscordDelimitationMessageEntity?,
+
+    @OneToMany(mappedBy = "message")
+    var fileReferences: Set<MessageFileReferenceEntity>?,
+
+    @OneToMany(mappedBy = "message")
+    var fileLogs: Set<MessageFileLogEntity>?,
 ) : BuilderBaseEntity()

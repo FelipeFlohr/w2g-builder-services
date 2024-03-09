@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { VideoController } from "./controllers/video.controller";
+import { VideoControllerImpl } from "./controllers/impl/video.impl.controller";
 import { DownloaderServiceImpl } from "./services/impl/downloader.impl.service";
 import { DownloaderService } from "./services/downloader.service";
 import { YoutubeModule } from "../youtube/youtube.module";
@@ -11,9 +11,10 @@ import { InstagramService } from "../instagram/services/instagram.service";
 import { InstagramModule } from "../instagram/instagram.module";
 import { FacebookService } from "../facebook/services/facebook.service";
 import { FacebookModule } from "../facebook/facebook.module";
+import { FileStorageModule } from "../file-storage/file-storage.module";
 
 @Module({
-  controllers: [VideoController],
+  controllers: [VideoControllerImpl],
   providers: [
     {
       provide: DownloaderService,
@@ -25,7 +26,7 @@ import { FacebookModule } from "../facebook/facebook.module";
       inject: [YoutubeService, TwitterService, InstagramService, FacebookService],
     },
   ],
-  imports: [YoutubeModule, TwitterModule, InstagramModule, FacebookModule],
+  imports: [YoutubeModule, TwitterModule, InstagramModule, FacebookModule, FileStorageModule],
   exports: [DownloaderService],
 })
 export class DownloaderModule {}

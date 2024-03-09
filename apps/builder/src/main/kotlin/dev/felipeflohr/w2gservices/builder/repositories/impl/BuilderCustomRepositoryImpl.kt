@@ -28,7 +28,8 @@ class BuilderCustomRepositoryImpl(
                 dme.messageCreatedAt as createdAt,
                 dma.authorId as authorId,
                 dma.username as authorName,
-                dma.avatarPngUrl as authorProfilePngUrl
+                dma.avatarPngUrl as authorProfilePngUrl,
+                dme.url as url
             )
             from DiscordMessageEntity dme
             inner join dme.author dma
@@ -55,7 +56,8 @@ class BuilderCustomRepositoryImpl(
                 dme.messageCreatedAt as createdAt,
                 dma.authorId as authorId,
                 dma.username as authorName,
-                dma.avatarPngUrl as authorProfilePngUrl
+                dma.avatarPngUrl as authorProfilePngUrl,
+                dme.url as url
             )
             from DiscordDelimitationMessageEntity ddm
             inner join ddm.message dme

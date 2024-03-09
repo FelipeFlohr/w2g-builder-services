@@ -22,7 +22,7 @@ class DiscordDelimitationMessageServiceImpl(
         val persistedMessage = messageService.getMessageByMessageId(delimitation.message.id)
         if (persistedMessage != null) {
             withContext(Dispatchers.IO) {
-                repository.deleteDelimitationMessageByMessageId(persistedMessage.id as Long)
+                repository.deleteByMessageId(persistedMessage.id as Long)
             }
         }
         val entity = if (persistedMessage != null) {
