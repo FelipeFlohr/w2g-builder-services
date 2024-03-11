@@ -3,9 +3,7 @@ package dev.felipeflohr.w2gservices.builder.services.impl
 import dev.felipeflohr.w2gservices.builder.entities.MessageFileReferenceEntity
 import dev.felipeflohr.w2gservices.builder.repositories.MessageFileReferenceRepository
 import dev.felipeflohr.w2gservices.builder.services.MessageFileReferenceService
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

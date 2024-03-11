@@ -1,9 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.services.impl
 
 import dev.felipeflohr.w2gservices.builder.services.QueueStatsService
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
 import org.springframework.amqp.rabbit.core.RabbitAdmin
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

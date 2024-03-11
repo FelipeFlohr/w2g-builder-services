@@ -9,15 +9,11 @@ import dev.felipeflohr.w2gservices.builder.services.QueueStatsService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.Message
 import org.springframework.stereotype.Component
-import java.util.Collections
 
 @Component
 class DiscordMessagesAMQPListener @Autowired constructor(
