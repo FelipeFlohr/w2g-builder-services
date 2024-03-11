@@ -4,6 +4,7 @@ import dev.felipeflohr.w2gservices.builder.entities.MessageFileLogEntity
 import dev.felipeflohr.w2gservices.builder.repositories.MessageFileLogRepository
 import dev.felipeflohr.w2gservices.builder.services.MessageFileLogService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -18,9 +19,7 @@ class MessageFileLogServiceImpl @Autowired constructor(
         }
     }
 
-    override suspend fun getByDiscordMessageIds(ids: Collection<Long>): List<MessageFileLogEntity> {
-        return withContext(Dispatchers.IO) {
-            repository.getAllByIdIn(ids)
-        }
+    override suspend fun getAllByDiscordMessageIds(ids: Collection<Long>): List<MessageFileLogEntity> = coroutineScope {
+        return@coroutineScope repository.getAllByDiscordMessageIdIn(ids)
     }
 }

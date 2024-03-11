@@ -55,12 +55,12 @@ class DiscordMessageEntity(
     @Column(name = "DME_CHAID", length = 64, nullable = false)
     var channelId: String,
 
-    @OneToOne(mappedBy = "message")
+    @OneToOne(mappedBy = "message", orphanRemoval = true)
     var delimitationMessage: DiscordDelimitationMessageEntity?,
 
-    @OneToMany(mappedBy = "message")
+    @OneToMany(mappedBy = "message", orphanRemoval = true)
     var fileReferences: Set<MessageFileReferenceEntity>?,
 
-    @OneToMany(mappedBy = "message")
+    @OneToMany(mappedBy = "message", orphanRemoval = true)
     var fileLogs: Set<MessageFileLogEntity>?,
 ) : BuilderBaseEntity()

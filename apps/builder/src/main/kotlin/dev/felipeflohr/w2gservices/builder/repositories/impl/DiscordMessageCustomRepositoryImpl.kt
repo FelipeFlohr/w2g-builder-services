@@ -38,21 +38,6 @@ class DiscordMessageCustomRepositoryImpl(
         return query.executeUpdate()
     }
 
-    override fun deleteByIdListReturningAuthorIds(messagesToDelete: List<MessageToDeleteDTO>): List<Long> {
-        val messagesToDeleteIds = messagesToDelete.map { message -> message.messageId }
-        val authorsToDeleteIds = messagesToDelete.map { message -> message.authorId }
-        val deleteQuerySql = """
-            delete from DiscordMessageEntity
-            where id in (:messagesToDelete)
-        """.trimIndent()
-
-        val query = entityManager.createQuery(deleteQuerySql)
-        query.setParameter("messagesToDelete", messagesToDeleteIds)
-        query.executeUpdate()
-
-        return authorsToDeleteIds
-    }
-
     override fun getMessagesToDeleteByGuildId(guildId: String): List<MessageToDeleteDTO> {
         val messagesToDeleteSql = """
             select new ${MessageToDeleteDTO::class.java.name}(

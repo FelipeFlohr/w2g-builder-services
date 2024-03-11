@@ -5,6 +5,9 @@ import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
 import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
 import dev.felipeflohr.w2gservices.builder.services.DiscordDelimitationMessageService
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
+import dev.felipeflohr.w2gservices.builder.services.QueueStatsService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -20,6 +23,7 @@ import java.util.Collections
 class DiscordMessagesAMQPListener @Autowired constructor(
     private val messageService: DiscordMessageService,
     private val delimitationService: DiscordDelimitationMessageService,
+    private val queueStatsService: QueueStatsService
 ) {
     companion object {
         const val BOOTSTRAP_CONTAINER_NAME = "boostrapMessagesListener"
@@ -30,6 +34,19 @@ class DiscordMessagesAMQPListener @Autowired constructor(
         private const val VIRTUAL_THREAD_EXECUTOR = "#{virtualThreadTaskExecutor}"
         private const val BOOTSTRAP_LISTENER_PRIORITY = "1000"
         private const val DELIMITATION_LISTENER_PRIORITY = "100"
+        private val queues = listOf(
+            MessagesAMQPConfiguration.MESSAGES_BOOTSTRAP,
+            MessagesAMQPConfiguration.MESSAGES_DELIMITATION,
+            MessagesAMQPConfiguration.MESSAGES_CREATED,
+            MessagesAMQPConfiguration.MESSAGES_UPDATED,
+            MessagesAMQPConfiguration.MESSAGES_DELETED
+        )
+    }
+
+    suspend fun waitForOngoingMessages() {
+        while(!allQueuesAreEmpty()) {
+            delay(500)
+        }
     }
 
     @RabbitListener(
@@ -58,8 +75,7 @@ class DiscordMessagesAMQPListener @Autowired constructor(
 
     @RabbitListener(
         id = CREATE_CONTAINER_NAME,
-        queues = [MessagesAMQPConfiguration.MESSAGES_CREATED],
-        executor = VIRTUAL_THREAD_EXECUTOR
+        queues = [MessagesAMQPConfiguration.MESSAGES_CREATED]
     )
     private fun createMessage(message: Message<DiscordMessageDTO>) {
         runBlocking {
@@ -69,8 +85,7 @@ class DiscordMessagesAMQPListener @Autowired constructor(
 
     @RabbitListener(
         id = UPDATED_CONTAINER_NAME,
-        queues = [MessagesAMQPConfiguration.MESSAGES_UPDATED],
-        executor = VIRTUAL_THREAD_EXECUTOR
+        queues = [MessagesAMQPConfiguration.MESSAGES_UPDATED]
     )
     private fun updateMessage(message: Message<DiscordMessageDTO>) {
         runBlocking {
@@ -80,12 +95,20 @@ class DiscordMessagesAMQPListener @Autowired constructor(
 
     @RabbitListener(
         id = DELETED_CONTAINER_NAME,
-        queues = [MessagesAMQPConfiguration.MESSAGES_DELETED],
-        executor = VIRTUAL_THREAD_EXECUTOR
+        queues = [MessagesAMQPConfiguration.MESSAGES_DELETED]
     )
     private fun deleteMessage(message: Message<DiscordMessageDTO>) {
         runBlocking {
             messageService.delete(message.payload)
         }
+    }
+
+    private suspend fun allQueuesAreEmpty() = coroutineScope {
+        return@coroutineScope queues
+            .map {queue ->
+                async {
+                    queueStatsService.getQueueSize(queue)
+                }.await()
+            }.all { it == 0 }
     }
 }

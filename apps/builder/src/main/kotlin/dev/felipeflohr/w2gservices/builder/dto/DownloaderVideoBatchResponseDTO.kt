@@ -6,9 +6,5 @@ import java.io.Serializable
 @NoArg
 data class DownloaderVideoBatchResponseDTO(
     var downloaded: List<DownloaderVideoDownloadedDTO>,
-    var failure: List<DownloaderFailureDTO>
-) : Serializable {
-    override fun toString(): String {
-        return "DownloaderVideoBatchResponseDTO(downloaded=$downloaded, failure=$failure)"
-    }
-}
+    var failed: List<DownloaderFailureDTO>
+) : Serializable

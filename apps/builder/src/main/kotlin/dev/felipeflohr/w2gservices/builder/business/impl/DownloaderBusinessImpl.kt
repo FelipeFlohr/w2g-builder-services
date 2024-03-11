@@ -19,10 +19,14 @@ class DownloaderBusinessImpl(
     private val downloaderWebClient: WebClient
 ) : DownloaderBusiness {
     override fun getUrlsFromMessages(messages: List<DiscordMessageEntity>): Set<String> {
-        return messages
+        val mapped = messages
             .map { video -> video.content }
             .map { content -> URLUtils.getUrlsFromString(content) }
-            .reduce { acc, curr -> acc + curr }
+
+        if (mapped.isNotEmpty()) {
+            return mapped.reduce { acc, curr -> acc + curr }
+        }
+        return emptySet()
     }
 
     override suspend fun postUrlsToDownloader(urls: Set<String>): ResponseEntity<DownloaderVideoBatchResponseDTO> {
@@ -94,7 +98,7 @@ class DownloaderBusinessImpl(
         messages: List<DiscordMessageEntity>
     ): Map<DownloaderFailureDTO, DiscordMessageEntity> {
         val responseMap: MutableMap<DownloaderFailureDTO, DiscordMessageEntity> = HashMap()
-        res.failure.forEach { failure ->
+        res.failed.forEach { failure ->
             val messageEntity = findMessageEntityContainingUrl(messages, failure.url)
             if (messageEntity != null) {
                 responseMap[failure] = messageEntity

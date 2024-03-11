@@ -6,6 +6,7 @@ import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 interface DiscordMessageService {
     suspend fun bootstrapMessage(message: DiscordMessageDTO)
     suspend fun save(message: DiscordMessageDTO)
+    suspend fun saveAndFlush(message: DiscordMessageDTO): DiscordMessageEntity
     suspend fun delete(message: DiscordMessageDTO)
     suspend fun update(message: DiscordMessageDTO)
     suspend fun getByMessageId(messageId: String): DiscordMessageEntity?

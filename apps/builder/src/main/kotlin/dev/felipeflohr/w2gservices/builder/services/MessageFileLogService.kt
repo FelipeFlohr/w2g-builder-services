@@ -8,5 +8,5 @@ interface MessageFileLogService {
     @Modifying
     @Transactional
     suspend fun saveAllAndFlush(entities: List<MessageFileLogEntity>): List<MessageFileLogEntity>
-    suspend fun getByDiscordMessageIds(ids: Collection<Long>): List<MessageFileLogEntity>
+    suspend fun getAllByDiscordMessageIds(ids: Collection<Long>): List<MessageFileLogEntity>
 }

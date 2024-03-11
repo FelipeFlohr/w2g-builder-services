@@ -3,19 +3,25 @@ package dev.felipeflohr.w2gservices.builder.repositories.impl
 import dev.felipeflohr.w2gservices.builder.dto.DiscordBuildMessageDTO
 import dev.felipeflohr.w2gservices.builder.repositories.BuilderCustomRepository
 import jakarta.persistence.EntityManager
+import jakarta.persistence.NoResultException
 import jakarta.persistence.PersistenceContext
+import org.springframework.stereotype.Repository
 
+@Repository
 class BuilderCustomRepositoryImpl(
     @PersistenceContext
     private val entityManager: EntityManager
 ) : BuilderCustomRepository {
     override fun getBuildMessages(guildId: String): Set<DiscordBuildMessageDTO> {
+        val set: MutableSet<DiscordBuildMessageDTO> = HashSet()
         val delimitationMessage = getDelimitationMessageByGuildId(guildId)
-        val messagesAfterDelimitation = getDelimitationMessagesByGuildIdAfterDelimitationMessage(delimitationMessage)
+        if (delimitationMessage != null) {
+            val messagesAfterDelimitation = getDelimitationMessagesByGuildIdAfterDelimitationMessage(delimitationMessage)
+            set.add(delimitationMessage)
+            set.addAll(messagesAfterDelimitation)
+        }
 
-        var messages: List<DiscordBuildMessageDTO> = listOf(delimitationMessage)
-        messages = messages + messagesAfterDelimitation
-        return messages.toSet()
+        return set
     }
 
     private fun getDelimitationMessagesByGuildIdAfterDelimitationMessage(delimitation: DiscordBuildMessageDTO): List<DiscordBuildMessageDTO> {
@@ -30,7 +36,7 @@ class BuilderCustomRepositoryImpl(
                 dma.authorId as authorId,
                 dma.username as authorName,
                 dma.avatarPngUrl as authorProfilePngUrl,
-                dme.url as url,
+                dme.url as url
             )
             from DiscordMessageEntity dme
             inner join dme.author dma
@@ -44,13 +50,18 @@ class BuilderCustomRepositoryImpl(
         query.setParameter("guildId", delimitation.guildId)
         query.setParameter("createdAt", delimitation.createdAt)
         query.setParameter("delimitationMessageId", delimitation.messageId)
-        return query.resultList
+        return try {
+            query.resultList
+        } catch (e: NoResultException) {
+            emptyList()
+        }
     }
 
-    private fun getDelimitationMessageByGuildId(guildId: String): DiscordBuildMessageDTO {
+    private fun getDelimitationMessageByGuildId(guildId: String): DiscordBuildMessageDTO? {
         val sql = """
             select new ${DiscordBuildMessageDTO::class.java.name}(
-                dme.messageId as id,
+                dme.id as id,
+                dme.messageId as messageId,
                 dme.channelId as channelId,
                 dme.guildId as guildId,
                 dme.content as content,
@@ -70,6 +81,10 @@ class BuilderCustomRepositoryImpl(
         val query = entityManager.createQuery(sql, DiscordBuildMessageDTO::class.java)
         query.setParameter("guildId", guildId)
         query.setMaxResults(1)
-        return query.singleResult
+        return try {
+            query.singleResult
+        } catch (e: NoResultException) {
+            null
+        }
     }
 }

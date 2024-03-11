@@ -5,9 +5,10 @@ import dev.felipeflohr.w2gservices.builder.entities.DiscordDelimitationMessageEn
 import dev.felipeflohr.w2gservices.builder.repositories.DiscordDelimitationMessageRepository
 import dev.felipeflohr.w2gservices.builder.services.DiscordDelimitationMessageService
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import jakarta.transaction.Transactional
+import kotlinx.coroutines.coroutineScope
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,12 +19,12 @@ class DiscordDelimitationMessageServiceImpl(
     @Autowired
     private val repository: DiscordDelimitationMessageRepository,
 ) : DiscordDelimitationMessageService {
-    override suspend fun saveDelimitationMessage(delimitation: DiscordDelimitationMessageDTO) {
+    @Modifying
+    @Transactional
+    override suspend fun saveDelimitationMessage(delimitation: DiscordDelimitationMessageDTO): Unit = coroutineScope {
         val persistedMessage = messageService.getByMessageId(delimitation.message.id)
         if (persistedMessage != null) {
-            withContext(Dispatchers.IO) {
-                repository.deleteByMessageId(persistedMessage.id as Long)
-            }
+            repository.deleteByMessageId(persistedMessage.id as Long)
         }
         val entity = if (persistedMessage != null) {
             DiscordDelimitationMessageEntity(
@@ -32,11 +33,12 @@ class DiscordDelimitationMessageServiceImpl(
                 delimitationCreatedAt = delimitation.createdAt
             )
         } else {
-            DiscordDelimitationMessageEntity.toEntity(delimitation)
+            val messageSaved = messageService.saveAndFlush(delimitation.message)
+            val entityDetached = DiscordDelimitationMessageEntity.toEntity(delimitation)
+            entityDetached.message = messageSaved
+            entityDetached
         }
 
-        withContext(Dispatchers.IO) {
-            repository.save(entity)
-        }
+        repository.save(entity)
     }
 }

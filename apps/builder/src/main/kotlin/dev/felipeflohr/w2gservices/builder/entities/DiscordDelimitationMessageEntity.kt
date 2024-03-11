@@ -2,8 +2,6 @@ package dev.felipeflohr.w2gservices.builder.entities
 
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
 import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
-import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
-import dev.felipeflohr.w2gservices.builder.services.DiscordDelimitationMessageService
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

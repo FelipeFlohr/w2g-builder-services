@@ -7,6 +7,7 @@ import dev.felipeflohr.w2gservices.builder.services.DiscordMessageAuthorService
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
 import dev.felipeflohr.w2gservices.builder.services.DownloaderService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -21,26 +22,32 @@ class DiscordMessageServiceImpl @Autowired constructor (
 ) : DiscordMessageService {
     private val fetchedGuildIds: MutableList<String> = Collections.synchronizedList(ArrayList())
 
-    override suspend fun bootstrapMessage(message: DiscordMessageDTO) {
-        withContext(Dispatchers.IO) {
-            if (!fetchedGuildIds.contains(message.guildId)) {
-                fetchedGuildIds.addLast(message.guildId)
-                val messagesToDelete = repository.getMessagesToDeleteByGuildId(message.guildId)
-                val messagesDeleted = repository.deleteByIdListReturningAuthorIds(messagesToDelete)
-                authorService.deleteAuthorsByIds(messagesDeleted)
-            }
-
-            save(message)
+    override suspend fun bootstrapMessage(message: DiscordMessageDTO) = coroutineScope {
+        if (!fetchedGuildIds.contains(message.guildId)) {
+            fetchedGuildIds.addLast(message.guildId)
+            val messagesToDelete = repository.getMessagesToDeleteByGuildId(message.guildId)
+            repository.deleteAllById(messagesToDelete.map { it.id })
+            authorService.deleteByIds(messagesToDelete.map { it.authorId })
         }
+
+        save(message)
     }
 
     override suspend fun save(message: DiscordMessageDTO) {
-        withContext(Dispatchers.IO) {
+        saveAndFlush(message)
+    }
+
+    override suspend fun saveAndFlush(message: DiscordMessageDTO): DiscordMessageEntity {
+        return withContext(Dispatchers.IO) {
             if (repository.existsByMessageId(message.id)) {
                 update(message)
+                return@withContext getByMessageId(message.id)!!
             } else {
                 val messageFlushed = repository.saveAndFlush(message.toEntity())
-                downloaderService.downloadVideosAndSave(listOf(messageFlushed))
+                coroutineScope {
+                    downloaderService.downloadVideosAndSave(listOf(messageFlushed))
+                }
+                return@withContext messageFlushed
             }
         }
     }
@@ -49,7 +56,7 @@ class DiscordMessageServiceImpl @Autowired constructor (
         withContext(Dispatchers.IO) {
             if (repository.existsByMessageId(message.id)) {
                 repository.deleteByMessageId(message.id)
-                authorService.deleteAuthorByAuthorId(message.author.id)
+                authorService.deleteByAuthorId(message.author.id)
             }
         }
     }

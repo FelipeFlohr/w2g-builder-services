@@ -10,9 +10,5 @@ interface DiscordMessageCustomRepository {
     @Modifying
     fun updateMessage(message: DiscordMessageDTO): Int
 
-    @Transactional
-    @Modifying
-    fun deleteByIdListReturningAuthorIds(messagesToDelete: List<MessageToDeleteDTO>): List<Long>
-
     fun getMessagesToDeleteByGuildId(guildId: String): List<MessageToDeleteDTO>
 }

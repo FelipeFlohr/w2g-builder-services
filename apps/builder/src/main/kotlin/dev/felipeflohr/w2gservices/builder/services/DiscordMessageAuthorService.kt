@@ -7,7 +7,7 @@ interface DiscordMessageAuthorService {
      * Deletes all the authors related to a guild
      * by the guild's ID.
      */
-    suspend fun deleteAuthorsByIds(ids: List<Long>)
+    suspend fun deleteByIds(ids: List<Long>)
     suspend fun updateAuthor(author: DiscordMessageAuthorDTO)
-    suspend fun deleteAuthorByAuthorId(authorId: String)
+    suspend fun deleteByAuthorId(authorId: String)
 }
