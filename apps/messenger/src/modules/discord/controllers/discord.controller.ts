@@ -1,19 +1,18 @@
-import { DiscordGuildInfoDTO } from "../models/discord-guild-info.dto";
-import { DiscordGuildDTO } from "../models/discord-guild.dto";
-import { DiscordMessageDTO } from "../models/discord-message.dto";
-import { DiscordTextChannelDTO } from "../models/discord-text-channel.dto";
-import { GetGuildsQueryDTO } from "../models/get-guilds-query.dto";
-import { GetMessagesQueryDTO } from "../models/get-messages-query.dto";
+import { Controller, Delete, HttpCode, HttpStatus, Inject } from "@nestjs/common";
+import { DiscordService } from "../services/discord.service";
+import { DiscordServiceProvider } from "../providers/discord-service.provider";
 
-export interface DiscordController {
-  getGuilds(query?: GetGuildsQueryDTO): Promise<Array<DiscordGuildInfoDTO>>;
-  getGuild(id: string): Promise<DiscordGuildDTO>;
-  getTextChannels(guildId: string): Promise<Array<DiscordTextChannelDTO>>;
-  getTextChannelById(guildId: string, channelId: string): Promise<DiscordTextChannelDTO>;
-  getMessagesFromTextChannel(
-    guildId: string,
-    channelId: string,
-    options?: GetMessagesQueryDTO,
-  ): Promise<Array<DiscordMessageDTO>>;
-  setupSlashCommands(): Promise<void>;
+@Controller("/discord")
+export class DiscordController {
+  private readonly service: DiscordService;
+
+  public constructor(@Inject(DiscordServiceProvider) service: DiscordService) {
+    this.service = service;
+  }
+
+  @Delete()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async deleteAllSlashCommands() {
+    await this.service.deleteAllSlashCommandsFromAllGuilds();
+  }
 }

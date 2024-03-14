@@ -7,14 +7,13 @@ import dev.felipeflohr.w2gservices.builder.dto.DownloaderVideoBatchResponseDTO
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 import dev.felipeflohr.w2gservices.builder.entities.MessageFileLogEntity
 import dev.felipeflohr.w2gservices.builder.entities.MessageFileReferenceEntity
+import dev.felipeflohr.w2gservices.builder.functions.virtualThread
 import dev.felipeflohr.w2gservices.builder.repositories.DownloaderRepository
 import dev.felipeflohr.w2gservices.builder.services.DownloaderService
 import dev.felipeflohr.w2gservices.builder.services.MessageFileLogService
 import dev.felipeflohr.w2gservices.builder.services.MessageFileReferenceService
 import dev.felipeflohr.w2gservices.builder.utils.Either
 import dev.felipeflohr.w2gservices.builder.utils.LoggerUtils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -57,7 +56,7 @@ class DownloaderServiceImpl @Autowired constructor(
     }
 
     private suspend fun getMessagesWithoutReferenceOrLog(messages: List<DiscordMessageEntity>): List<DiscordMessageEntity> {
-        val messagesWithReferenceOrLog = withContext(Dispatchers.IO) {
+        val messagesWithReferenceOrLog = virtualThread {
             repository.getIdsWithReferencesOrLogByMessageIds(messages.mapNotNull { it.id })
         }
         return messages.filter { !messagesWithReferenceOrLog.contains(it.id) }

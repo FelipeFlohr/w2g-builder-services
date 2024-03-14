@@ -2,6 +2,7 @@ package dev.felipeflohr.w2gservices.builder.services.impl
 
 import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
 import dev.felipeflohr.w2gservices.builder.entities.DiscordDelimitationMessageEntity
+import dev.felipeflohr.w2gservices.builder.functions.virtualThread
 import dev.felipeflohr.w2gservices.builder.repositories.DiscordDelimitationMessageRepository
 import dev.felipeflohr.w2gservices.builder.services.DiscordDelimitationMessageService
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
@@ -24,7 +25,9 @@ class DiscordDelimitationMessageServiceImpl(
     override suspend fun saveDelimitationMessage(delimitation: DiscordDelimitationMessageDTO): Unit = coroutineScope {
         val persistedMessage = messageService.getByMessageId(delimitation.message.id)
         if (persistedMessage != null) {
-            repository.deleteByMessageId(persistedMessage.id as Long)
+            virtualThread {
+                repository.deleteByMessageId(persistedMessage.id as Long)
+            }
         }
         val entity = if (persistedMessage != null) {
             DiscordDelimitationMessageEntity(
@@ -39,6 +42,8 @@ class DiscordDelimitationMessageServiceImpl(
             entityDetached
         }
 
-        repository.save(entity)
+        virtualThread {
+            repository.save(entity)
+        }
     }
 }

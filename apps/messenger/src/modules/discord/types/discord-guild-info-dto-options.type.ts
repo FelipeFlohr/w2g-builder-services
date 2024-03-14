@@ -1,4 +1,4 @@
-export type DiscordGuildInfoDTOOptions = {
+export type DiscordGuildInfoDTOOptionsType = {
   readonly id: string;
   readonly verified: boolean;
   readonly createdAt: Date;

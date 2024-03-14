@@ -1,4 +1,4 @@
-export type DiscordGuildDTOOptions = {
+export type DiscordGuildDTOOptionsType = {
   readonly applicationId?: string;
   readonly memberCount: number;
   readonly available: boolean;

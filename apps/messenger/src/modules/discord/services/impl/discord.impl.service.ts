@@ -1,240 +1,200 @@
-import { Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { DiscordService } from "../discord.service";
-import { DiscordClientService } from "../discord-client.service";
-import { GuildFetchOptionsType } from "../../client/types/guild-fetch-options.type";
-import { DiscordJsTextChannelImpl } from "../../client/business/impl/discord-js-text-channel.impl";
-import { DiscordJsChannelImpl } from "../../client/business/impl/discord-js-channel.impl";
-import { MessageFetchOptions } from "../../client/types/message-fetch-options.type";
-import { DiscordGuild } from "../../client/business/discord-guild";
-import { DiscordGuildInfo } from "../../client/business/discord-guild-info";
-import { DiscordMessage } from "../../client/business/discord-message";
-import { DiscordTextChannel } from "../../client/business/discord-text-channel";
-import { DiscordTextChannelListenerDTO } from "../../models/discord-text-channel-listener.dto";
-import { DiscordListenerRepository } from "../../repositories/discord-listener.repository";
-import { DiscordDelimitationMessageRepository } from "../../repositories/discord-delimitation-message.repository";
-import { DiscordMessageDTO } from "../../models/discord-message.dto";
-import { DiscordMessageRepository } from "../../repositories/discord-message.repository";
-import { DiscordDelimitationMessageWithListenerDTO } from "../../models/discord-delimitation-message-with-listener.dto";
-import { DiscordMessageAuthorDTO } from "../../models/discord-message-author.dto";
-import { DiscordMessageAuthorRepository } from "../../repositories/discord-message-author.repository";
-import { DiscordAMQPService } from "../../amqp/discord-amqp.service";
-import { DiscordDelimitationMessageEntity } from "../../entities/discord-delimitation-message.entity";
-import { StringUtils } from "src/utils/string-utils";
-import { CollectionUtils } from "src/utils/collection-utils";
-import { DiscordPersistedMessageStatusEnum } from "../../types/discord-persisted-message-status.enum";
-import { DiscordDelimitationMessageDTO } from "../../models/discord-delimitation-message.dto";
+import { DiscordGuildInfoDTO } from "../../models/discord-guild-info.dto";
+import { DiscordGuildDTO } from "../../models/discord-guild.dto";
+import { GuildFetchOptionsType } from "../../types/guild-fetch-options.type";
+import { Client, DiscordAPIError, Events, Guild, Message, NonThreadGuildBasedChannel, TextChannel } from "discord.js";
+import { EnvironmentSettingsServiceProvider } from "src/modules/env/providers/environment-settings-service.provider";
+import { EnvironmentSettingsService } from "src/modules/env/services/environment-settings.service";
+import { DiscordJsHelper } from "./discord-js.helper";
+import { LoggerUtils } from "src/utils/logger.utils";
+import { CollectionUtils } from "src/utils/collection.utils";
+import { DiscordErrorCodeEnum } from "../../enums/discord-error-code.enum";
+import { DiscordChannelDTO } from "../../models/discord-channel.dto";
+import { DiscordMessageDTO } from "src/models/discord-message.dto";
+import { MessageFetchOptionsType } from "../../types/message-fetch-options.type";
+import { DiscordSlashCommandDTO } from "../../models/discord-slash-command.dto";
 
 @Injectable()
-export class DiscordServiceImpl implements DiscordService {
-  private readonly clientService: DiscordClientService;
-  private readonly amqpService: DiscordAMQPService;
-  private readonly listenerRepository: DiscordListenerRepository;
-  private readonly delimitationRepository: DiscordDelimitationMessageRepository;
-  private readonly messageRepository: DiscordMessageRepository;
-  private readonly messageAuthorRepository: DiscordMessageAuthorRepository;
+export class DiscordServiceImpl implements DiscordService, OnModuleInit {
+  private readonly env: EnvironmentSettingsService;
+  private readonly helper = new DiscordJsHelper();
+  private readonly logger = LoggerUtils.from(DiscordServiceImpl);
+  private client: Client<true>;
 
-  private static readonly logger = new Logger(DiscordServiceImpl.name);
+  private static readonly MAX_GUILD_FETCH = 200;
+  private static readonly MAX_MESSAGES_TO_FETCH = 100;
 
-  public constructor(
-    @Inject(DiscordClientService) clientService: DiscordClientService,
-    @Inject(DiscordAMQPService) amqpService: DiscordAMQPService,
-    @Inject(DiscordListenerRepository)
-    listenerRepository: DiscordListenerRepository,
-    @Inject(DiscordDelimitationMessageRepository)
-    delimitationRepository: DiscordDelimitationMessageRepository,
-    @Inject(DiscordMessageRepository) messageRepository: DiscordMessageRepository,
-    @Inject(DiscordMessageAuthorRepository) messageAuthorRepository: DiscordMessageAuthorRepository,
-  ) {
-    this.clientService = clientService;
-    this.amqpService = amqpService;
-    this.listenerRepository = listenerRepository;
-    this.delimitationRepository = delimitationRepository;
-    this.messageRepository = messageRepository;
-    this.messageAuthorRepository = messageAuthorRepository;
+  public constructor(@Inject(EnvironmentSettingsServiceProvider) env: EnvironmentSettingsService) {
+    this.env = env;
   }
 
-  public async fetchGuilds(options?: GuildFetchOptionsType): Promise<DiscordGuildInfo[]> {
-    return await this.clientService.client.fetchGuilds(options);
+  public async onModuleInit() {
+    await this.login();
   }
 
-  public async fetchGuildById(id: string): Promise<DiscordGuild | undefined> {
-    return await this.clientService.client.fetchGuildById(id);
+  public async fetchGuilds(options?: GuildFetchOptionsType | undefined): Promise<DiscordGuildInfoDTO[]> {
+    return await CollectionUtils.fetchCollection(
+      {
+        maxPossibleRecordsToFetch: DiscordServiceImpl.MAX_GUILD_FETCH,
+        maxRecords: options?.limit,
+      },
+      async (amount, lastItemFetched) => {
+        const res = await this.client.guilds.fetch({
+          after: options?.after,
+          before: options?.before ?? lastItemFetched?.id,
+          limit: amount,
+        });
+        return res.map(this.helper.OAuth2GuildToGuildInfoDTO);
+      },
+    );
   }
 
-  public async fetchTextChannels(guildId: string): Promise<DiscordTextChannel[]> {
-    const guild = await this.clientService.client.fetchGuildById(guildId);
+  public async fetchGuildById(id: string): Promise<DiscordGuildDTO | undefined> {
+    const guild = await this.fetchGuild(id);
     if (guild) {
-      const channels = await guild.fetchChannels();
-      return channels
-        .filter((channel) => channel.isTextChannel())
-        .map((channel) => DiscordJsTextChannelImpl.fromChannel(channel as DiscordJsChannelImpl));
-    }
-
-    throw new NotFoundException();
-  }
-
-  public async fetchTextChannelById(guildId: string, channelId: string): Promise<DiscordTextChannel | undefined> {
-    const guild = await this.fetchGuildById(guildId);
-    if (guild) {
-      const channel = await guild.fetchChannelById(channelId);
-      if (channel?.isTextChannel()) {
-        return DiscordJsTextChannelImpl.fromChannel(channel as DiscordJsChannelImpl);
-      }
+      return this.helper.guildToGuildDTO(guild);
     }
   }
 
-  public async fetchChannelMessages(options: MessageFetchOptions): Promise<DiscordMessage[]> {
-    const channel = await this.fetchTextChannelById(options.guildId, options.channelId);
+  public async fetchGuildByGuildInfo(guildInfo: DiscordGuildInfoDTO): Promise<DiscordGuildDTO | undefined> {
+    return await this.fetchGuildById(guildInfo.id);
+  }
 
+  public async fetchChannelsByGuildId(guildId: string): Promise<DiscordChannelDTO[]> {
+    const guild = await this.client.guilds.fetch(guildId);
+    const channels = await guild.channels.fetch();
+    return channels
+      .filter((channel) => channel != null)
+      .map((channel) => channel as NonThreadGuildBasedChannel)
+      .map(this.helper.discordJsChannelToChannelDTO);
+  }
+
+  public async fetchChannelsByGuild(guild: DiscordGuildDTO): Promise<DiscordChannelDTO[]> {
+    return await this.fetchChannelsByGuildId(guild.id);
+  }
+
+  public async fetchChannelByIdAndGuildId(channelId: string, guildId: string): Promise<DiscordChannelDTO | undefined> {
+    const channel = await this.fetchChannel(channelId, guildId);
     if (channel) {
-      return await channel.fetchMessages({
-        after: options.after,
-        amount: options.limit,
-        around: options.around,
-        before: options.before,
-      });
+      return this.helper.discordJsChannelToChannelDTO(channel);
+    }
+  }
+
+  public async fetchMessages(options: MessageFetchOptionsType): Promise<DiscordMessageDTO[]> {
+    const guildId = typeof options.guild === "string" ? options.guild : options.guild.id;
+    const channelId = typeof options.channel === "string" ? options.channel : options.channel.id;
+    const guild = await this.client.guilds.fetch(guildId);
+    const channel = await guild.channels.fetch(channelId);
+
+    if (channel instanceof TextChannel) {
+      return await CollectionUtils.fetchCollection<DiscordMessageDTO>(
+        {
+          maxPossibleRecordsToFetch: DiscordServiceImpl.MAX_MESSAGES_TO_FETCH,
+          maxRecords: options.limit,
+        },
+        async (amount, lastItem) => {
+          const messages = await channel.messages.fetch({
+            after: lastItem == undefined ? options.after : lastItem.id,
+            around: options.around,
+            before: options.before,
+            cache: true,
+            limit: amount,
+          });
+          return messages.map(this.helper.discordJsMessageToMessageDTO);
+        },
+      );
     }
     return [];
   }
 
-  public async fetchMessageById(
-    guildId: string,
-    channelId: string,
+  public async fetchMessageByIdAndGuildIdAndChannelId(
     messageId: string,
-  ): Promise<DiscordMessage | undefined> {
-    const channel = await this.fetchTextChannelById(guildId, channelId);
-    if (channel) {
-      return await channel.fetchMessageById(messageId);
+    channelId: string,
+    guildId: string,
+  ): Promise<DiscordMessageDTO | undefined> {
+    const message = await this.fetchMessage(messageId, channelId, guildId);
+    if (message) {
+      return this.helper.discordJsMessageToMessageDTO(message);
     }
   }
 
-  public async saveTextChannelListener(listener: DiscordTextChannelListenerDTO): Promise<void> {
-    return await this.listenerRepository.saveListener(listener);
-  }
-
-  public async listenerExists(listener: DiscordTextChannelListenerDTO): Promise<boolean> {
-    const res = await this.listenerRepository.findListenerByDTO(listener);
-    return res != undefined;
-  }
-
-  public async deleteListener(listener: DiscordTextChannelListenerDTO): Promise<void> {
-    await this.listenerRepository.deleteListener(listener);
-  }
-
-  public async fetchListeners(): Promise<DiscordTextChannelListenerDTO[]> {
-    const res = await this.listenerRepository.findAllListeners();
-    return res.map(DiscordTextChannelListenerDTO.fromEntity);
-  }
-
-  public async saveDelimitationMessage(message: DiscordMessage): Promise<void> {
-    const messageDTO = message.toDTO();
-    const delimitationMessage = await this.delimitationRepository.saveDelimitation(messageDTO);
-    await this.amqpService.sendDelimitationMessage(delimitationMessage);
-  }
-
-  public async saveMessage(message: DiscordMessageDTO, forceCreation?: boolean): Promise<number> {
-    return await this.messageRepository.saveMessage(message, forceCreation);
-  }
-
-  public async updateMessageById(messageId: number, message: DiscordMessageDTO): Promise<void> {
-    await this.messageRepository.updateMessageById(messageId, message);
-  }
-
-  public async softDeleteMessage(message: DiscordMessageDTO): Promise<void> {
-    return await this.messageRepository.softDeleteMessage(message);
-  }
-
-  public async updateMessage(message: DiscordMessageDTO): Promise<void> {
-    return await this.messageRepository.updateMessage(message);
-  }
-
-  public async fetchDelimitationMessagesWithListener(): Promise<DiscordDelimitationMessageWithListenerDTO[]> {
-    return await this.delimitationRepository.getDelimitationMessagesWithListener();
-  }
-
-  public async updateMessageAuthorById(authorId: number, authorDTO: DiscordMessageAuthorDTO): Promise<void> {
-    return await this.messageAuthorRepository.updateAuthorById(authorId, authorDTO);
-  }
-
-  public async saveAuthor(author: DiscordMessageAuthorDTO): Promise<number> {
-    return await this.messageAuthorRepository.saveAuthor(author);
-  }
-
-  public async getDelimitationMessageLinkByGuildAndChannelId(
-    guildId: string,
-    channelId: string,
-  ): Promise<string | undefined> {
-    return await this.delimitationRepository.getDelimitationMessageLinkByGuildAndChannelId(guildId, channelId);
-  }
-
-  public async getDelimitationMessageByGuildAndChannelId(
-    guildId: string,
-    channelId: string,
-  ): Promise<DiscordDelimitationMessageEntity> {
-    return await this.delimitationRepository.getDelimitationMessageByGuildAndChannelId(guildId, channelId);
-  }
-
-  public async setupSlashCommands(): Promise<void> {
-    return await this.clientService.setupSlashCommands();
-  }
-
-  public async cacheChannelMessages(
-    isBootstrap: boolean,
-    delimitationMessage: DiscordDelimitationMessageWithListenerDTO,
-  ): Promise<void>;
-  public async cacheChannelMessages(guildId: string, channelId: string, isBootstrap: boolean): Promise<void>;
-  public async cacheChannelMessages(
-    guildIdOrIsBootstrap: string | boolean,
-    channelIdOrDelimitationMessage: string | DiscordDelimitationMessageWithListenerDTO,
-    isBootstrap?: boolean,
-  ): Promise<void> {
-    let guildId: string;
-    let channelId: string;
-    let messageId: string;
-    const bootstrap = isBootstrap ?? (typeof guildIdOrIsBootstrap === "boolean" && guildIdOrIsBootstrap);
-
-    if (typeof guildIdOrIsBootstrap === "string" && typeof channelIdOrDelimitationMessage === "string") {
-      guildId = guildIdOrIsBootstrap;
-      channelId = channelIdOrDelimitationMessage;
-      const messageFetched = await this.getDelimitationMessageByGuildAndChannelId(guildId, channelId);
-      messageId = messageFetched.message.messageId;
-    } else {
-      const delimitationMessage = channelIdOrDelimitationMessage as DiscordDelimitationMessageWithListenerDTO;
-      guildId = delimitationMessage.guildId;
-      channelId = delimitationMessage.channelId;
-      messageId = delimitationMessage.discordMessageId;
-    }
-
-    const messages = await this.fetchChannelMessages({
-      guildId: guildId,
-      channelId: channelId,
-      after: messageId,
-      limit: 1500,
-    });
-    DiscordServiceImpl.logger.debug(
-      `Cached ${messages.length} ${StringUtils.pluralHandler(messages.length, "message")} for guild ${guildId}`,
-    );
-
-    await CollectionUtils.asyncForEach(messages, async (message) => {
-      const messageDTO = message.toDTO();
-      if (bootstrap) {
-        await this.saveMessage(messageDTO);
-        await this.amqpService.sendBootstrapMessage(messageDTO);
-      } else {
-        const messageStatus = await this.messageRepository.upsertMessage(messageDTO);
-        switch (messageStatus) {
-          case DiscordPersistedMessageStatusEnum.MESSAGE_CREATED:
-            await this.amqpService.sendCreatedMessage(messageDTO);
-            break;
-          case DiscordPersistedMessageStatusEnum.MESSAGE_EXISTS_BUT_DIFFERENT_CONTENT:
-            await this.amqpService.sendUpdatedMessage(messageDTO);
-            break;
-        }
+  public async addSlashCommandToAllGuilds(command: DiscordSlashCommandDTO): Promise<void> {
+    const guildInfos = await this.fetchGuilds();
+    const guildIds = guildInfos.map((g) => g.id);
+    await CollectionUtils.asyncForEach(guildIds, async (guildId) => {
+      const guild = await this.fetchGuild(guildId);
+      if (guild) {
+        await guild.commands.create(this.helper.slashCommandDTOToSlashCommandBuilder(command));
       }
     });
   }
 
-  public async sendDelimitationMessageViaAMQP(message: DiscordDelimitationMessageDTO): Promise<void> {
-    await this.amqpService.sendDelimitationMessage(message);
+  public async deleteAllSlashCommandsFromAllGuilds(): Promise<void> {
+    const guildInfos = await this.fetchGuilds();
+    const guildIds = guildInfos.map((g) => g.id);
+    await CollectionUtils.asyncForEach(guildIds, async (guildId) => {
+      const guild = await this.fetchGuild(guildId);
+      if (guild) {
+        await guild.commands.set([]);
+      }
+    });
+  }
+
+  private async login(): Promise<void> {
+    const clientIsNotReady = this.client == null || !this.client.isReady();
+    if (clientIsNotReady) {
+      const clientLoggedOff = this.helper.createClient();
+      clientLoggedOff.login(this.env.discordToken);
+
+      this.client = await this.waitForLogin(clientLoggedOff);
+      this.logger.log("Discord client logged in.");
+    }
+  }
+
+  private async waitForLogin(client: Client<false>): Promise<Client<true>> {
+    return new Promise((res) => client.once(Events.ClientReady, res));
+  }
+
+  private async fetchGuild(guildId: string): Promise<Guild | undefined> {
+    try {
+      return await this.client.guilds.fetch(guildId);
+    } catch (e) {
+      if (e instanceof DiscordAPIError && e.code === DiscordErrorCodeEnum.UNKNOWN_GUILD) {
+        return;
+      }
+      throw e;
+    }
+  }
+
+  private async fetchChannel(channelId: string, guildId: string): Promise<TextChannel | undefined> {
+    try {
+      const guild = await this.fetchGuild(guildId);
+      if (guild) {
+        const channel = await guild.channels.fetch(channelId);
+        if (channel instanceof TextChannel) return channel;
+      }
+    } catch (e) {
+      if (e instanceof DiscordAPIError && e.code === DiscordErrorCodeEnum.UNKNOWN_CHANNEL) {
+        return;
+      }
+      throw e;
+    }
+  }
+
+  private async fetchMessage(
+    messageId: string,
+    channelId: string,
+    guildId: string,
+  ): Promise<Message<true> | undefined> {
+    try {
+      const channel = await this.fetchChannel(channelId, guildId);
+      return await channel?.messages.fetch(messageId);
+    } catch (e) {
+      if (e instanceof DiscordAPIError && e.code === DiscordErrorCodeEnum.UNKNOWN_MESSAGE) {
+        return;
+      }
+      throw e;
+    }
   }
 }

@@ -1,0 +1,178 @@
+import {
+  Client,
+  GatewayIntentBits,
+  Guild,
+  GuildBasedChannel,
+  Message,
+  NonThreadGuildBasedChannel,
+  OAuth2Guild,
+  Partials,
+  SlashCommandBuilder,
+  User,
+} from "discord.js";
+import { DiscordGuildInfoDTO } from "../../models/discord-guild-info.dto";
+import { TypeUtils } from "src/utils/type.utils";
+import { DiscordGuildDTO } from "../../models/discord-guild.dto";
+import { DiscordChannelDTO } from "../../models/discord-channel.dto";
+import { DiscordMessageDTO } from "src/models/discord-message.dto";
+import { DiscordMessageAuthorDTO } from "src/models/discord-message-author.dto";
+import { DiscordSlashCommandDTO } from "../../models/discord-slash-command.dto";
+import { DiscordParameterTypeEnum } from "../../enums/discord-parameter-type.enum";
+import { DiscordSlashCommandParameterDTO } from "../../models/discord-slash-command-parameter.dto";
+
+export class DiscordJsHelper {
+  private static readonly intents = [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.DirectMessages,
+  ] as const;
+  private static readonly partials = [Partials.Message];
+
+  public constructor() {}
+
+  public createClient(): Client<false> {
+    return new Client({
+      intents: DiscordJsHelper.intents,
+      partials: DiscordJsHelper.partials,
+    });
+  }
+
+  public OAuth2GuildToGuildInfoDTO(guild: OAuth2Guild): DiscordGuildInfoDTO {
+    return new DiscordGuildInfoDTO({
+      createdAt: guild.createdAt,
+      id: guild.id,
+      verified: guild.verified,
+      iconGifUrl: TypeUtils.parseNullToUndefined(
+        guild.iconURL({
+          extension: "gif",
+          forceStatic: false,
+          size: 512,
+        }),
+      ),
+      iconJpegUrl: TypeUtils.parseNullToUndefined(
+        guild.iconURL({
+          extension: "jpeg",
+          forceStatic: true,
+          size: 512,
+        }),
+      ),
+      iconPngUrl: TypeUtils.parseNullToUndefined(
+        guild.iconURL({
+          extension: "png",
+          forceStatic: true,
+          size: 512,
+        }),
+      ),
+    });
+  }
+
+  public guildToGuildDTO(guild: Guild): DiscordGuildDTO {
+    return new DiscordGuildDTO({
+      available: guild.available,
+      createdAt: guild.createdAt,
+      id: guild.id,
+      joinedAt: guild.joinedAt,
+      large: guild.large,
+      memberCount: guild.memberCount,
+      name: guild.name,
+      ownerId: guild.ownerId,
+      applicationId: guild.ownerId,
+    });
+  }
+
+  public discordJsChannelToChannelDTO(channel: NonThreadGuildBasedChannel | GuildBasedChannel): DiscordChannelDTO {
+    return new DiscordChannelDTO({
+      createdAt: channel.createdAt ?? new Date(),
+      id: channel.id,
+      manageable: channel.manageable,
+      name: channel.name,
+      url: channel.url,
+      viewable: channel.viewable,
+    });
+  }
+
+  public discordJsMessageToMessageDTO(message: Message<true>): DiscordMessageDTO {
+    return new DiscordMessageDTO({
+      author: this.userToAuthorDTO(message.author),
+      cleanContent: message.cleanContent,
+      content: message.content,
+      createdAt: message.createdAt,
+      hasThread: message.hasThread,
+      id: message.id,
+      pinnable: message.pinnable,
+      pinned: message.pinned,
+      system: message.system,
+      url: message.url,
+      applicationId: TypeUtils.parseNullToUndefined(message.applicationId),
+      position: TypeUtils.parseNullToUndefined(message.position),
+      channelId: message.channelId,
+      guildId: message.guildId,
+    });
+  }
+
+  private userToAuthorDTO(user: User): DiscordMessageAuthorDTO {
+    return new DiscordMessageAuthorDTO({
+      bot: user.bot,
+      createdAt: user.createdAt,
+      discriminator: user.discriminator,
+      displayName: user.displayName,
+      id: user.id,
+      system: user.system,
+      tag: user.tag,
+      username: user.username,
+      avatarPngUrl: TypeUtils.parseNullToUndefined(
+        user.avatarURL({
+          extension: "png",
+          forceStatic: true,
+          size: 512,
+        }),
+      ),
+      bannerPngUrl: TypeUtils.parseNullToUndefined(
+        user.bannerURL({
+          extension: "png",
+          forceStatic: true,
+          size: 512,
+        }),
+      ),
+      globalName: TypeUtils.parseNullToUndefined(user.globalName),
+    });
+  }
+
+  public slashCommandDTOToSlashCommandBuilder(command: DiscordSlashCommandDTO): SlashCommandBuilder {
+    const slashBuilder = new SlashCommandBuilder()
+      .setName(command.name)
+      .setDescription(command.description)
+      .setDMPermission(command.dmPermission);
+    this.buildSlashParameters(slashBuilder, command);
+    return slashBuilder;
+  }
+
+  private buildSlashParameters(slashBuilder: SlashCommandBuilder, command: DiscordSlashCommandDTO): void {
+    if (command.parameters) {
+      for (const parameter of command.parameters) {
+        switch (parameter.type) {
+          case DiscordParameterTypeEnum.INTEGER:
+            this.buildIntegerParameter(slashBuilder, parameter);
+            break;
+          case DiscordParameterTypeEnum.STRING:
+            this.buildStringParameter(slashBuilder, parameter);
+            break;
+        }
+      }
+    }
+  }
+
+  private buildIntegerParameter(slashBuilder: SlashCommandBuilder, parameter: DiscordSlashCommandParameterDTO): void {
+    slashBuilder.addIntegerOption((builder) => {
+      builder.setDescription(parameter.description).setName(parameter.name).setRequired(parameter.required);
+      return builder;
+    });
+  }
+
+  private buildStringParameter(slashBuilder: SlashCommandBuilder, parameter: DiscordSlashCommandParameterDTO): void {
+    slashBuilder.addStringOption((builder) => {
+      builder.setDescription(parameter.description).setName(parameter.name).setRequired(parameter.required);
+      return builder;
+    });
+  }
+}
