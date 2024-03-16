@@ -5,6 +5,10 @@ import { EnvironmentSettingsServiceImpl } from "src/modules/env/services/impl/en
 import { LoggerUtils } from "src/utils/logger.utils";
 import { DataSource } from "typeorm";
 import { TypeORMLogger } from "../../logger/typeorm.logger";
+import { DiscordDelimitationMessageTypeORMEntity } from "src/modules/messenger/entities/impl/discord-delimitation-message.typeorm.entity.impl";
+import { DiscordMessageTypeORMEntity } from "src/modules/messenger/entities/impl/discord-message.typeorm.entity";
+import { DiscordMessageAuthorTypeORMEntity } from "src/modules/messenger/entities/impl/discord-message-author.typeorm.entity";
+import { DiscordListenerTypeORMEntity } from "src/modules/messenger/entities/impl/discord-listener.typeorm.entity";
 
 @Injectable()
 export class DatabaseServiceImpl implements OnModuleInit {
@@ -22,7 +26,12 @@ export class DatabaseServiceImpl implements OnModuleInit {
       username: this.envService.database.user,
       password: this.envService.database.password,
       database: this.envService.database.name,
-      entities: [],
+      entities: [
+        DiscordDelimitationMessageTypeORMEntity,
+        DiscordMessageTypeORMEntity,
+        DiscordMessageAuthorTypeORMEntity,
+        DiscordListenerTypeORMEntity,
+      ],
       migrations: [],
       synchronize: envService.application.env === "development",
       logger: new TypeORMLogger("all"),

@@ -1,3 +1,3 @@
 export interface Equatable<T> {
-  equals(val: T): val is T;
+  equals(val: unknown): val is T;
 }

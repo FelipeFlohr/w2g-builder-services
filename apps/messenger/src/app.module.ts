@@ -6,6 +6,7 @@ import { DatabaseModule } from "./modules/database/database.module";
 import { DiscordAMQPModule } from "./modules/discord-amqp/discord-amqp.module";
 import { DiscordModule } from "./modules/discord/discord.module";
 import { HealthcheckModule } from "./modules/healthcheck/healthcheck.module";
+import { MessengerModule } from "./modules/messenger/messenger.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { HealthcheckModule } from "./modules/healthcheck/healthcheck.module";
     DiscordAMQPModule,
     DiscordModule,
     HealthcheckModule,
+    MessengerModule,
   ],
   controllers: [],
   providers: [],

@@ -18,6 +18,10 @@ export abstract class MessengerBaseTypeORMRepository<T extends MessengerBaseEnti
     this.clazz = clazz;
   }
 
+  public abstract getById(id: number): Promise<T | undefined>;
+  public abstract deleteById(id: number): Promise<number | undefined>;
+  public abstract existsById(id: number): Promise<boolean>;
+
   protected getRepository(): Repository<T>;
   protected getRepository<U extends ObjectLiteral>(clazz: ClassType<U>): Repository<U>;
   protected getRepository<U extends ObjectLiteral>(clazz?: ClassType<U>): Repository<T> | Repository<U> {
