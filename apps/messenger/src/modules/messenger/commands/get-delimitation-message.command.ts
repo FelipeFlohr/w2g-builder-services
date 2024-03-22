@@ -2,23 +2,23 @@ import { DiscordGuildSlashCommandInteractionDTO } from "src/modules/discord/mode
 import { DiscordGuildSlashCommandDTO } from "src/modules/discord/models/discord-guild-slash-command.dto";
 import { MessengerService } from "../services/messenger.service";
 
-export class AddListenerCommand extends DiscordGuildSlashCommandDTO {
+export class GetDelimitationMessageCommand extends DiscordGuildSlashCommandDTO {
   private readonly service: MessengerService;
 
   public constructor(service: MessengerService) {
     super({
-      name: "addlistener",
-      description: "Listen to messages in this channel",
+      name: "haslistener",
+      description: "Returns a message telling if there is an active listener on this channel",
       dmPermission: false,
     });
     this.service = service;
   }
 
   public async onGuildInteraction(interaction: DiscordGuildSlashCommandInteractionDTO): Promise<string> {
-    if (await this.service.listenerExistsByChannelIdAndGuildId(interaction.channelId, interaction.guildId)) {
-      return "Listener already exists on this channel.";
-    }
-    await this.service.saveListenerByChannelIdAndGuildId(interaction.channelId, interaction.guildId);
-    return "Listener created.";
+    const url = await this.service.getDelimitationMessageUrlByChannelIdAndGuildId(
+      interaction.channelId,
+      interaction.guildId,
+    );
+    return url ?? "No delimitation message found on this channel.";
   }
 }

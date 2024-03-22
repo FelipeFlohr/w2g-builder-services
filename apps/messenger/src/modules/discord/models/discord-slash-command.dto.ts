@@ -15,5 +15,5 @@ export abstract class DiscordSlashCommandDTO {
     this.parameters = options.parameters;
   }
 
-  public abstract onInteraction(interaction: DiscordSlashCommandInteractionDTO): Promise<string | undefined>;
+  public abstract onInteraction(interaction: DiscordSlashCommandInteractionDTO): Promise<string>;
 }

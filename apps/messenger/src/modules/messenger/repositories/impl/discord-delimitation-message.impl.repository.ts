@@ -7,6 +7,8 @@ import { TypeUtils } from "src/utils/type.utils";
 import { DiscordMessageRepository } from "../discord-message.repository";
 import { DiscordMessageRepositoryProvider } from "../../providers/discord-message-repository.provider";
 import { DiscordDelimitationMessageRepository } from "../discord-delimitation-message.repository";
+import { DiscordDelimitationMessageEntity } from "../../entities/discord-delimitation-message.entity";
+import { DiscordDelimitationMessageDTO } from "src/models/discord-demilitation-message.dto";
 
 @Injectable()
 export class DiscordDelimitationMessageRepositoryImpl
@@ -30,8 +32,13 @@ export class DiscordDelimitationMessageRepositoryImpl
 
   public async deleteById(id: number): Promise<number | undefined> {
     if (await this.existsById(id)) {
-      const messageId = await this.getMessageIdByDelimitationMessageId(id);
-      await this.messageRepository.deleteById(messageId);
+      const delimitation = (await this.getChannelIdAndGuildIdByDelimitationMessageId(
+        id,
+      )) as DiscordDelimitationMessageTypeORMEntity;
+      await this.messageRepository.deleteManyByChannelIdAndGuildId(
+        delimitation.message.channelId,
+        delimitation.message.guildId,
+      );
       await this.getRepository().delete(id);
       return id;
     }
@@ -41,15 +48,97 @@ export class DiscordDelimitationMessageRepositoryImpl
     return await this.getRepository().existsBy({ id });
   }
 
-  private async getMessageIdByDelimitationMessageId(id: number): Promise<number> {
-    const res = await this.getRepository().findOne({
-      select: {
-        messageId: true,
-      },
-      where: {
-        id,
+  public async getByChannelIdAndGuildId(
+    channelId: string,
+    guildId: string,
+  ): Promise<DiscordDelimitationMessageEntity | undefined> {
+    const res = await this.getRepository().findOneBy({
+      message: {
+        channelId,
+        guildId,
       },
     });
-    return res?.messageId as number;
+    return TypeUtils.parseNullToUndefined(res);
+  }
+
+  public async deleteByGuildIdAndChannelId(channelId: string, guildId: string): Promise<boolean> {
+    const message = await this.getRepository().findOne({
+      select: { id: true },
+      where: { message: { channelId, guildId } },
+      relations: { message: true },
+      loadEagerRelations: false,
+    });
+
+    if (message) {
+      await this.deleteById(message.id);
+    }
+    return false;
+  }
+
+  public async save(delimitation: DiscordDelimitationMessageDTO): Promise<DiscordDelimitationMessageEntity> {
+    const message = await this.messageRepository.upsert(delimitation.message);
+    const entity = DiscordDelimitationMessageTypeORMEntity.fromDTO(delimitation);
+    entity.message = message;
+
+    const delimitationIdOnThisChannel = await this.getDelimitationIdByChannelIdAndGuildId(
+      delimitation.message.channelId,
+      delimitation.message.guildId,
+    );
+    if (delimitationIdOnThisChannel) {
+      await this.deleteById(delimitationIdOnThisChannel);
+    }
+    return await this.getRepository().save(entity, { reload: true });
+  }
+
+  public async existsByMessageIdAndChannelIdAndGuildId(
+    messageId: string,
+    channelId: string,
+    guildId: string,
+  ): Promise<boolean> {
+    return await this.getRepository().existsBy({
+      message: {
+        messageId,
+        channelId,
+        guildId,
+      },
+    });
+  }
+
+  public async getMessageUrlByChannelIdAndGuildId(channelId: string, guildId: string): Promise<string | undefined> {
+    const delimitation = await this.getRepository().findOne({
+      select: { messageId: true },
+      relations: { message: true },
+      loadEagerRelations: false,
+      relationLoadStrategy: "join",
+      where: { message: { channelId, guildId } },
+    });
+    if (delimitation?.messageId) {
+      return await this.messageRepository.getUrlById(delimitation.messageId);
+    }
+  }
+
+  private async getChannelIdAndGuildIdByDelimitationMessageId(
+    id: number,
+  ): Promise<DiscordDelimitationMessageTypeORMEntity | undefined> {
+    const res = await this.getRepository().findOne({
+      select: { message: { channelId: true, messageId: true } },
+      where: { id },
+      relations: { message: true },
+      loadEagerRelations: false,
+    });
+    return TypeUtils.parseNullToUndefined(res);
+  }
+
+  private async getDelimitationIdByChannelIdAndGuildId(
+    channelId: string,
+    guildId: string,
+  ): Promise<number | undefined> {
+    const res = await this.getRepository().findOne({
+      select: { id: true },
+      where: { message: { channelId, guildId } },
+      relations: { message: true },
+      loadEagerRelations: false,
+    });
+    return TypeUtils.parseNullToUndefined(res?.id);
   }
 }

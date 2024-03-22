@@ -39,10 +39,10 @@ export class DatabaseServiceImpl implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    DatabaseServiceImpl.logger.warn("Initializing database");
+    DatabaseServiceImpl.logger.log("Initializing database");
     try {
       await this.datasource.initialize();
-      DatabaseServiceImpl.logger.debug("Database initialized");
+      DatabaseServiceImpl.logger.log("Database initialized");
     } catch (e) {
       DatabaseServiceImpl.logger.fatal(e);
       throw e;

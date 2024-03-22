@@ -1,13 +1,14 @@
-import { MessengerBaseTypeORMRepository } from "src/modules/database/base/impl/messenger-base-typeorm.repository";
-import { DiscordMessageTypeORMEntity } from "../../entities/impl/discord-message.typeorm.entity";
 import { Inject } from "@nestjs/common";
+import { DiscordMessageDTO } from "src/models/discord-message.dto";
+import { MessengerBaseTypeORMRepository } from "src/modules/database/base/impl/messenger-base-typeorm.repository";
 import { DatabaseServiceProvider } from "src/modules/database/providers/database-service.provider";
 import { DatabaseService } from "src/modules/database/services/database.service";
-import { DiscordMessageAuthorRepository } from "../discord-message-author.repository";
-import { DiscordMessageAuthorRepositoryProvider } from "../../providers/discord-message-author-repository.provider";
-import { TypeUtils } from "src/utils/type.utils";
-import { DiscordMessageRepository } from "../discord-message.repository";
 import { CollectionUtils } from "src/utils/collection.utils";
+import { TypeUtils } from "src/utils/type.utils";
+import { DiscordMessageTypeORMEntity } from "../../entities/impl/discord-message.typeorm.entity";
+import { DiscordMessageAuthorRepositoryProvider } from "../../providers/discord-message-author-repository.provider";
+import { DiscordMessageAuthorRepository } from "../discord-message-author.repository";
+import { DiscordMessageRepository } from "../discord-message.repository";
 
 export class DiscordMessageRepositoryImpl
   extends MessengerBaseTypeORMRepository<DiscordMessageTypeORMEntity>
@@ -52,29 +53,80 @@ export class DiscordMessageRepositoryImpl
     return res;
   }
 
+  public async upsert(message: DiscordMessageDTO): Promise<DiscordMessageTypeORMEntity> {
+    const persistedMessage = await this.getRepository().findOne({
+      select: { id: true, author: { id: true } },
+      relations: { author: true },
+      where: { messageId: message.id },
+      loadEagerRelations: false,
+    });
+
+    const entity = DiscordMessageTypeORMEntity.fromDTO(message);
+    if (persistedMessage?.id) {
+      entity.id = persistedMessage.id;
+      entity.authorId = persistedMessage.author.id;
+      entity.author.id = persistedMessage.author.id;
+    }
+    const res = await this.getRepository().save(entity, { reload: true });
+    return res;
+  }
+
+  public async deleteByMessageIdAndChannelIdAndGuildId(
+    messageId: string,
+    channelId: string,
+    guildId: string,
+  ): Promise<boolean> {
+    const message = await this.getRepository().findOne({
+      select: { id: true },
+      where: { messageId, channelId, guildId },
+      loadEagerRelations: false,
+    });
+    if (message?.id) {
+      const res = await this.deleteById(message.id);
+      return res != undefined;
+    }
+    return false;
+  }
+
+  public async upsertMany(messages: DiscordMessageDTO[]): Promise<void> {
+    await CollectionUtils.asyncForEach(messages, async (message) => {
+      await this.upsert(message);
+    });
+  }
+
+  public async existsByMessageIdAndChannelIdAndGuildId(
+    messageId: string,
+    channelId: string,
+    guildId: string,
+  ): Promise<boolean> {
+    return await this.getRepository().existsBy({ messageId, channelId, guildId });
+  }
+
+  public async getUrlById(id: number): Promise<string | undefined> {
+    const res = await this.getRepository().findOne({
+      select: { url: true },
+      loadEagerRelations: false,
+      loadRelationIds: false,
+      where: { id },
+    });
+    return res?.url;
+  }
+
   private async getAuthorIdByMessageId(id: number): Promise<number> {
     const res = await this.getRepository().findOne({
-      select: {
-        authorId: true,
-      },
-      where: {
-        id: id,
-      },
+      select: { authorId: true },
+      where: { id },
+      loadEagerRelations: false,
     });
     return res?.authorId as number;
   }
 
   private async getManyIdsByChannelIdAndGuildId(channelId: string, guildId: string): Promise<Array<number>> {
     const res = await this.getRepository().find({
-      select: {
-        id: true,
-      },
-      where: {
-        channelId,
-        guildId,
-      },
+      select: { id: true },
+      where: { channelId, guildId },
+      loadEagerRelations: false,
     });
-
     return res.map((e) => e.id);
   }
 }

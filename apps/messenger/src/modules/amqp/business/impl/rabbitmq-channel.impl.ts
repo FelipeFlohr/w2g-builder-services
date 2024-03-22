@@ -167,7 +167,6 @@ export class RabbitMQChannelImpl implements AMQPChannel {
     if (msg == undefined) {
       return await this.sendMessageWithoutRoutingKey(queueOrExchange, msgOrRoutingKey);
     }
-
     return await this.sendMessageWithRoutingKey(queueOrExchange as AMQPExchange, msgOrRoutingKey as string, msg);
   }
 

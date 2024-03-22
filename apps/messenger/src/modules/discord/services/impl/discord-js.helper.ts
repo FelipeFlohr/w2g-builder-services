@@ -1,11 +1,14 @@
 import {
+  CacheType,
   Client,
+  CommandInteraction,
   GatewayIntentBits,
   Guild,
   GuildBasedChannel,
   Message,
   NonThreadGuildBasedChannel,
   OAuth2Guild,
+  PartialMessage,
   Partials,
   SlashCommandBuilder,
   User,
@@ -19,6 +22,7 @@ import { DiscordMessageAuthorDTO } from "src/models/discord-message-author.dto";
 import { DiscordSlashCommandDTO } from "../../models/discord-slash-command.dto";
 import { DiscordParameterTypeEnum } from "../../enums/discord-parameter-type.enum";
 import { DiscordSlashCommandParameterDTO } from "../../models/discord-slash-command-parameter.dto";
+import { DiscordSlashCommandInteractionDTO } from "../../models/discord-slash-command-interaction.dto";
 
 export class DiscordJsHelper {
   private static readonly intents = [
@@ -91,22 +95,22 @@ export class DiscordJsHelper {
     });
   }
 
-  public discordJsMessageToMessageDTO(message: Message<true>): DiscordMessageDTO {
+  public discordJsMessageToMessageDTO(message: Message<boolean> | PartialMessage): DiscordMessageDTO {
     return new DiscordMessageDTO({
-      author: this.userToAuthorDTO(message.author),
-      cleanContent: message.cleanContent,
-      content: message.content,
+      author: this.userToAuthorDTO(message.author as User),
+      cleanContent: message.cleanContent ?? "",
+      content: message.content ?? "",
       createdAt: message.createdAt,
       hasThread: message.hasThread,
       id: message.id,
       pinnable: message.pinnable,
-      pinned: message.pinned,
-      system: message.system,
+      pinned: message.pinned ?? false,
+      system: message.system ?? false,
       url: message.url,
       applicationId: TypeUtils.parseNullToUndefined(message.applicationId),
       position: TypeUtils.parseNullToUndefined(message.position),
       channelId: message.channelId,
-      guildId: message.guildId,
+      guildId: message.guildId ?? "",
     });
   }
 
@@ -145,6 +149,29 @@ export class DiscordJsHelper {
       .setDMPermission(command.dmPermission);
     this.buildSlashParameters(slashBuilder, command);
     return slashBuilder;
+  }
+
+  public async fetchMessageIfNotFetched(message: Message<boolean> | PartialMessage): Promise<Message<true>> {
+    if (!message.partial) {
+      return message as Message<true>;
+    }
+    return (await message.fetch()) as Message<true>;
+  }
+
+  public commandInteractionToInteractionDTO(
+    interaction: CommandInteraction<CacheType>,
+  ): DiscordSlashCommandInteractionDTO {
+    const data: Record<string, unknown> = {};
+    for (const val of interaction.options.data) {
+      data[val.name] = val.value;
+    }
+
+    return new DiscordSlashCommandInteractionDTO({
+      channelId: interaction.channelId,
+      guildId: TypeUtils.parseNullToUndefined(interaction.guildId),
+      commandName: interaction.commandName,
+      data: data,
+    });
   }
 
   private buildSlashParameters(slashBuilder: SlashCommandBuilder, command: DiscordSlashCommandDTO): void {

@@ -5,6 +5,7 @@ import { DiscordMessageAuthorEntity } from "../discord-message-author.entity";
 import { DiscordMessageEntity } from "../discord-message.entity";
 import { DiscordDelimitationMessageTypeORMEntity } from "./discord-delimitation-message.typeorm.entity.impl";
 import { DiscordMessageAuthorTypeORMEntity } from "./discord-message-author.typeorm.entity";
+import { DiscordMessageDTO } from "src/models/discord-message.dto";
 
 @Entity({
   name: "TB_DISCORD_MESSAGE",
@@ -31,6 +32,7 @@ export class DiscordMessageTypeORMEntity
     nullable: false,
     cascade: true,
     onDelete: "CASCADE",
+    eager: true,
   })
   @JoinColumn({
     name: "DME_DMAID",
@@ -142,5 +144,24 @@ export class DiscordMessageTypeORMEntity
       return this.id === val.id;
     }
     return false;
+  }
+
+  public static fromDTO(message: DiscordMessageDTO): DiscordMessageTypeORMEntity {
+    const entity = new DiscordMessageTypeORMEntity();
+    entity.applicationId = message.applicationId;
+    entity.author = DiscordMessageAuthorTypeORMEntity.fromDTO(message.author);
+    entity.cleanContent = message.cleanContent;
+    entity.content = message.content;
+    entity.hasThread = message.hasThread;
+    entity.messageId = message.id;
+    entity.pinnable = message.pinnable;
+    entity.pinned = message.pinned;
+    entity.position = message.position;
+    entity.system = message.system;
+    entity.url = message.url;
+    entity.guildId = message.guildId;
+    entity.channelId = message.channelId;
+    entity.messageCreatedAt = message.createdAt;
+    return entity;
   }
 }

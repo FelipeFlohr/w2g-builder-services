@@ -1,25 +1,37 @@
-import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { DiscordService } from "../discord.service";
-import { DiscordGuildInfoDTO } from "../../models/discord-guild-info.dto";
-import { DiscordGuildDTO } from "../../models/discord-guild.dto";
-import { GuildFetchOptionsType } from "../../types/guild-fetch-options.type";
-import { Client, DiscordAPIError, Events, Guild, Message, NonThreadGuildBasedChannel, TextChannel } from "discord.js";
+import { Injectable, OnModuleInit, Inject } from "@nestjs/common";
+import {
+  Client,
+  NonThreadGuildBasedChannel,
+  TextChannel,
+  Events,
+  Guild,
+  DiscordAPIError,
+  PartialMessage,
+  Message,
+} from "discord.js";
+import { DiscordMessageDTO } from "src/models/discord-message.dto";
 import { EnvironmentSettingsServiceProvider } from "src/modules/env/providers/environment-settings-service.provider";
 import { EnvironmentSettingsService } from "src/modules/env/services/environment-settings.service";
-import { DiscordJsHelper } from "./discord-js.helper";
-import { LoggerUtils } from "src/utils/logger.utils";
 import { CollectionUtils } from "src/utils/collection.utils";
+import { LoggerUtils } from "src/utils/logger.utils";
 import { DiscordErrorCodeEnum } from "../../enums/discord-error-code.enum";
+import { IMessageListener } from "../../interfaces/message-listener.interface";
 import { DiscordChannelDTO } from "../../models/discord-channel.dto";
-import { DiscordMessageDTO } from "src/models/discord-message.dto";
-import { MessageFetchOptionsType } from "../../types/message-fetch-options.type";
+import { DiscordGuildInfoDTO } from "../../models/discord-guild-info.dto";
+import { DiscordGuildDTO } from "../../models/discord-guild.dto";
 import { DiscordSlashCommandDTO } from "../../models/discord-slash-command.dto";
+import { GuildFetchOptionsType } from "../../types/guild-fetch-options.type";
+import { MessageFetchOptionsType } from "../../types/message-fetch-options.type";
+import { DiscordService } from "../discord.service";
+import { DiscordJsHelper } from "./discord-js.helper";
+import { DiscordCommandError } from "../../base/discord-command.error";
 
 @Injectable()
 export class DiscordServiceImpl implements DiscordService, OnModuleInit {
   private readonly env: EnvironmentSettingsService;
   private readonly helper = new DiscordJsHelper();
   private readonly logger = LoggerUtils.from(DiscordServiceImpl);
+  private readonly slashCommands: Array<DiscordSlashCommandDTO> = [];
   private client: Client<true>;
 
   private static readonly MAX_GUILD_FETCH = 200;
@@ -31,6 +43,7 @@ export class DiscordServiceImpl implements DiscordService, OnModuleInit {
 
   public async onModuleInit() {
     await this.login();
+    this.setupInteractionListeners();
   }
 
   public async fetchGuilds(options?: GuildFetchOptionsType | undefined): Promise<DiscordGuildInfoDTO[]> {
@@ -101,7 +114,7 @@ export class DiscordServiceImpl implements DiscordService, OnModuleInit {
             cache: true,
             limit: amount,
           });
-          return messages.map(this.helper.discordJsMessageToMessageDTO);
+          return messages.map((value) => this.helper.discordJsMessageToMessageDTO(value));
         },
       );
     }
@@ -128,6 +141,11 @@ export class DiscordServiceImpl implements DiscordService, OnModuleInit {
         await guild.commands.create(this.helper.slashCommandDTOToSlashCommandBuilder(command));
       }
     });
+    this.logger.log(`Created global command "${command.name}".`);
+  }
+
+  public addSlashCommandToInteraction(command: DiscordSlashCommandDTO): void {
+    this.slashCommands.push(command);
   }
 
   public async deleteAllSlashCommandsFromAllGuilds(): Promise<void> {
@@ -139,6 +157,18 @@ export class DiscordServiceImpl implements DiscordService, OnModuleInit {
         await guild.commands.set([]);
       }
     });
+  }
+
+  public addMessageCreatedListener(listener: IMessageListener): void {
+    this.client.on(Events.MessageCreate, async (message) => this.onMessageWrapper(listener, message));
+  }
+
+  public addMessageUpdatedListener(listener: IMessageListener): void {
+    this.client.on(Events.MessageUpdate, async (message) => this.onMessageWrapper(listener, message));
+  }
+
+  addMessageDeletedListener(listener: IMessageListener): void {
+    this.client.on(Events.MessageDelete, async (message) => this.onMessageWrapper(listener, message));
   }
 
   private async login(): Promise<void> {
@@ -195,6 +225,41 @@ export class DiscordServiceImpl implements DiscordService, OnModuleInit {
         return;
       }
       throw e;
+    }
+  }
+
+  private setupInteractionListeners(): void {
+    this.client.on(Events.InteractionCreate, async (interaction) => {
+      if (interaction.isChatInputCommand()) {
+        try {
+          const command = this.slashCommands.find((c) => c.name === interaction.commandName);
+          const res = await command?.onInteraction(this.helper.commandInteractionToInteractionDTO(interaction));
+          if (res) await interaction.reply(res);
+        } catch (e) {
+          if (e instanceof DiscordAPIError && e.code === DiscordErrorCodeEnum.UNKNOWN_INTERACTION) {
+            this.logger.error(e);
+            return;
+          } else if (e instanceof DiscordCommandError) {
+            await interaction.reply(e.message);
+          } else {
+            throw e;
+          }
+        }
+      }
+    });
+  }
+
+  private async onMessageWrapper(
+    listener: IMessageListener,
+    message: Message<boolean> | PartialMessage,
+  ): Promise<void> {
+    const nonFetchedMessage = this.helper.discordJsMessageToMessageDTO(message);
+    if (nonFetchedMessage && (await listener.validateBeforeFetching(nonFetchedMessage))) {
+      const messageFetched = await this.helper.fetchMessageIfNotFetched(message);
+      const messageDTO = this.helper.discordJsMessageToMessageDTO(messageFetched);
+      if (messageDTO) {
+        await listener.onMessage(messageDTO);
+      }
     }
   }
 }

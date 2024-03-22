@@ -5,6 +5,7 @@ import { DiscordGuildDTO } from "../models/discord-guild.dto";
 import { GuildFetchOptionsType } from "../types/guild-fetch-options.type";
 import { MessageFetchOptionsType } from "../types/message-fetch-options.type";
 import { DiscordSlashCommandDTO } from "../models/discord-slash-command.dto";
+import { IMessageListener } from "../interfaces/message-listener.interface";
 
 export interface DiscordService {
   fetchGuilds(options?: GuildFetchOptionsType): Promise<Array<DiscordGuildInfoDTO>>;
@@ -20,5 +21,9 @@ export interface DiscordService {
     guildId: string,
   ): Promise<DiscordMessageDTO | undefined>;
   addSlashCommandToAllGuilds(command: DiscordSlashCommandDTO): Promise<void>;
+  addSlashCommandToInteraction(command: DiscordSlashCommandDTO): void;
   deleteAllSlashCommandsFromAllGuilds(): Promise<void>;
+  addMessageCreatedListener(listener: IMessageListener): void;
+  addMessageUpdatedListener(listener: IMessageListener): void;
+  addMessageDeletedListener(listener: IMessageListener): void;
 }

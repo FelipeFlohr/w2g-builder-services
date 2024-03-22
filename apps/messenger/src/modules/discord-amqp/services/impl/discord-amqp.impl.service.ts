@@ -7,6 +7,7 @@ import { AMQPExchangeTypeEnum } from "src/modules/amqp/enums/amqp-exchange-type.
 import { AMQPService } from "src/modules/amqp/services/amqp.service";
 import { DiscordAMQPService } from "../discord-amqp.service";
 import { AMQPServiceProvider } from "src/modules/amqp/providers/amqp-service.provider";
+import { LoggerUtils } from "src/utils/logger.utils";
 
 @Injectable()
 export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit {
@@ -17,6 +18,7 @@ export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit 
   private messagesBootstrapQueue: AMQPQueue;
   private messagesDelimitationQueue: AMQPQueue;
   private messagesExchange: AMQPExchange;
+  private readonly logger = LoggerUtils.from(DiscordAMQPServiceImpl);
 
   private static readonly MESSAGES_CREATED_QUEUE_NAME = "messages.created";
   private static readonly MESSAGES_UPDATED_QUEUE_NAME = "messages.updated";
@@ -39,6 +41,7 @@ export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit 
       DiscordAMQPServiceImpl.MESSAGES_CREATED_QUEUE_NAME,
       message,
     );
+    this.logger.debug(`CREATED | Sent ${message.id}.`);
   }
 
   public async sendUpdatedMessage(message: DiscordMessageDTO): Promise<void> {
@@ -47,6 +50,7 @@ export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit 
       DiscordAMQPServiceImpl.MESSAGES_UPDATED_QUEUE_NAME,
       message,
     );
+    this.logger.debug(`UPDATED | Sent ${message.id}.`);
   }
 
   public async sendDeletedMessage(message: DiscordMessageDTO): Promise<void> {
@@ -55,6 +59,7 @@ export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit 
       DiscordAMQPServiceImpl.MESSAGES_DELETED_QUEUE_NAME,
       message,
     );
+    this.logger.debug(`DELETED | Sent ${message.id}.`);
   }
 
   public async sendBootstrapMessage(message: DiscordMessageDTO): Promise<void> {
@@ -71,6 +76,7 @@ export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit 
       DiscordAMQPServiceImpl.MESSAGES_DELIMITATION_QUEUE_NAME,
       message,
     );
+    this.logger.debug(`DELIMITATION | Sent ${message.message.id}.`);
   }
 
   private async setupAmqp(): Promise<void> {
