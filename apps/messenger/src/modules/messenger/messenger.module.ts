@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { CacheModule } from "../cache/cache.module";
 import { DiscordAMQPModule } from "../discord-amqp/discord-amqp.module";
 import { DiscordModule } from "../discord/discord.module";
 import { MessengerController } from "./controllers/messenger.controller";
@@ -37,7 +38,7 @@ import { MessengerServiceImpl } from "./services/impl/messenger.impl.service";
       useClass: MessengerServiceImpl,
     },
   ],
-  imports: [DiscordModule, DiscordAMQPModule],
+  imports: [CacheModule, DiscordModule, DiscordAMQPModule],
   exports: [MessengerServiceProvider],
 })
 export class MessengerModule {}

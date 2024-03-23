@@ -112,7 +112,7 @@ export class DiscordListenerRepositoryImpl
     }
 
     const listeners = await queryBuilder.getMany();
-    await CollectionUtils.asyncForEach(listeners, this.saveListenerToCache);
+    await CollectionUtils.asyncForEach(listeners, async (listener) => await this.saveListenerToCache(listener));
     return [...allCachedListeners, ...listeners];
   }
 
