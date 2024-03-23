@@ -1,11 +1,11 @@
 import { Inject } from "@nestjs/common";
 import { ClassType } from "src/utils/types/class.type";
-import { Repository, ObjectLiteral } from "typeorm";
-import { MessengerBaseEntity } from "../messenger-base.entity";
-import { MessengerBaseRepository } from "../messenger-base.repository";
+import { ObjectLiteral, Repository } from "typeorm";
 import { DatabaseServiceProvider } from "../../providers/database-service.provider";
 import { DatabaseService } from "../../services/database.service";
 import { DatabaseServiceImpl } from "../../services/impl/database.impl.service";
+import { MessengerBaseEntity } from "../messenger-base.entity";
+import { MessengerBaseRepository } from "../messenger-base.repository";
 
 export abstract class MessengerBaseTypeORMRepository<T extends MessengerBaseEntity<T>>
   implements MessengerBaseRepository<T>

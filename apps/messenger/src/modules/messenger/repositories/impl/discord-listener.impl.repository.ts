@@ -1,4 +1,4 @@
-import { Injectable, Inject } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { CacheServiceProvider } from "src/modules/cache/providers/cache-service.provider";
 import { CacheService } from "src/modules/cache/services/cache.service";
 import { MessengerBaseTypeORMRepository } from "src/modules/database/base/impl/messenger-base-typeorm.repository";

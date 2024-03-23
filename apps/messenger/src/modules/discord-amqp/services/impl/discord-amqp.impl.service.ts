@@ -1,13 +1,13 @@
-import { Injectable, OnModuleInit, Inject } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { DiscordDelimitationMessageDTO } from "src/models/discord-demilitation-message.dto";
 import { DiscordMessageDTO } from "src/models/discord-message.dto";
 import { AMQPExchange } from "src/modules/amqp/business/amqp-exchange";
 import { AMQPQueue } from "src/modules/amqp/business/amqp-queue";
 import { AMQPExchangeTypeEnum } from "src/modules/amqp/enums/amqp-exchange-type.enum";
-import { AMQPService } from "src/modules/amqp/services/amqp.service";
-import { DiscordAMQPService } from "../discord-amqp.service";
 import { AMQPServiceProvider } from "src/modules/amqp/providers/amqp-service.provider";
+import { AMQPService } from "src/modules/amqp/services/amqp.service";
 import { LoggerUtils } from "src/utils/logger.utils";
+import { DiscordAMQPService } from "../discord-amqp.service";
 
 @Injectable()
 export class DiscordAMQPServiceImpl implements DiscordAMQPService, OnModuleInit {

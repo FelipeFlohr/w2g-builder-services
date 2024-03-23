@@ -1,7 +1,7 @@
 import { Global, Module } from "@nestjs/common";
+import { EnvironmentSettingsModule } from "../env/environment-settings.module";
 import { CacheServiceProvider } from "./providers/cache-service.provider";
 import { RedisCacheServiceImpl } from "./services/impl/cache.impl.service";
-import { EnvironmentSettingsModule } from "../env/environment-settings.module";
 
 @Global()
 @Module({

@@ -1,10 +1,10 @@
 import * as dotenv from "dotenv";
-import { EnvironmentSettingsService } from "../environment-settings.service";
 import { LoggerUtils } from "src/utils/logger.utils";
 import { ApplicationSettingsType } from "../../types/application-settings.type";
 import { DatabaseSettingsType } from "../../types/database-settings.type";
 import { RabbitMQSettingsType } from "../../types/rabbitmq-settings.type";
 import { RedisSettingsType } from "../../types/redis-settings.type";
+import { EnvironmentSettingsService } from "../environment-settings.service";
 
 export class EnvironmentSettingsServiceImpl implements EnvironmentSettingsService {
   public readonly application: ApplicationSettingsType;

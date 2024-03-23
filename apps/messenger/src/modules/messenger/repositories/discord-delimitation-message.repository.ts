@@ -1,6 +1,6 @@
+import { DiscordDelimitationMessageDTO } from "src/models/discord-demilitation-message.dto";
 import { MessengerBaseRepository } from "src/modules/database/base/messenger-base.repository";
 import { DiscordDelimitationMessageEntity } from "../entities/discord-delimitation-message.entity";
-import { DiscordDelimitationMessageDTO } from "src/models/discord-demilitation-message.dto";
 
 export interface DiscordDelimitationMessageRepository
   extends MessengerBaseRepository<DiscordDelimitationMessageEntity> {

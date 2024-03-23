@@ -1,11 +1,11 @@
+import { DiscordMessageDTO } from "src/models/discord-message.dto";
 import { MessengerBaseTypeORMEntity } from "src/modules/database/base/impl/messenger-base-typeorm.entity";
-import { Entity, Index, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { DiscordDelimitationMessageEntity } from "../discord-delimitation-message.entity";
 import { DiscordMessageAuthorEntity } from "../discord-message-author.entity";
 import { DiscordMessageEntity } from "../discord-message.entity";
 import { DiscordDelimitationMessageTypeORMEntity } from "./discord-delimitation-message.typeorm.entity.impl";
 import { DiscordMessageAuthorTypeORMEntity } from "./discord-message-author.typeorm.entity";
-import { DiscordMessageDTO } from "src/models/discord-message.dto";
 
 @Entity({
   name: "TB_DISCORD_MESSAGE",

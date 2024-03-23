@@ -1,6 +1,6 @@
 import { Controller, Delete, HttpCode, HttpStatus, Inject } from "@nestjs/common";
-import { DiscordService } from "../services/discord.service";
 import { DiscordServiceProvider } from "../providers/discord-service.provider";
+import { DiscordService } from "../services/discord.service";
 
 @Controller("/discord")
 export class DiscordController {

@@ -1,14 +1,14 @@
-import { Injectable, OnModuleInit, Inject } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { EnvironmentSettingsServiceProvider } from "src/modules/env/providers/environment-settings-service.provider";
 import { EnvironmentSettingsService } from "src/modules/env/services/environment-settings.service";
 import { EnvironmentSettingsServiceImpl } from "src/modules/env/services/impl/environment-settings.impl.service";
+import { DiscordDelimitationMessageTypeORMEntity } from "src/modules/messenger/entities/impl/discord-delimitation-message.typeorm.entity.impl";
+import { DiscordListenerTypeORMEntity } from "src/modules/messenger/entities/impl/discord-listener.typeorm.entity";
+import { DiscordMessageAuthorTypeORMEntity } from "src/modules/messenger/entities/impl/discord-message-author.typeorm.entity";
+import { DiscordMessageTypeORMEntity } from "src/modules/messenger/entities/impl/discord-message.typeorm.entity";
 import { LoggerUtils } from "src/utils/logger.utils";
 import { DataSource } from "typeorm";
 import { TypeORMLogger } from "../../logger/typeorm.logger";
-import { DiscordDelimitationMessageTypeORMEntity } from "src/modules/messenger/entities/impl/discord-delimitation-message.typeorm.entity.impl";
-import { DiscordMessageTypeORMEntity } from "src/modules/messenger/entities/impl/discord-message.typeorm.entity";
-import { DiscordMessageAuthorTypeORMEntity } from "src/modules/messenger/entities/impl/discord-message-author.typeorm.entity";
-import { DiscordListenerTypeORMEntity } from "src/modules/messenger/entities/impl/discord-listener.typeorm.entity";
 
 @Injectable()
 export class DatabaseServiceImpl implements OnModuleInit {

@@ -1,5 +1,5 @@
 import { MessengerBaseTypeORMEntity } from "src/modules/database/base/impl/messenger-base-typeorm.entity";
-import { Entity, Index, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
 import { DiscordListenerEntity } from "../discord-listener.entity";
 
 @Entity({

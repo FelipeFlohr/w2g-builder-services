@@ -1,8 +1,8 @@
+import { DiscordParameterTypeEnum } from "src/modules/discord/enums/discord-parameter-type.enum";
 import { DiscordGuildSlashCommandInteractionDTO } from "src/modules/discord/models/discord-guild-slash-command-interaction.dto";
 import { DiscordGuildSlashCommandDTO } from "src/modules/discord/models/discord-guild-slash-command.dto";
-import { MessengerService } from "../services/messenger.service";
-import { DiscordParameterTypeEnum } from "src/modules/discord/enums/discord-parameter-type.enum";
 import { DiscordSlashCommandParameterDTO } from "src/modules/discord/models/discord-slash-command-parameter.dto";
+import { MessengerService } from "../services/messenger.service";
 
 export class MarkDelimitationCommand extends DiscordGuildSlashCommandDTO {
   private readonly service: MessengerService;

@@ -1,4 +1,5 @@
-import { Injectable, OnModuleInit, Inject } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
+import { DiscordDelimitationMessageDTO } from "src/models/discord-demilitation-message.dto";
 import { DiscordMessageDTO } from "src/models/discord-message.dto";
 import { DiscordAMQPServiceProvider } from "src/modules/discord-amqp/providers/discord-amqp-service.provider";
 import { DiscordAMQPService } from "src/modules/discord-amqp/services/discord-amqp.service";
@@ -6,8 +7,14 @@ import { DiscordSlashCommandDTO } from "src/modules/discord/models/discord-slash
 import { DiscordServiceProvider } from "src/modules/discord/providers/discord-service.provider";
 import { DiscordService } from "src/modules/discord/services/discord.service";
 import { CollectionUtils } from "src/utils/collection.utils";
+import { LoggerUtils } from "src/utils/logger.utils";
 import { AddListenerCommand } from "../../commands/add-listener.command";
+import { MarkDelimitationCommand } from "../../commands/delimitation-message.command";
+import { RemoveListenerCommand } from "../../commands/remove-listener.command";
+import { DiscordDelimitationMessageEntity } from "../../entities/discord-delimitation-message.entity";
 import { DiscordListenerEntity } from "../../entities/discord-listener.entity";
+import { DelimitationMessageAlreadyExistError } from "../../errors/delimitation-message-already-exist.error";
+import { MessageNotFoundError } from "../../errors/message-not-found.error";
 import { OnMessageCreatedListener } from "../../listeners/on-message-created.listener";
 import { OnMessageDeletedListener } from "../../listeners/on-message-deleted.listener";
 import { OnMessageUpdatedListener } from "../../listeners/on-message-updated.listener";
@@ -18,13 +25,6 @@ import { DiscordDelimitationMessageRepository } from "../../repositories/discord
 import { DiscordListenerRepository } from "../../repositories/discord-listener.repository";
 import { DiscordMessageRepository } from "../../repositories/discord-message.repository";
 import { MessengerService } from "../messenger.service";
-import { DiscordDelimitationMessageEntity } from "../../entities/discord-delimitation-message.entity";
-import { DiscordDelimitationMessageDTO } from "src/models/discord-demilitation-message.dto";
-import { MarkDelimitationCommand } from "../../commands/delimitation-message.command";
-import { MessageNotFoundError } from "../../errors/message-not-found.error";
-import { DelimitationMessageAlreadyExistError } from "../../errors/delimitation-message-already-exist.error";
-import { LoggerUtils } from "src/utils/logger.utils";
-import { RemoveListenerCommand } from "../../commands/remove-listener.command";
 
 @Injectable()
 export class MessengerServiceImpl implements MessengerService, OnModuleInit {
@@ -54,10 +54,10 @@ export class MessengerServiceImpl implements MessengerService, OnModuleInit {
   }
 
   public async onModuleInit(): Promise<void> {
-    this.addMessagesListeners();
-    this.addSlashCommandToInteraction();
     const bootstrapMessages = await this.cacheAllMessages();
     await this.sendManyBootstrapMessages(bootstrapMessages);
+    this.addMessagesListeners();
+    this.addSlashCommandToInteraction();
   }
 
   public async listenerExistsByChannelIdAndGuildId(channelId: string, guildId: string): Promise<boolean> {

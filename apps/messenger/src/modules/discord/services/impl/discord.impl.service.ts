@@ -1,19 +1,20 @@
-import { Injectable, OnModuleInit, Inject } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import {
   Client,
-  NonThreadGuildBasedChannel,
-  TextChannel,
+  DiscordAPIError,
   Events,
   Guild,
-  DiscordAPIError,
-  PartialMessage,
   Message,
+  NonThreadGuildBasedChannel,
+  PartialMessage,
+  TextChannel,
 } from "discord.js";
 import { DiscordMessageDTO } from "src/models/discord-message.dto";
 import { EnvironmentSettingsServiceProvider } from "src/modules/env/providers/environment-settings-service.provider";
 import { EnvironmentSettingsService } from "src/modules/env/services/environment-settings.service";
 import { CollectionUtils } from "src/utils/collection.utils";
 import { LoggerUtils } from "src/utils/logger.utils";
+import { DiscordCommandError } from "../../base/discord-command.error";
 import { DiscordErrorCodeEnum } from "../../enums/discord-error-code.enum";
 import { IMessageListener } from "../../interfaces/message-listener.interface";
 import { DiscordChannelDTO } from "../../models/discord-channel.dto";
@@ -24,7 +25,6 @@ import { GuildFetchOptionsType } from "../../types/guild-fetch-options.type";
 import { MessageFetchOptionsType } from "../../types/message-fetch-options.type";
 import { DiscordService } from "../discord.service";
 import { DiscordJsHelper } from "./discord-js.helper";
-import { DiscordCommandError } from "../../base/discord-command.error";
 
 @Injectable()
 export class DiscordServiceImpl implements DiscordService, OnModuleInit {

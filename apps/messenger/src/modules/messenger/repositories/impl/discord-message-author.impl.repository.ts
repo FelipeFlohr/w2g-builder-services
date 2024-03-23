@@ -1,9 +1,9 @@
-import { MessengerBaseTypeORMRepository } from "src/modules/database/base/impl/messenger-base-typeorm.repository";
-import { DiscordMessageAuthorTypeORMEntity } from "../../entities/impl/discord-message-author.typeorm.entity";
 import { Inject, Injectable } from "@nestjs/common";
+import { MessengerBaseTypeORMRepository } from "src/modules/database/base/impl/messenger-base-typeorm.repository";
 import { DatabaseServiceProvider } from "src/modules/database/providers/database-service.provider";
 import { DatabaseService } from "src/modules/database/services/database.service";
 import { TypeUtils } from "src/utils/type.utils";
+import { DiscordMessageAuthorTypeORMEntity } from "../../entities/impl/discord-message-author.typeorm.entity";
 import { DiscordMessageAuthorRepository } from "../discord-message-author.repository";
 
 @Injectable()

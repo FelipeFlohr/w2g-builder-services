@@ -1,6 +1,6 @@
 import { DiscordMessageDTO } from "src/models/discord-message.dto";
-import { DiscordListenerEntity } from "../entities/discord-listener.entity";
 import { DiscordDelimitationMessageEntity } from "../entities/discord-delimitation-message.entity";
+import { DiscordListenerEntity } from "../entities/discord-listener.entity";
 
 export interface MessengerService {
   listenerExistsByChannelIdAndGuildId(channelId: string, guildId: string): Promise<boolean>;

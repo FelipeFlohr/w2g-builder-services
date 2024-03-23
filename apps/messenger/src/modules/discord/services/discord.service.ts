@@ -1,11 +1,11 @@
 import { DiscordMessageDTO } from "src/models/discord-message.dto";
+import { IMessageListener } from "../interfaces/message-listener.interface";
 import { DiscordChannelDTO } from "../models/discord-channel.dto";
 import { DiscordGuildInfoDTO } from "../models/discord-guild-info.dto";
 import { DiscordGuildDTO } from "../models/discord-guild.dto";
+import { DiscordSlashCommandDTO } from "../models/discord-slash-command.dto";
 import { GuildFetchOptionsType } from "../types/guild-fetch-options.type";
 import { MessageFetchOptionsType } from "../types/message-fetch-options.type";
-import { DiscordSlashCommandDTO } from "../models/discord-slash-command.dto";
-import { IMessageListener } from "../interfaces/message-listener.interface";
 
 export interface DiscordService {
   fetchGuilds(options?: GuildFetchOptionsType): Promise<Array<DiscordGuildInfoDTO>>;

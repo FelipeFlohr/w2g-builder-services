@@ -1,10 +1,10 @@
+import { DiscordMessageAuthorDTO } from "src/models/discord-message-author.dto";
 import { MessengerBaseTypeORMEntity } from "src/modules/database/base/impl/messenger-base-typeorm.entity";
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from "typeorm";
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { DiscordMessageAuthorTypeORMOptions } from "../../types/discord-message-author-typeorm-options.type";
 import { DiscordMessageAuthorEntity } from "../discord-message-author.entity";
 import { DiscordMessageEntity } from "../discord-message.entity";
 import { DiscordMessageTypeORMEntity } from "./discord-message.typeorm.entity";
-import { DiscordMessageAuthorTypeORMOptions } from "../../types/discord-message-author-typeorm-options.type";
-import { DiscordMessageAuthorDTO } from "src/models/discord-message-author.dto";
 
 @Entity({
   name: "TB_DISCORD_MESSAGE_AUTHOR",

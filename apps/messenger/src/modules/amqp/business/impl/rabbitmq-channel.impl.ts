@@ -1,3 +1,4 @@
+import { Channel } from "amqp-connection-manager";
 import { LoggerUtils } from "src/utils/logger.utils";
 import { AMQPExchangeTypeEnum } from "../../enums/amqp-exchange-type.enum";
 import { AssertExchangeOptions } from "../../types/assert-exchange-options.type";
@@ -10,10 +11,9 @@ import { AMQPExchange } from "../amqp-exchange";
 import { AMQPMessage } from "../amqp-message";
 import { AMQPQueue } from "../amqp-queue";
 import { RabbitMQBindingImpl } from "./rabbitmq-binding.impl";
-import { RabbitMQQueueImpl } from "./rabbitmq-queue.impl";
 import { RabbitMQExchangeImpl } from "./rabbitmq-exchange.impl";
 import { RabbitMQMessageImpl } from "./rabbitmq-message.impl";
-import { Channel } from "amqp-connection-manager";
+import { RabbitMQQueueImpl } from "./rabbitmq-queue.impl";
 
 export class RabbitMQChannelImpl implements AMQPChannel {
   public readonly confirm?: boolean;

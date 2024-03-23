@@ -13,16 +13,16 @@ import {
   SlashCommandBuilder,
   User,
 } from "discord.js";
-import { DiscordGuildInfoDTO } from "../../models/discord-guild-info.dto";
-import { TypeUtils } from "src/utils/type.utils";
-import { DiscordGuildDTO } from "../../models/discord-guild.dto";
-import { DiscordChannelDTO } from "../../models/discord-channel.dto";
-import { DiscordMessageDTO } from "src/models/discord-message.dto";
 import { DiscordMessageAuthorDTO } from "src/models/discord-message-author.dto";
-import { DiscordSlashCommandDTO } from "../../models/discord-slash-command.dto";
+import { DiscordMessageDTO } from "src/models/discord-message.dto";
+import { TypeUtils } from "src/utils/type.utils";
 import { DiscordParameterTypeEnum } from "../../enums/discord-parameter-type.enum";
-import { DiscordSlashCommandParameterDTO } from "../../models/discord-slash-command-parameter.dto";
+import { DiscordChannelDTO } from "../../models/discord-channel.dto";
+import { DiscordGuildInfoDTO } from "../../models/discord-guild-info.dto";
+import { DiscordGuildDTO } from "../../models/discord-guild.dto";
 import { DiscordSlashCommandInteractionDTO } from "../../models/discord-slash-command-interaction.dto";
+import { DiscordSlashCommandParameterDTO } from "../../models/discord-slash-command-parameter.dto";
+import { DiscordSlashCommandDTO } from "../../models/discord-slash-command.dto";
 
 export class DiscordJsHelper {
   private static readonly intents = [

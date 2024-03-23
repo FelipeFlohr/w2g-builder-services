@@ -1,14 +1,14 @@
-import { MessengerBaseTypeORMRepository } from "src/modules/database/base/impl/messenger-base-typeorm.repository";
-import { DiscordDelimitationMessageTypeORMEntity } from "../../entities/impl/discord-delimitation-message.typeorm.entity.impl";
 import { Inject, Injectable } from "@nestjs/common";
+import { DiscordDelimitationMessageDTO } from "src/models/discord-demilitation-message.dto";
+import { MessengerBaseTypeORMRepository } from "src/modules/database/base/impl/messenger-base-typeorm.repository";
 import { DatabaseServiceProvider } from "src/modules/database/providers/database-service.provider";
 import { DatabaseService } from "src/modules/database/services/database.service";
 import { TypeUtils } from "src/utils/type.utils";
-import { DiscordMessageRepository } from "../discord-message.repository";
+import { DiscordDelimitationMessageEntity } from "../../entities/discord-delimitation-message.entity";
+import { DiscordDelimitationMessageTypeORMEntity } from "../../entities/impl/discord-delimitation-message.typeorm.entity.impl";
 import { DiscordMessageRepositoryProvider } from "../../providers/discord-message-repository.provider";
 import { DiscordDelimitationMessageRepository } from "../discord-delimitation-message.repository";
-import { DiscordDelimitationMessageEntity } from "../../entities/discord-delimitation-message.entity";
-import { DiscordDelimitationMessageDTO } from "src/models/discord-demilitation-message.dto";
+import { DiscordMessageRepository } from "../discord-message.repository";
 
 @Injectable()
 export class DiscordDelimitationMessageRepositoryImpl

@@ -1,9 +1,9 @@
+import { DiscordDelimitationMessageDTO } from "src/models/discord-demilitation-message.dto";
 import { MessengerBaseTypeORMEntity } from "src/modules/database/base/impl/messenger-base-typeorm.entity";
-import { Entity, Index, PrimaryGeneratedColumn, OneToOne, JoinColumn, Column } from "typeorm";
+import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { DiscordDelimitationMessageEntity } from "../discord-delimitation-message.entity";
 import { DiscordMessageEntity } from "../discord-message.entity";
 import { DiscordMessageTypeORMEntity } from "./discord-message.typeorm.entity";
-import { DiscordDelimitationMessageDTO } from "src/models/discord-demilitation-message.dto";
 
 @Entity({
   name: "TB_DISCORD_DELIMITATION_MESSAGE",

@@ -1,6 +1,6 @@
 import { Controller, HttpCode, HttpStatus, Inject, Post } from "@nestjs/common";
-import { MessengerService } from "../services/messenger.service";
 import { MessengerServiceProvider } from "../providers/messenger-service.provider";
+import { MessengerService } from "../services/messenger.service";
 
 @Controller("/messenger")
 export class MessengerController {

@@ -1,13 +1,13 @@
-import { Injectable, OnModuleInit, Inject } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import amqp from "amqp-connection-manager";
 import { IAmqpConnectionManager } from "amqp-connection-manager/dist/types/AmqpConnectionManager";
 import { Channel } from "amqplib";
+import { EnvironmentSettingsServiceProvider } from "src/modules/env/providers/environment-settings-service.provider";
+import { EnvironmentSettingsService } from "src/modules/env/services/environment-settings.service";
 import { LoggerUtils } from "src/utils/logger.utils";
 import { AMQPChannel } from "../../business/amqp-channel";
 import { RabbitMQChannelImpl } from "../../business/impl/rabbitmq-channel.impl";
 import { AMQPService } from "../amqp.service";
-import { EnvironmentSettingsService } from "src/modules/env/services/environment-settings.service";
-import { EnvironmentSettingsServiceProvider } from "src/modules/env/providers/environment-settings-service.provider";
 
 @Injectable()
 export class RabbitMQServiceImpl implements AMQPService, OnModuleInit {

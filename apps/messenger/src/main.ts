@@ -1,10 +1,10 @@
+import { ValidationPipe } from "@nestjs/common";
 import { NestApplication, NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { LoggerUtils } from "./utils/logger.utils";
-import { ValidationPipe } from "@nestjs/common";
-import { ErrorHandlingUtils } from "./utils/error-handling.utils";
-import { EnvironmentSettingsServiceImpl } from "./modules/env/services/impl/environment-settings.impl.service";
 import { EnvironmentSettingsServiceProvider } from "./modules/env/providers/environment-settings-service.provider";
+import { EnvironmentSettingsServiceImpl } from "./modules/env/services/impl/environment-settings.impl.service";
+import { ErrorHandlingUtils } from "./utils/error-handling.utils";
+import { LoggerUtils } from "./utils/logger.utils";
 
 async function bootstrap() {
   const logger = LoggerUtils.from(NestApplication);

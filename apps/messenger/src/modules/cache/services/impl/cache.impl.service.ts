@@ -1,10 +1,10 @@
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { RedisClientType, RedisModules, RedisFunctions, RedisScripts, createClient } from "redis";
+import { RedisClientType, RedisFunctions, RedisModules, RedisScripts, createClient } from "redis";
+import { EnvironmentSettingsServiceProvider } from "src/modules/env/providers/environment-settings-service.provider";
 import { EnvironmentSettingsService } from "src/modules/env/services/environment-settings.service";
 import { LoggerUtils } from "src/utils/logger.utils";
 import { TypeUtils } from "src/utils/type.utils";
 import { CacheService } from "../cache.service";
-import { EnvironmentSettingsServiceProvider } from "src/modules/env/providers/environment-settings-service.provider";
 
 @Injectable()
 export class RedisCacheServiceImpl implements CacheService, OnModuleInit {

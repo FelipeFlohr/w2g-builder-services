@@ -1,6 +1,6 @@
+import { DiscordGuildSlashCommandInteractionDTO } from "src/modules/discord/models/discord-guild-slash-command-interaction.dto";
 import { DiscordGuildSlashCommandDTO } from "src/modules/discord/models/discord-guild-slash-command.dto";
 import { MessengerService } from "../services/messenger.service";
-import { DiscordGuildSlashCommandInteractionDTO } from "src/modules/discord/models/discord-guild-slash-command-interaction.dto";
 
 export class RemoveListenerCommand extends DiscordGuildSlashCommandDTO {
   private readonly service: MessengerService;

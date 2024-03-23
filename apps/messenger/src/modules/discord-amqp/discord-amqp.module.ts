@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
+import { AMQPModule } from "../amqp/amqp.module";
 import { DiscordAMQPServiceProvider } from "./providers/discord-amqp-service.provider";
 import { DiscordAMQPServiceImpl } from "./services/impl/discord-amqp.impl.service";
-import { AMQPModule } from "../amqp/amqp.module";
 
 @Module({
   providers: [

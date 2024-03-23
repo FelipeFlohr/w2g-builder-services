@@ -1,7 +1,7 @@
 import { Global, Module } from "@nestjs/common";
+import { EnvironmentSettingsModule } from "../env/environment-settings.module";
 import { AMQPServiceProvider } from "./providers/amqp-service.provider";
 import { RabbitMQServiceImpl } from "./services/impl/rabbitmq.impl.service";
-import { EnvironmentSettingsModule } from "../env/environment-settings.module";
 
 @Global()
 @Module({
