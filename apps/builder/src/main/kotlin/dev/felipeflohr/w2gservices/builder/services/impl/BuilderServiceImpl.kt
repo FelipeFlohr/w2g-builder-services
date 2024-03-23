@@ -4,6 +4,7 @@ import dev.felipeflohr.w2gservices.builder.business.BuilderBusiness
 import dev.felipeflohr.w2gservices.builder.business.impl.BuilderBusinessImpl
 import dev.felipeflohr.w2gservices.builder.dto.VideoReferenceDTO
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
+import dev.felipeflohr.w2gservices.builder.functions.virtualThread
 import dev.felipeflohr.w2gservices.builder.listeners.DiscordMessagesAMQPListener
 import dev.felipeflohr.w2gservices.builder.repositories.BuilderRepository
 import dev.felipeflohr.w2gservices.builder.services.BuilderService
@@ -12,11 +13,9 @@ import dev.felipeflohr.w2gservices.builder.services.DownloaderService
 import dev.felipeflohr.w2gservices.builder.services.MessageFileLogService
 import dev.felipeflohr.w2gservices.builder.services.MessageFileReferenceService
 import jakarta.annotation.PostConstruct
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import kotlin.concurrent.thread
@@ -48,7 +47,7 @@ class BuilderServiceImpl @Autowired constructor (
     }
 
     override suspend fun getVideoReferences(guildId: String): List<VideoReferenceDTO> {
-        val buildMessages = withContext(Dispatchers.IO) { repository.getBuildMessages(guildId) }
+        val buildMessages = virtualThread { repository.getBuildMessages(guildId) }
         val references = messageFileReferenceService.getAllByDiscordMessageIds(buildMessages.map { it.id })
         val logs = messageFileLogService.getAllByDiscordMessageIds(buildMessages.map { it.id })
 

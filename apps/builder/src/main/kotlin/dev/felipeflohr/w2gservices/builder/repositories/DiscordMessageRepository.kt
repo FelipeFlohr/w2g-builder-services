@@ -12,11 +12,6 @@ interface DiscordMessageRepository : JpaRepository<DiscordMessageEntity, Long>, 
     @Query("select (count(dme) > 0) from DiscordMessageEntity dme where dme.messageId = :messageId")
     fun existsByMessageId(messageId: String): Boolean
 
-    @Transactional
-    @Modifying
-    @Query("delete from DiscordMessageEntity where messageId = :messageId")
-    fun deleteByMessageId(messageId: String)
-
     @Query("select id from DiscordMessageEntity where messageId = :messageId")
     fun getMessageIdByDiscordMessageId(messageId: String): Long?
 
@@ -29,4 +24,11 @@ interface DiscordMessageRepository : JpaRepository<DiscordMessageEntity, Long>, 
     fun getAllDistinctGuildIds(): Set<String>
 
     fun getAllByMessageIdIn(messageIds: Collection<String>): List<DiscordMessageEntity>
+
+    @Modifying
+    @Transactional
+    fun deleteByMessageId(messageId: String)
+
+    @Query("select dme.author.id from DiscordMessageEntity dme where dme.messageId = :messageId")
+    fun getAuthorIdByMessageId(messageId: String): Long?
 }

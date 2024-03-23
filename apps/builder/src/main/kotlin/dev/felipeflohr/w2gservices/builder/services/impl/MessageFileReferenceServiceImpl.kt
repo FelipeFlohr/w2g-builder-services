@@ -16,6 +16,6 @@ class MessageFileReferenceServiceImpl @Autowired constructor (
     }
 
     override suspend fun getAllByDiscordMessageIds(ids: Collection<Long>): List<MessageFileReferenceEntity> = coroutineScope {
-        return@coroutineScope repository.getAllByDiscordMessageIdIn(ids)
+        repository.getAllByMessageIdsIn(ids)
     }
 }

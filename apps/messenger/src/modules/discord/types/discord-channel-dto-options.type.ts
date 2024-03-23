@@ -1,4 +1,4 @@
-export type DiscordChannelDTOOptions = {
+export type DiscordChannelDTOOptionsType = {
   readonly createdAt: Date;
   readonly id: string;
   readonly manageable: boolean;

@@ -14,4 +14,5 @@ interface DiscordMessageService {
     suspend fun getAllWithNoFileReference(): List<DiscordMessageEntity>
     suspend fun getAllDistinctGuildIds(): Set<String>
     suspend fun getAllByMessageIds(messageIds: Collection<String>): List<DiscordMessageEntity>
+    suspend fun getAuthorIdByMessageId(messageId: String): Long?
 }

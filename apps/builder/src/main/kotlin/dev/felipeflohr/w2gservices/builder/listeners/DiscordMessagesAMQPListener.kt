@@ -49,7 +49,7 @@ class DiscordMessagesAMQPListener @Autowired constructor(
         id = BOOTSTRAP_CONTAINER_NAME,
         queues = [MessagesAMQPConfiguration.MESSAGES_BOOTSTRAP],
         priority = BOOTSTRAP_LISTENER_PRIORITY,
-        concurrency = "1"
+        concurrency = "10"
     )
     private fun bootstrapMessage(message: Message<DiscordMessageDTO>) {
         runBlocking {

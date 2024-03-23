@@ -1,4 +1,4 @@
-export type DiscordMessageAuthorDTOOptions = {
+export type DiscordMessageAuthorDTOOptionsType = {
   readonly avatarPngUrl?: string;
   readonly bannerPngUrl?: string;
   readonly bot: boolean;
