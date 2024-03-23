@@ -152,7 +152,7 @@ export class DiscordJsHelper {
   }
 
   public async fetchMessageIfNotFetched(message: Message<boolean> | PartialMessage): Promise<Message<true>> {
-    if (!message.partial) {
+    if (message.content != "" && message.cleanContent != "") {
       return message as Message<true>;
     }
     return (await message.fetch()) as Message<true>;

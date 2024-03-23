@@ -54,8 +54,9 @@ class DiscordMessageServiceImpl @Autowired constructor (
     override suspend fun delete(message: DiscordMessageDTO) {
         virtualThread {
             if (repository.existsByMessageId(message.id)) {
+                val authorId: Long = getAuthorIdByMessageId(message.id)!!
                 repository.deleteByMessageId(message.id)
-                authorService.deleteByAuthorId(message.author.id)
+                authorService.deleteById(authorId)
             }
         }
     }
@@ -94,6 +95,12 @@ class DiscordMessageServiceImpl @Autowired constructor (
     override suspend fun getAllByMessageIds(messageIds: Collection<String>): List<DiscordMessageEntity> {
         return virtualThread {
             repository.getAllByMessageIdIn(messageIds)
+        }
+    }
+
+    override suspend fun getAuthorIdByMessageId(messageId: String): Long? {
+        return virtualThread {
+            repository.getAuthorIdByMessageId(messageId)
         }
     }
 }

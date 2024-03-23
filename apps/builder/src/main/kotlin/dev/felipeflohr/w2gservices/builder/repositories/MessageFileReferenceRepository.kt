@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface MessageFileReferenceRepository : JpaRepository<MessageFileReferenceEntity, Long> {
     @Query("from MessageFileReferenceEntity mfr where mfr.message.id in (:ids)")
-    fun getAllByDiscordMessageIdIn(ids: Collection<Long>): List<MessageFileReferenceEntity>
+    fun getAllByMessageIdsIn(ids: Collection<Long>): List<MessageFileReferenceEntity>
 }

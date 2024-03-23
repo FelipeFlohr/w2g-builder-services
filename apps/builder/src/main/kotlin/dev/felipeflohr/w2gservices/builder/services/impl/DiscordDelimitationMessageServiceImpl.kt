@@ -13,11 +13,8 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.stereotype.Service
 
 @Service
-class DiscordDelimitationMessageServiceImpl(
-    @Autowired
+class DiscordDelimitationMessageServiceImpl @Autowired constructor(
     private val messageService: DiscordMessageService,
-
-    @Autowired
     private val repository: DiscordDelimitationMessageRepository,
 ) : DiscordDelimitationMessageService {
     @Modifying
