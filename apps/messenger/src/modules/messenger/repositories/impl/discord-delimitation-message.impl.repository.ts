@@ -117,6 +117,13 @@ export class DiscordDelimitationMessageRepositoryImpl
     }
   }
 
+  public async getAll(): Promise<DiscordDelimitationMessageEntity[]> {
+    return await this.getRepository().find({
+      loadEagerRelations: true,
+      relationLoadStrategy: "join",
+    });
+  }
+
   private async getChannelIdAndGuildIdByDelimitationMessageId(
     id: number,
   ): Promise<DiscordDelimitationMessageTypeORMEntity | undefined> {

@@ -51,4 +51,8 @@ export class DiscordDelimitationMessageTypeORMEntity
     entity.message = DiscordMessageTypeORMEntity.fromDTO(delimitation.message);
     return entity;
   }
+
+  public toDTO(): DiscordDelimitationMessageDTO {
+    return new DiscordDelimitationMessageDTO(this.createdAt, this.message.toDTO());
+  }
 }

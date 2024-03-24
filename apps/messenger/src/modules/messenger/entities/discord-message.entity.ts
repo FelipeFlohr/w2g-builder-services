@@ -1,3 +1,4 @@
+import { DiscordMessageDTO } from "src/models/discord-message.dto";
 import { MessengerBaseEntity } from "src/modules/database/base/messenger-base.entity";
 import { DiscordDelimitationMessageEntity } from "./discord-delimitation-message.entity";
 import { DiscordMessageAuthorEntity } from "./discord-message-author.entity";
@@ -19,4 +20,5 @@ export interface DiscordMessageEntity extends MessengerBaseEntity<DiscordMessage
   channelId: string;
   delimitation?: DiscordDelimitationMessageEntity;
   messageCreatedAt: Date;
+  toDTO(): DiscordMessageDTO;
 }

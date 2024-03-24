@@ -56,6 +56,7 @@ export class MessengerServiceImpl implements MessengerService, OnModuleInit {
   public async onModuleInit(): Promise<void> {
     const bootstrapMessages = await this.cacheAllMessages();
     await this.sendManyBootstrapMessages(bootstrapMessages);
+    await this.sendManyDelimitationMessages();
     this.addMessagesListeners();
     this.addSlashCommandToInteraction();
   }
@@ -201,5 +202,14 @@ export class MessengerServiceImpl implements MessengerService, OnModuleInit {
       await this.discordAMQPService.sendBootstrapMessage(message);
     }
     this.logger.log(`Sent ${messages.length} bootstrap message(s).`);
+  }
+
+  private async sendManyDelimitationMessages(): Promise<void> {
+    const delimitations = await this.delimitationRepository.getAll();
+    const delimitationsDTO = delimitations.map((d) => d.toDTO());
+    await CollectionUtils.asyncForEach(
+      delimitationsDTO,
+      async (message) => await this.discordAMQPService.sendDelimitationMessage(message),
+    );
   }
 }

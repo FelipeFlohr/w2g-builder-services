@@ -1,3 +1,4 @@
+import { DiscordMessageAuthorDTO } from "src/models/discord-message-author.dto";
 import { MessengerBaseEntity } from "src/modules/database/base/messenger-base.entity";
 import { DiscordMessageEntity } from "./discord-message.entity";
 
@@ -15,4 +16,5 @@ export interface DiscordMessageAuthorEntity extends MessengerBaseEntity<DiscordM
   system: boolean;
   username: string;
   message: DiscordMessageEntity;
+  toDTO(): DiscordMessageAuthorDTO;
 }

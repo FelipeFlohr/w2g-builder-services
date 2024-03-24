@@ -150,4 +150,20 @@ export class DiscordMessageAuthorTypeORMEntity
       globalName: author.globalName,
     });
   }
+
+  public toDTO(): DiscordMessageAuthorDTO {
+    return new DiscordMessageAuthorDTO({
+      bot: this.bot,
+      createdAt: this.createdAt,
+      discriminator: this.discriminator,
+      displayName: this.displayName,
+      id: this.authorId,
+      system: this.system,
+      tag: this.tag,
+      username: this.username,
+      avatarPngUrl: this.avatarPngUrl,
+      bannerPngUrl: this.bannerPngUrl,
+      globalName: this.globalName,
+    });
+  }
 }

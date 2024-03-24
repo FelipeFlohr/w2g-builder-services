@@ -1,4 +1,4 @@
-package dev.felipeflohr.w2gservices.builder.controllers
+package dev.felipeflohr.w2gservices.builder.controllers.builder
 
 import dev.felipeflohr.w2gservices.builder.dto.VideoReferenceDTO
 

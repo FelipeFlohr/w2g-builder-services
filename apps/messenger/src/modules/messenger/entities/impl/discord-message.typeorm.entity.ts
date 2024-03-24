@@ -164,4 +164,23 @@ export class DiscordMessageTypeORMEntity
     entity.messageCreatedAt = message.createdAt;
     return entity;
   }
+
+  public toDTO(): DiscordMessageDTO {
+    return new DiscordMessageDTO({
+      author: this.author.toDTO(),
+      channelId: this.channelId,
+      cleanContent: this.cleanContent,
+      content: this.content,
+      createdAt: this.createdAt,
+      guildId: this.guildId,
+      hasThread: this.hasThread,
+      id: this.messageId,
+      pinnable: this.pinnable,
+      pinned: this.pinned,
+      system: this.system,
+      url: this.url,
+      applicationId: this.applicationId,
+      position: this.position,
+    });
+  }
 }

@@ -9,4 +9,5 @@ export interface DiscordDelimitationMessageRepository
   existsByMessageIdAndChannelIdAndGuildId(messageId: string, channelId: string, guildId: string): Promise<boolean>;
   save(delimitation: DiscordDelimitationMessageDTO): Promise<DiscordDelimitationMessageEntity>;
   getMessageUrlByChannelIdAndGuildId(channelId: string, guildId: string): Promise<string | undefined>;
+  getAll(): Promise<Array<DiscordDelimitationMessageEntity>>;
 }

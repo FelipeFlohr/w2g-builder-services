@@ -17,6 +17,7 @@ class DiscordMessageCustomRepositoryImpl(
         val querySql = """
             update DiscordMessageEntity
             set content = :content,
+            messageCreatedAt = :createdAt,
             pinned = :pinned,
             position = :position,
             system = :system,
@@ -28,6 +29,7 @@ class DiscordMessageCustomRepositoryImpl(
 
         val query = entityManager.createQuery(querySql)
         query.setParameter("content", message.content)
+        query.setParameter("createdAt", message.createdAt)
         query.setParameter("pinned", message.pinned)
         query.setParameter("position", message.position)
         query.setParameter("system", message.system)
