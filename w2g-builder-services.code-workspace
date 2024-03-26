@@ -27,6 +27,10 @@
 		{
 			"path": "apps/file-storage",
 			"name": "File Storage"
+		},
+		{
+			"path": "apps/frontend",
+			"name": "Front-end"
 		}
 	],
 	"settings": {}
