@@ -15,4 +15,5 @@ interface DiscordMessageService {
     suspend fun getAllDistinctGuildIds(): Set<String>
     suspend fun getAllByMessageIds(messageIds: Collection<String>): List<DiscordMessageEntity>
     suspend fun getAuthorIdByMessageId(messageId: String): Long?
+    suspend fun getDistinctGuildIds(): Set<String>
 }

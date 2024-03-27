@@ -2,6 +2,7 @@ package dev.felipeflohr.w2gservices.builder.services.impl
 
 import dev.felipeflohr.w2gservices.builder.business.BuilderBusiness
 import dev.felipeflohr.w2gservices.builder.business.impl.BuilderBusinessImpl
+import dev.felipeflohr.w2gservices.builder.dto.AvailableGuildDTO
 import dev.felipeflohr.w2gservices.builder.dto.VideoReferenceDTO
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 import dev.felipeflohr.w2gservices.builder.functions.virtualThread
@@ -12,6 +13,7 @@ import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
 import dev.felipeflohr.w2gservices.builder.services.DownloaderService
 import dev.felipeflohr.w2gservices.builder.services.MessageFileLogService
 import dev.felipeflohr.w2gservices.builder.services.MessageFileReferenceService
+import dev.felipeflohr.w2gservices.builder.services.MessengerService
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -28,6 +30,7 @@ class BuilderServiceImpl @Autowired constructor (
     private val messageFileLogService: MessageFileLogService,
     private val downloaderService: DownloaderService,
     private val amqpListener: DiscordMessagesAMQPListener,
+    private val messengerService: MessengerService,
 ) : BuilderService {
     private val business: BuilderBusiness = BuilderBusinessImpl()
 
@@ -53,6 +56,11 @@ class BuilderServiceImpl @Autowired constructor (
 
         business.populateVideoReferencesAndLogs(buildMessages, references, logs)
         return business.generateVideoReferencesFromBuildMessages(buildMessages)
+    }
+
+    override suspend fun getAvailableGuilds(): Set<AvailableGuildDTO> {
+        val guilds = messageService.getAllDistinctGuildIds()
+        return messengerService.getGuildsWithImageLink(guilds)
     }
 
     private suspend fun downloadReferencesOfMessagesWithoutReference(references: List<VideoReferenceDTO>) {

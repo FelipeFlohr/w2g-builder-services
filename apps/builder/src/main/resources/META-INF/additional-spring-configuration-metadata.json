@@ -6,9 +6,9 @@
       "description": "The address of the downloader application."
     },
     {
-      "name": "builder.file-storage.address",
+      "name": "builder.messenger.address",
       "type": "java.lang.String",
-      "description": "The address of the file storage application."
+      "description": "The address of the messenger application."
     }
   ]
 }

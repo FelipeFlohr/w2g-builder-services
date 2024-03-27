@@ -1,6 +1,7 @@
 import { DiscordMessageDTO } from "src/models/discord-message.dto";
 import { DiscordDelimitationMessageEntity } from "../entities/discord-delimitation-message.entity";
 import { DiscordListenerEntity } from "../entities/discord-listener.entity";
+import { GuildWithImageLinkDTO } from "../models/guild-with-image-link.dto";
 
 export interface MessengerService {
   listenerExistsByChannelIdAndGuildId(channelId: string, guildId: string): Promise<boolean>;
@@ -17,4 +18,5 @@ export interface MessengerService {
   ): Promise<DiscordDelimitationMessageEntity | undefined>;
   deleteDelimitationMessageByChannelIdAndGuildId(channelId: string, guildId: string): Promise<boolean>;
   getDelimitationMessageUrlByChannelIdAndGuildId(channelId: string, guildId: string): Promise<string | undefined>;
+  getGuildsWithImageLink(guildIds: Array<string>): Promise<Array<GuildWithImageLinkDTO>>;
 }

@@ -10,6 +10,9 @@ export class DiscordGuildDTO {
   public readonly ownerId: string;
   public readonly name: string;
   public readonly large: boolean;
+  public readonly iconPngUrl?: string;
+  public readonly iconJpegUrl?: string;
+  public readonly iconGifUrl?: string;
 
   public constructor(options: DiscordGuildDTOOptionsType) {
     this.applicationId = options.applicationId;
@@ -21,5 +24,8 @@ export class DiscordGuildDTO {
     this.ownerId = options.ownerId;
     this.name = options.name;
     this.large = options.large;
+    this.iconPngUrl = options.iconPngUrl;
+    this.iconJpegUrl = options.iconJpegUrl;
+    this.iconGifUrl = options.iconGifUrl;
   }
 }

@@ -18,6 +18,7 @@ import { MessageNotFoundError } from "../../errors/message-not-found.error";
 import { OnMessageCreatedListener } from "../../listeners/on-message-created.listener";
 import { OnMessageDeletedListener } from "../../listeners/on-message-deleted.listener";
 import { OnMessageUpdatedListener } from "../../listeners/on-message-updated.listener";
+import { GuildWithImageLinkDTO } from "../../models/guild-with-image-link.dto";
 import { DiscordDelimitationMessageRepositoryProvider } from "../../providers/discord-delimitation-message-repository.provider";
 import { DiscordListenerRepositoryProvider } from "../../providers/discord-listener-repository.provider";
 import { DiscordMessageRepositoryProvider } from "../../providers/discord-message-repository.provider";
@@ -123,6 +124,17 @@ export class MessengerServiceImpl implements MessengerService, OnModuleInit {
     guildId: string,
   ): Promise<string | undefined> {
     return await this.delimitationRepository.getMessageUrlByChannelIdAndGuildId(channelId, guildId);
+  }
+
+  public async getGuildsWithImageLink(guildIds: Array<string>): Promise<Array<GuildWithImageLinkDTO>> {
+    const res = await CollectionUtils.asyncMap(guildIds, async (id) => {
+      const guild = await this.discordService.fetchGuildById(id);
+      const imageUrl = guild?.iconPngUrl ?? guild?.iconJpegUrl ?? guild?.iconGifUrl;
+      if (guild && imageUrl) {
+        return new GuildWithImageLinkDTO(guild.name, id, imageUrl);
+      }
+    });
+    return res.filter((val) => val != null) as Array<GuildWithImageLinkDTO>;
   }
 
   private addMessagesListeners(): void {

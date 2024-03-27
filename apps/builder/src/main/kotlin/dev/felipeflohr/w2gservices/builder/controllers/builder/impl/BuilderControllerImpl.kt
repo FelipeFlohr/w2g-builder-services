@@ -1,6 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.controllers.builder.impl
 
 import dev.felipeflohr.w2gservices.builder.controllers.builder.BuilderController
+import dev.felipeflohr.w2gservices.builder.dto.AvailableGuildDTO
 import dev.felipeflohr.w2gservices.builder.dto.VideoReferenceDTO
 import dev.felipeflohr.w2gservices.builder.services.BuilderService
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,8 +15,13 @@ import org.springframework.web.bind.annotation.RestController
 class BuilderControllerImpl @Autowired constructor (
     private val service: BuilderService
 ) : BuilderController {
-    @GetMapping("/{guildId}")
+    @GetMapping("/references/{guildId}")
     override suspend fun getVideoReferences(@PathVariable guildId: String): List<VideoReferenceDTO> {
         return service.getVideoReferences(guildId)
+    }
+
+    @GetMapping("/guilds")
+    override suspend fun getAvailableGuilds(): Set<AvailableGuildDTO> {
+        return service.getAvailableGuilds()
     }
 }

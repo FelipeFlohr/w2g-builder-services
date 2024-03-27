@@ -103,4 +103,10 @@ class DiscordMessageServiceImpl @Autowired constructor (
             repository.getAuthorIdByMessageId(messageId)
         }
     }
+
+    override suspend fun getDistinctGuildIds(): Set<String> {
+        return virtualThread {
+            repository.getDistinctGuildIds()
+        }
+    }
 }

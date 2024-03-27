@@ -81,6 +81,9 @@ export class DiscordJsHelper {
       name: guild.name,
       ownerId: guild.ownerId,
       applicationId: guild.ownerId,
+      iconGifUrl: TypeUtils.parseNullToUndefined(guild.iconURL({ extension: "gif", size: 512 })),
+      iconJpegUrl: TypeUtils.parseNullToUndefined(guild.iconURL({ extension: "jpeg", size: 512 })),
+      iconPngUrl: TypeUtils.parseNullToUndefined(guild.iconURL({ extension: "png", size: 512 })),
     });
   }
 

@@ -2,7 +2,7 @@ package dev.felipeflohr.w2gservices.builder.services.impl
 
 import dev.felipeflohr.w2gservices.builder.business.DownloaderBusiness
 import dev.felipeflohr.w2gservices.builder.business.impl.DownloaderBusinessImpl
-import dev.felipeflohr.w2gservices.builder.configurations.DownloaderWebClientConfiguration
+import dev.felipeflohr.w2gservices.builder.configurations.WebClientConfiguration
 import dev.felipeflohr.w2gservices.builder.dto.DownloaderVideoBatchResponseDTO
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 import dev.felipeflohr.w2gservices.builder.entities.MessageFileLogEntity
@@ -22,8 +22,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @Service
 class DownloaderServiceImpl @Autowired constructor(
     private val repository: DownloaderRepository,
-    @Qualifier(DownloaderWebClientConfiguration.DOWNLOADER_WEB_CLIENT_BEAN_NAME)
-    private val downloaderWebClient: WebClient,
+    @Qualifier(WebClientConfiguration.DOWNLOADER_WEB_CLIENT_BEAN_NAME) private val downloaderWebClient: WebClient,
     private val messageFileReferenceService: MessageFileReferenceService,
     private val messageFileLogService: MessageFileLogService
 ) : DownloaderService {

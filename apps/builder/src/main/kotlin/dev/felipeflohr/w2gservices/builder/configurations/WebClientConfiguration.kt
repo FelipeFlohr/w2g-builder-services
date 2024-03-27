@@ -10,17 +10,27 @@ import reactor.netty.http.client.HttpClient
 import java.time.Duration
 
 @Configuration
-class DownloaderWebClientConfiguration(
+class WebClientConfiguration(
     @Autowired
     private val env: Environment
 ) {
     companion object {
         const val DOWNLOADER_WEB_CLIENT_BEAN_NAME = "downloaderWebClient"
+        const val MESSENGER_WEB_CLIENT_BEAN_NAME = "messengerWebClient"
     }
 
     @Bean(name = [DOWNLOADER_WEB_CLIENT_BEAN_NAME])
     fun downloaderWebClient(builder: WebClient.Builder): WebClient {
-        val envProperty = env.getProperty("builder.downloader.address") ?: throw IllegalArgumentException()
+        return createWebClient(builder, "builder.downloader.address")
+    }
+
+    @Bean(name = [MESSENGER_WEB_CLIENT_BEAN_NAME])
+    fun messengerWebClient(builder: WebClient.Builder): WebClient {
+        return createWebClient(builder, "builder.messenger.address")
+    }
+
+    private fun createWebClient(builder: WebClient.Builder, addressEnvProperty: String): WebClient {
+        val envProperty = env.getProperty(addressEnvProperty) ?: throw IllegalArgumentException()
         return builder
             .baseUrl(envProperty)
             .clientConnector(ReactorClientHttpConnector(createHttpClient()))

@@ -8,4 +8,7 @@ export type DiscordGuildDTOOptionsType = {
   readonly ownerId: string;
   readonly name: string;
   readonly large: boolean;
+  readonly iconPngUrl?: string;
+  readonly iconJpegUrl?: string;
+  readonly iconGifUrl?: string;
 };

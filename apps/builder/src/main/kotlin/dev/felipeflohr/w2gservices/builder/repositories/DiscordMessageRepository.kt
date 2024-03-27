@@ -31,4 +31,7 @@ interface DiscordMessageRepository : JpaRepository<DiscordMessageEntity, Long>, 
 
     @Query("select dme.author.id from DiscordMessageEntity dme where dme.messageId = :messageId")
     fun getAuthorIdByMessageId(messageId: String): Long?
+
+    @Query("select distinct dme.guildId from DiscordMessageEntity dme")
+    fun getDistinctGuildIds(): Set<String>
 }
