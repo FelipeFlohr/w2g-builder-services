@@ -5,7 +5,19 @@
   </header>
   <div class="w-full h-full flex flex-col items-center justify-center">
     <nav class="w-4/5 h-4/5">
-      test
+      <div class="w-full h-full flex flex-col items-center justify-center">
+        @if (this.isLoadingGuilds()) {
+          <div class="w-full h-full flex flex-col items-center justify-center">
+            <mat-spinner color="warm" mode="indeterminate"></mat-spinner>
+          </div>
+        } @else if (!this.isLoadingGuilds() && this.guilds().length === 0) {
+          <span>No guilds found.</span>
+        } @else {
+          @for (guild of this.guilds(); track $index) {
+            <guild-item [guildId]="guild.guildId" [name]="guild.name" [url]="guild.url" />
+          }
+        }
+      </div>
     </nav>
   </div>
 </div>

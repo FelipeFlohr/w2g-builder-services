@@ -1,8 +1,5 @@
-import { Injectable } from "@angular/core";
+import { GuildInfoDTO } from "../models/guild-info.dto";
 
-@Injectable({
-  providedIn: "root",
-})
-export class GuildSelectorService {
-  public constructor() {}
+export interface GuildSelectorService {
+  getGuilds(): Promise<Array<GuildInfoDTO>>;
 }
