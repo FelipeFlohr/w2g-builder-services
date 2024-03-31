@@ -1,8 +1,8 @@
 import { HttpClient } from "@angular/common/http";
 import { Inject, Injectable } from "@angular/core";
 import { environment } from "../../../../environments/environment";
+import { GuildInfoDTO } from "../../../../models/guild-info.dto";
 import { GuildSelectorRoutes } from "../../data/guild-selector-routes";
-import { GuildInfoDTO } from "../../models/guild-info.dto";
 import { GuildInfoType } from "../../types/guild-info.type";
 import { GuildSelectorService } from "../guild-selector.service";
 

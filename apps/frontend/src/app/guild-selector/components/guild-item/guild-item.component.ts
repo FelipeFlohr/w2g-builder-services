@@ -1,19 +1,15 @@
 import { Component, Input } from "@angular/core";
+import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
+import { GuildInfoDTO } from "../../../../models/guild-info.dto";
 
 @Component({
   selector: "guild-item",
   standalone: true,
-  imports: [],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: "./guild-item.component.html",
   styleUrl: "./guild-item.component.css",
 })
 export class GuildItemComponent {
   @Input({ required: true })
-  public guildId!: string;
-
-  @Input({ required: true })
-  public name!: string;
-
-  @Input({ required: false })
-  public url: string | undefined;
+  public guildInfo!: GuildInfoDTO;
 }

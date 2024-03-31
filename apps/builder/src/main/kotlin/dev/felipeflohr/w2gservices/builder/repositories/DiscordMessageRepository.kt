@@ -20,8 +20,13 @@ interface DiscordMessageRepository : JpaRepository<DiscordMessageEntity, Long>, 
 
     fun getAllByFileReferencesEmptyAndFileLogsEmpty(): List<DiscordMessageEntity>
 
-    @Query("select distinct guildId from DiscordMessageEntity")
-    fun getAllDistinctGuildIds(): Set<String>
+    @Query("""
+        select distinct dme.channelId
+        from DiscordDelimitationMessageEntity ddm
+        inner join ddm.message dme
+        where dme.guildId = :guildId
+    """)
+    fun getAllDistinctChannelIdsByGuildId(guildId: String): Set<String>
 
     fun getAllByMessageIdIn(messageIds: Collection<String>): List<DiscordMessageEntity>
 
@@ -34,4 +39,11 @@ interface DiscordMessageRepository : JpaRepository<DiscordMessageEntity, Long>, 
 
     @Query("select distinct dme.guildId from DiscordMessageEntity dme")
     fun getDistinctGuildIds(): Set<String>
+
+//    @Transactional
+//    @Modifying
+//    fun updateAndFlush(message: DiscordMessageDTO): DiscordMessageEntity? {
+//        update(message)
+//        return getByMessageId(message.id)
+//    }
 }

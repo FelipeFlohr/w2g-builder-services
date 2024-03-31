@@ -41,4 +41,11 @@ class DiscordDelimitationMessageEntity (
             )
         }
     }
+
+    fun toDTO(): DiscordDelimitationMessageDTO {
+        return DiscordDelimitationMessageDTO(
+            message = message.toDTO(),
+            createdAt = delimitationCreatedAt
+        )
+    }
 }

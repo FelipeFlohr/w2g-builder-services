@@ -1,23 +1,21 @@
-<div class="bg-gray-800 text-white flex flex-col w-full h-full">
-  <header class="w-full flex items-center justify-center flex-col mt-8">
-    <h1 class="text-5xl mb-3">Watch2Gether Builder</h1>
-    <h3 class="text-3xl">Select your guild:</h3>
-  </header>
-  <div class="w-full h-full flex flex-col items-center justify-center">
-    <nav class="w-4/5 h-4/5">
-      <div class="w-full h-full flex flex-col items-center justify-center">
-        @if (this.isLoadingGuilds()) {
-          <div class="w-full h-full flex flex-col items-center justify-center">
-            <mat-spinner color="warm" mode="indeterminate"></mat-spinner>
-          </div>
-        } @else if (!this.isLoadingGuilds() && this.guilds().length === 0) {
-          <span>No guilds found.</span>
-        } @else {
-          @for (guild of this.guilds(); track $index) {
-            <guild-item [guildId]="guild.guildId" [name]="guild.name" [url]="guild.url" />
-          }
+<header class="w-full flex items-center justify-center flex-col mt-8">
+  <h1 class="text-5xl mb-3">Watch2Gether Builder</h1>
+  <h3 class="text-3xl">Select your guild:</h3>
+</header>
+<div class="w-full h-full flex flex-col items-center justify-center">
+  <nav class="w-4/5 h-3/5 overflow-auto">
+    <div class="w-full h-full flex flex-wrap items-center justify-center">
+      @if (this.isLoadingGuilds()) {
+        <div class="w-full h-full flex flex-col items-center justify-center">
+          <mat-spinner color="warm" mode="indeterminate"></mat-spinner>
+        </div>
+      } @else if (!this.isLoadingGuilds() && this.guilds().length === 0) {
+        <span>No guilds found.</span>
+      } @else {
+        @for (guild of this.guilds(); track $index) {
+          <guild-item [guildInfo]="guild" />
         }
-      </div>
-    </nav>
-  </div>
+      }
+    </div>
+  </nav>
 </div>

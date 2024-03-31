@@ -1,6 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.entities
 
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
+import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageAuthorDTO
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -49,4 +50,24 @@ class DiscordMessageAuthorEntity(
 
     @OneToOne(mappedBy = "author")
     var message: DiscordMessageEntity?,
-) : BuilderBaseEntity()
+) : BuilderBaseEntity() {
+    override fun toString(): String {
+        return "DiscordMessageAuthorEntity(id=$id, avatarPngUrl=$avatarPngUrl, bannerPngUrl=$bannerPngUrl, bot=$bot, autCreatedAt=$autCreatedAt, displayName='$displayName', globalName=$globalName, authorId='$authorId', system=$system, username='$username', message=$message)"
+    }
+
+    fun toDTO(): DiscordMessageAuthorDTO {
+        return DiscordMessageAuthorDTO(
+            avatarPngUrl = avatarPngUrl,
+            bannerPngUrl = bannerPngUrl,
+            bot = bot,
+            username = username,
+            id = authorId,
+            tag = "",
+            createdAt = autCreatedAt,
+            discriminator = "",
+            globalName = globalName,
+            displayName = displayName,
+            system = system
+        )
+    }
+}

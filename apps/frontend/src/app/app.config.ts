@@ -1,9 +1,13 @@
 import { HttpClientModule } from "@angular/common/http";
 import { ApplicationConfig, importProvidersFrom } from "@angular/core";
-import { provideRouter } from "@angular/router";
+import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";
+import { provideRouter, withComponentInputBinding, withRouterConfig } from "@angular/router";
 import { routes } from "./app.routes";
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), importProvidersFrom(HttpClientModule), provideAnimationsAsync()],
+  providers: [
+    provideRouter(routes, withComponentInputBinding(), withRouterConfig({ paramsInheritanceStrategy: "always" })),
+    importProvidersFrom(HttpClientModule),
+    provideAnimationsAsync(),
+  ],
 };

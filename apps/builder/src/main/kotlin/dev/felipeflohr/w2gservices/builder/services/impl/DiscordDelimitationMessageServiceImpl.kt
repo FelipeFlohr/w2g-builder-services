@@ -21,11 +21,7 @@ class DiscordDelimitationMessageServiceImpl @Autowired constructor(
     @Transactional
     override suspend fun saveDelimitationMessage(delimitation: DiscordDelimitationMessageDTO): Unit = coroutineScope {
         val persistedMessage = messageService.getByMessageId(delimitation.message.id)
-        if (persistedMessage != null) {
-            virtualThread {
-                repository.deleteByMessageId(persistedMessage.id as Long)
-            }
-        }
+
         val entity = if (persistedMessage != null) {
             DiscordDelimitationMessageEntity(
                 id = null,
@@ -40,7 +36,7 @@ class DiscordDelimitationMessageServiceImpl @Autowired constructor(
         }
 
         virtualThread {
-            repository.save(entity)
+            repository.upsert(entity)
         }
     }
 }

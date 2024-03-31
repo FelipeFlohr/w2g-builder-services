@@ -1,4 +1,4 @@
-import { GuildInfoType } from "../types/guild-info.type";
+import { GuildInfoType } from "../app/guild-selector/types/guild-info.type";
 
 export class GuildInfoDTO {
   public readonly name: string;

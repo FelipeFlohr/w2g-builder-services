@@ -59,4 +59,8 @@ data class DiscordMessageDTO(
         result = 31 * result + id.hashCode()
         return result
     }
+
+    override fun toString(): String {
+        return "DiscordMessageDTO(applicationId=$applicationId, author=$author, cleanContent='$cleanContent', content='$content', createdAt=$createdAt, hasThread=$hasThread, id='$id', pinnable=$pinnable, pinned=$pinned, position=$position, system=$system, url='$url', guildId='$guildId', channelId='$channelId', deleted=$deleted)"
+    }
 }

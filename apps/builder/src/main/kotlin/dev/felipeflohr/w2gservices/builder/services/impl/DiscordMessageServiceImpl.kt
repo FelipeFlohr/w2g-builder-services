@@ -1,6 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.services.impl
 
 import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
+import dev.felipeflohr.w2gservices.builder.dto.GuildAndChannelDTO
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 import dev.felipeflohr.w2gservices.builder.functions.virtualThread
 import dev.felipeflohr.w2gservices.builder.repositories.DiscordMessageRepository
@@ -10,8 +11,6 @@ import dev.felipeflohr.w2gservices.builder.services.DownloaderService
 import kotlinx.coroutines.coroutineScope
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.Collections
-import kotlin.collections.ArrayList
 
 @Service
 class DiscordMessageServiceImpl @Autowired constructor (
@@ -19,17 +18,8 @@ class DiscordMessageServiceImpl @Autowired constructor (
     private val authorService: DiscordMessageAuthorService,
     private val downloaderService: DownloaderService
 ) : DiscordMessageService {
-    private val fetchedGuildIds: MutableList<String> = Collections.synchronizedList(ArrayList())
-
-    override suspend fun bootstrapMessage(message: DiscordMessageDTO) = coroutineScope {
-        if (!fetchedGuildIds.contains(message.guildId)) {
-            fetchedGuildIds.addLast(message.guildId)
-            val messagesToDelete = repository.getMessagesToDeleteByGuildId(message.guildId)
-            repository.deleteAllById(messagesToDelete.map { it.id })
-            authorService.deleteByIds(messagesToDelete.map { it.authorId })
-        }
-
-        save(message)
+    override suspend fun bootstrapMessage(message: DiscordMessageDTO) {
+        upsert(message)
     }
 
     override suspend fun save(message: DiscordMessageDTO) {
@@ -64,7 +54,32 @@ class DiscordMessageServiceImpl @Autowired constructor (
     override suspend fun update(message: DiscordMessageDTO) {
         virtualThread {
             authorService.updateAuthor(message.author)
-            repository.updateMessage(message)
+            repository.update(message)
+        }
+    }
+
+    override suspend fun updateAndFlush(message: DiscordMessageDTO): DiscordMessageEntity? {
+        return virtualThread {
+            authorService.updateAuthor(message.author)
+            repository.updateAndFlush(message)
+        }
+    }
+
+    override suspend fun upsert(message: DiscordMessageDTO) {
+        return virtualThread {
+            if (repository.existsByMessageId(message.id)) {
+                update(message)
+            }
+            save(message)
+        }
+    }
+
+    override suspend fun upsertAndFlush(message: DiscordMessageDTO): DiscordMessageEntity {
+        return virtualThread {
+            if (repository.existsByMessageId(message.id)) {
+                updateAndFlush(message)!!
+            }
+            saveAndFlush(message)
         }
     }
 
@@ -86,9 +101,9 @@ class DiscordMessageServiceImpl @Autowired constructor (
         }
     }
 
-    override suspend fun getAllDistinctGuildIds(): Set<String> {
+    override suspend fun getAllDistinctGuildIdsAndChannelIds(): Set<GuildAndChannelDTO> {
         return virtualThread {
-            repository.getAllDistinctGuildIds()
+            repository.getAllDistinctGuildIdsAndChannelIds()
         }
     }
 
@@ -107,6 +122,24 @@ class DiscordMessageServiceImpl @Autowired constructor (
     override suspend fun getDistinctGuildIds(): Set<String> {
         return virtualThread {
             repository.getDistinctGuildIds()
+        }
+    }
+
+    override suspend fun getDistinctChannelIdsByGuildId(guildId: String): Set<String> {
+        return virtualThread {
+            repository.getAllDistinctChannelIdsByGuildId(guildId)
+        }
+    }
+
+    override suspend fun existsByMessageId(id: String): Boolean {
+        return virtualThread {
+            repository.existsByMessageId(id)
+        }
+    }
+
+    override suspend fun getIdByMessageId(messageId: String): Long? {
+        return virtualThread {
+            repository.getMessageIdByDiscordMessageId(messageId)
         }
     }
 }

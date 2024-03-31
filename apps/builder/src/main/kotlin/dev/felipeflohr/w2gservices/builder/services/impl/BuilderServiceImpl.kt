@@ -2,7 +2,9 @@ package dev.felipeflohr.w2gservices.builder.services.impl
 
 import dev.felipeflohr.w2gservices.builder.business.BuilderBusiness
 import dev.felipeflohr.w2gservices.builder.business.impl.BuilderBusinessImpl
+import dev.felipeflohr.w2gservices.builder.dto.AvailableChannelDTO
 import dev.felipeflohr.w2gservices.builder.dto.AvailableGuildDTO
+import dev.felipeflohr.w2gservices.builder.dto.GuildAndChannelIdsDTO
 import dev.felipeflohr.w2gservices.builder.dto.VideoReferenceDTO
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 import dev.felipeflohr.w2gservices.builder.functions.virtualThread
@@ -49,8 +51,8 @@ class BuilderServiceImpl @Autowired constructor (
         }
     }
 
-    override suspend fun getVideoReferences(guildId: String): List<VideoReferenceDTO> {
-        val buildMessages = virtualThread { repository.getBuildMessages(guildId) }
+    override suspend fun getVideoReferences(guildId: String, channelId: String): List<VideoReferenceDTO> {
+        val buildMessages = virtualThread { repository.getBuildMessages(guildId, channelId) }
         val references = messageFileReferenceService.getAllByDiscordMessageIds(buildMessages.map { it.id })
         val logs = messageFileLogService.getAllByDiscordMessageIds(buildMessages.map { it.id })
 
@@ -59,8 +61,14 @@ class BuilderServiceImpl @Autowired constructor (
     }
 
     override suspend fun getAvailableGuilds(): Set<AvailableGuildDTO> {
-        val guilds = messageService.getAllDistinctGuildIds()
-        return messengerService.getGuildsWithImageLink(guilds)
+        val guilds = messageService.getAllDistinctGuildIdsAndChannelIds()
+        val guildIds = guilds.map { it.guildId }
+        return messengerService.getGuildsWithImageLink(guildIds)
+    }
+
+    override suspend fun getAvailableChannels(guildId: String): Set<AvailableChannelDTO> {
+        val channels = messageService.getDistinctChannelIdsByGuildId(guildId)
+        return messengerService.getChannelNames(GuildAndChannelIdsDTO(guildId, channels))
     }
 
     private suspend fun downloadReferencesOfMessagesWithoutReference(references: List<VideoReferenceDTO>) {
@@ -75,10 +83,10 @@ class BuilderServiceImpl @Autowired constructor (
 
     private suspend fun getVideoReferencesForEveryGuild(): Map<String, List<VideoReferenceDTO>> = coroutineScope {
         val res: MutableMap<String, List<VideoReferenceDTO>> = HashMap()
-        val guilds = messageService.getAllDistinctGuildIds()
+        val guilds = messageService.getAllDistinctGuildIdsAndChannelIds()
         guilds.forEach { guild ->
             async {
-                res[guild] = getVideoReferences(guild)
+                res[guild.guildId] = getVideoReferences(guild.guildId, guild.channelId)
             }.await()
         }
 

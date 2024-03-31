@@ -1,1 +1,10 @@
-<p>guild-item works!</p>
+<div class="w-40 border-2 border-white bg-gray-800 rounded-lg hover:cursor-pointer hover:scale-125 transition-all shadow-lg shadow-slate-900"
+  role="link"
+  [routerLink]="['/channelselector', this.guildInfo]">
+  <div class="flex flex-col items-center justiy-center p-4">
+    <img class="rounded-full" [src]="this.guildInfo.url" alt="Guild icon" sizes="512">
+    <header class="break-all">
+      <h1>{{ this.guildInfo.name }}</h1>
+    </header>
+  </div>
+</div>

@@ -3,7 +3,9 @@ package dev.felipeflohr.w2gservices.builder.services.impl
 import dev.felipeflohr.w2gservices.builder.business.MessengerBusiness
 import dev.felipeflohr.w2gservices.builder.business.impl.MessengerBusinessImpl
 import dev.felipeflohr.w2gservices.builder.configurations.WebClientConfiguration
+import dev.felipeflohr.w2gservices.builder.dto.AvailableChannelDTO
 import dev.felipeflohr.w2gservices.builder.dto.AvailableGuildDTO
+import dev.felipeflohr.w2gservices.builder.dto.GuildAndChannelIdsDTO
 import dev.felipeflohr.w2gservices.builder.services.MessengerService
 import dev.felipeflohr.w2gservices.builder.utils.LoggerUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,6 +25,14 @@ class MessengerServiceImpl @Autowired constructor (
         if (res.statusCode.isError || res.body == null) {
             logger.error("Request returned ${res.statusCode.value()} | ${res.body.toString()}")
             return emptySet()
+        }
+        return res.body!!.toSet()
+    }
+
+    override suspend fun getChannelNames(channels: GuildAndChannelIdsDTO): Set<AvailableChannelDTO> {
+        val res = business.getChannelNames(channels)
+        if (res.statusCode.isError || res.body == null) {
+            logger.error("Request returned ${res.statusCode.value()} | ${res.body.toString()}")
         }
         return res.body!!.toSet()
     }

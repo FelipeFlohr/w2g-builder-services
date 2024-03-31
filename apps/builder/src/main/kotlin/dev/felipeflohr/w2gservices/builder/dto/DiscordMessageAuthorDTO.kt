@@ -34,4 +34,8 @@ data class DiscordMessageAuthorDTO(
             message = null,
         )
     }
+
+    override fun toString(): String {
+        return "DiscordMessageAuthorDTO(avatarPngUrl=$avatarPngUrl, bannerPngUrl=$bannerPngUrl, bot=$bot, createdAt=$createdAt, discriminator='$discriminator', displayName='$displayName', globalName=$globalName, id='$id', tag='$tag', system=$system, username='$username')"
+    }
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from "@angular/core";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { GuildInfoDTO } from "../../../models/guild-info.dto";
 import { GuildItemComponent } from "../components/guild-item/guild-item.component";
-import { GuildInfoDTO } from "../models/guild-info.dto";
 import { GuildSelectorService } from "../services/guild-selector.service";
 import { GuildSelectorServiceImpl } from "../services/impl/guild-selector.impl.service";
 

@@ -27,9 +27,8 @@ class DiscordMessagesAMQPListener @Autowired constructor(
         const val CREATE_CONTAINER_NAME = "createMessagesListener"
         const val UPDATED_CONTAINER_NAME = "updatedMessagesListener"
         const val DELETED_CONTAINER_NAME = "deletedMessagesListener"
-        private const val VIRTUAL_THREAD_EXECUTOR = "#{virtualThreadTaskExecutor}"
-        private const val BOOTSTRAP_LISTENER_PRIORITY = "1000"
-        private const val DELIMITATION_LISTENER_PRIORITY = "100"
+        private const val BOOTSTRAP_LISTENER_PRIORITY = "100"
+        private const val DELIMITATION_LISTENER_PRIORITY = "1000"
         private val queues = listOf(
             MessagesAMQPConfiguration.MESSAGES_BOOTSTRAP,
             MessagesAMQPConfiguration.MESSAGES_DELIMITATION,
@@ -49,7 +48,6 @@ class DiscordMessagesAMQPListener @Autowired constructor(
         id = BOOTSTRAP_CONTAINER_NAME,
         queues = [MessagesAMQPConfiguration.MESSAGES_BOOTSTRAP],
         priority = BOOTSTRAP_LISTENER_PRIORITY,
-        concurrency = "10"
     )
     private fun bootstrapMessage(message: Message<DiscordMessageDTO>) {
         runBlocking {
@@ -61,7 +59,6 @@ class DiscordMessagesAMQPListener @Autowired constructor(
         id = DELIMITATION_CONTAINER_NAME,
         queues = [MessagesAMQPConfiguration.MESSAGES_DELIMITATION],
         priority = DELIMITATION_LISTENER_PRIORITY,
-        executor = VIRTUAL_THREAD_EXECUTOR
     )
     private fun delimitationMessage(message: Message<DiscordDelimitationMessageDTO>) {
         runBlocking {

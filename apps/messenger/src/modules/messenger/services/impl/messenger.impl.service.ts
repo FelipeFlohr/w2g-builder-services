@@ -18,6 +18,8 @@ import { MessageNotFoundError } from "../../errors/message-not-found.error";
 import { OnMessageCreatedListener } from "../../listeners/on-message-created.listener";
 import { OnMessageDeletedListener } from "../../listeners/on-message-deleted.listener";
 import { OnMessageUpdatedListener } from "../../listeners/on-message-updated.listener";
+import { ChannelNameDTO } from "../../models/channel-name.dto";
+import { GuildWithChannelIdsDTO } from "../../models/guild-with-channel-ids.dto";
 import { GuildWithImageLinkDTO } from "../../models/guild-with-image-link.dto";
 import { DiscordDelimitationMessageRepositoryProvider } from "../../providers/discord-delimitation-message-repository.provider";
 import { DiscordListenerRepositoryProvider } from "../../providers/discord-listener-repository.provider";
@@ -134,7 +136,17 @@ export class MessengerServiceImpl implements MessengerService, OnModuleInit {
         return new GuildWithImageLinkDTO(guild.name, id, imageUrl);
       }
     });
-    return res.filter((val) => val != null) as Array<GuildWithImageLinkDTO>;
+    return res.filter((val) => val != undefined) as Array<GuildWithImageLinkDTO>;
+  }
+
+  public async getChannelNames(guildWithChannelIds: GuildWithChannelIdsDTO): Promise<ChannelNameDTO[]> {
+    const res = await CollectionUtils.asyncMap(guildWithChannelIds.channelIds, async (channelId) => {
+      const channel = await this.discordService.fetchChannelByIdAndGuildId(channelId, guildWithChannelIds.guildId);
+      if (channel) {
+        return new ChannelNameDTO(channelId, channel.name);
+      }
+    });
+    return res.filter((val) => val != undefined) as Array<ChannelNameDTO>;
   }
 
   private addMessagesListeners(): void {

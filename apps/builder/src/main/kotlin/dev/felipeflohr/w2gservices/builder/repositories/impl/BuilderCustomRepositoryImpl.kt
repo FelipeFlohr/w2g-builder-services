@@ -12,11 +12,11 @@ class BuilderCustomRepositoryImpl(
     @PersistenceContext
     private val entityManager: EntityManager
 ) : BuilderCustomRepository {
-    override fun getBuildMessages(guildId: String): Set<DiscordBuildMessageDTO> {
+    override fun getBuildMessages(guildId: String, channelId: String): Set<DiscordBuildMessageDTO> {
         val set: MutableSet<DiscordBuildMessageDTO> = HashSet()
-        val delimitationMessage = getDelimitationMessageByGuildId(guildId)
+        val delimitationMessage = getDelimitationMessageByGuildIdAndChannelId(guildId, channelId)
         if (delimitationMessage != null) {
-            val messagesAfterDelimitation = getDelimitationMessagesByGuildIdAfterDelimitationMessage(delimitationMessage)
+            val messagesAfterDelimitation = getDelimitationMessagesByGuildIdAndChannelIdAfterDelimitationMessage(delimitationMessage)
             set.add(delimitationMessage)
             set.addAll(messagesAfterDelimitation)
         }
@@ -24,7 +24,7 @@ class BuilderCustomRepositoryImpl(
         return set
     }
 
-    private fun getDelimitationMessagesByGuildIdAfterDelimitationMessage(delimitation: DiscordBuildMessageDTO): List<DiscordBuildMessageDTO> {
+    private fun getDelimitationMessagesByGuildIdAndChannelIdAfterDelimitationMessage(delimitation: DiscordBuildMessageDTO): List<DiscordBuildMessageDTO> {
         val sql = """
             select new ${DiscordBuildMessageDTO::class.java.name}(
                 dme.id as id,
@@ -41,6 +41,7 @@ class BuilderCustomRepositoryImpl(
             from DiscordMessageEntity dme
             inner join dme.author dma
             where dme.guildId = :guildId
+            and dme.channelId = :channelId
             and dme.messageCreatedAt >= :createdAt
             and dme.messageId <> :delimitationMessageId
             order by dme.messageCreatedAt asc
@@ -48,6 +49,7 @@ class BuilderCustomRepositoryImpl(
 
         val query = entityManager.createQuery(sql, DiscordBuildMessageDTO::class.java)
         query.setParameter("guildId", delimitation.guildId)
+        query.setParameter("channelId", delimitation.channelId)
         query.setParameter("createdAt", delimitation.createdAt)
         query.setParameter("delimitationMessageId", delimitation.messageId)
         return try {
@@ -57,7 +59,7 @@ class BuilderCustomRepositoryImpl(
         }
     }
 
-    private fun getDelimitationMessageByGuildId(guildId: String): DiscordBuildMessageDTO? {
+    private fun getDelimitationMessageByGuildIdAndChannelId(guildId: String, channelId: String): DiscordBuildMessageDTO? {
         val sql = """
             select new ${DiscordBuildMessageDTO::class.java.name}(
                 dme.id as id,
@@ -75,11 +77,13 @@ class BuilderCustomRepositoryImpl(
             inner join ddm.message dme
             inner join dme.author dma
             where dme.guildId = :guildId
+            and dme.channelId = :channelId
             order by ddm.delimitationCreatedAt desc
         """.trimIndent()
 
         val query = entityManager.createQuery(sql, DiscordBuildMessageDTO::class.java)
         query.setParameter("guildId", guildId)
+        query.setParameter("channelId", channelId)
         query.setMaxResults(1)
         return try {
             query.singleResult

@@ -1,4 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Inject, Post } from "@nestjs/common";
+import { GuildWithChannelIdsDTO } from "../models/guild-with-channel-ids.dto";
 import { MessengerServiceProvider } from "../providers/messenger-service.provider";
 import { MessengerService } from "../services/messenger.service";
 
@@ -22,5 +23,10 @@ export class MessengerController {
       return await this.service.getGuildsWithImageLink(guildIds);
     }
     return [];
+  }
+
+  @Post("/channelnames")
+  public async channelNames(@Body() guildWithChannels: GuildWithChannelIdsDTO) {
+    return await this.service.getChannelNames(guildWithChannels);
   }
 }

@@ -8,4 +8,8 @@ import java.util.Date
 data class DiscordDelimitationMessageDTO(
     var createdAt: Date,
     var message: DiscordMessageDTO,
-) : Serializable
+) : Serializable {
+    override fun toString(): String {
+        return "DiscordDelimitationMessageDTO(createdAt=$createdAt, message=$message)"
+    }
+}

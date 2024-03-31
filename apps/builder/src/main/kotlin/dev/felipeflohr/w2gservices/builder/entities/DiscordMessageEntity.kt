@@ -1,6 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.entities
 
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
+import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -63,4 +64,24 @@ class DiscordMessageEntity(
 
     @OneToMany(mappedBy = "message", orphanRemoval = true)
     var fileLogs: Set<MessageFileLogEntity>?,
-) : BuilderBaseEntity()
+) : BuilderBaseEntity() {
+    fun toDTO(): DiscordMessageDTO {
+        return DiscordMessageDTO(
+            channelId = channelId,
+            id = messageId,
+            createdAt = messageCreatedAt,
+            system = system,
+            url = url,
+            hasThread = false,
+            cleanContent = content,
+            applicationId = null,
+            author = author.toDTO(),
+            pinned = pinned,
+            pinnable = false,
+            position = null,
+            content = content,
+            deleted = false,
+            guildId = guildId
+        )
+    }
+}
