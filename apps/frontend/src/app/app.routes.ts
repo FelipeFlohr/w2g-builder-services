@@ -1,18 +1,24 @@
 import { Routes } from "@angular/router";
+import { RoutesEnum } from "./enums/routes.enum";
 
 export const routes: Routes = [
   {
     path: "",
-    redirectTo: "/guildselector",
+    redirectTo: `/${RoutesEnum.GUILD_SELECTOR}`,
     pathMatch: "full",
   },
   {
-    path: "guildselector",
-    loadComponent: async () => (await import("./guild-selector/views/guild-selector.component")).GuildSelectorComponent,
+    path: RoutesEnum.GUILD_SELECTOR,
+    loadComponent: async () =>
+      (await import("./views/guild-selector/views/guild-selector.component")).GuildSelectorComponent,
   },
   {
-    path: "channelselector",
+    path: RoutesEnum.CHANNEL_SELECTOR,
     loadComponent: async () =>
-      (await import("./channel-selector/views/channel-selector.component")).ChannelSelectorComponent,
+      (await import("./views/channel-selector/views/channel-selector.component")).ChannelSelectorComponent,
+  },
+  {
+    path: RoutesEnum.VISUALIZER,
+    loadComponent: async () => (await import("./views/visualizer/views/visualizer.component")).VisualizerComponent,
   },
 ];

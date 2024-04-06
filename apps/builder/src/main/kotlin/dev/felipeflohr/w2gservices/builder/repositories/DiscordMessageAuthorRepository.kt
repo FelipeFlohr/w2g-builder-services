@@ -16,9 +16,4 @@ interface DiscordMessageAuthorRepository : JpaRepository<DiscordMessageAuthorEnt
         where id in (:ids)
     """)
     fun deleteByIds(ids: List<Long>)
-
-    @Transactional
-    @Modifying
-    @Query("delete DiscordMessageAuthorEntity where authorId = :authorId")
-    fun deleteByAuthorId(authorId: String)
 }

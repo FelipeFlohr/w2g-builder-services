@@ -8,3 +8,7 @@ html, body, main {
   padding: 0;
   overflow: hidden;
 }
+
+.border-1 {
+  border-width: 1px;
+}

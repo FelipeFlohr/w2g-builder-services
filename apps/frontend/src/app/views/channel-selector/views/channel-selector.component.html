@@ -1,0 +1,16 @@
+<div class="w-full h-full flex flex-col items-center justify-center">
+  <header class="m-4">
+    <h1 class="text-3xl">Select the channel:</h1>
+  </header>
+  <nav>
+    @if (isLoadingChannels()) {
+      <mat-spinner color="warm" mode="indeterminate" />
+    } @else {
+      @for (channel of channels(); track $index) {
+        <channel-item [channelInfo]="channel" [guildId]="guildId" [guildName]="guildName" />
+      } @empty {
+        <span>No channels were found.</span>
+      }
+    }
+  </nav>
+</div>

@@ -7,7 +7,7 @@
     <div class="w-full h-full flex flex-wrap items-center justify-center">
       @if (this.isLoadingGuilds()) {
         <div class="w-full h-full flex flex-col items-center justify-center">
-          <mat-spinner color="warm" mode="indeterminate"></mat-spinner>
+          <mat-spinner color="warm" mode="indeterminate" />
         </div>
       } @else if (!this.isLoadingGuilds() && this.guilds().length === 0) {
         <span>No guilds found.</span>
