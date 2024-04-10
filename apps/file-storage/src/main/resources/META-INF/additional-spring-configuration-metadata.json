@@ -1,9 +1,0 @@
-{
-  "properties": [
-    {
-      "name": "file-storage.s3.bucket-name",
-      "type": "java.lang.String",
-      "description": "Name of the bucket whose files are going to be saved."
-    }
-  ]
-}

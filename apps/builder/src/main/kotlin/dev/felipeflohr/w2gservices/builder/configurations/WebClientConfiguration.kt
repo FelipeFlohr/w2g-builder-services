@@ -17,6 +17,7 @@ class WebClientConfiguration(
     companion object {
         const val DOWNLOADER_WEB_CLIENT_BEAN_NAME = "downloaderWebClient"
         const val MESSENGER_WEB_CLIENT_BEAN_NAME = "messengerWebClient"
+        const val FILE_STORAGE_WEB_CLIENT_BEAN_NAME = "fileStorageWebClient"
     }
 
     @Bean(name = [DOWNLOADER_WEB_CLIENT_BEAN_NAME])
@@ -27,6 +28,11 @@ class WebClientConfiguration(
     @Bean(name = [MESSENGER_WEB_CLIENT_BEAN_NAME])
     fun messengerWebClient(builder: WebClient.Builder): WebClient {
         return createWebClient(builder, "builder.messenger.address")
+    }
+
+    @Bean(name = [FILE_STORAGE_WEB_CLIENT_BEAN_NAME])
+    fun fileStorageWebClient(builder: WebClient.Builder): WebClient {
+        return createWebClient(builder, "builder.file-storage.address")
     }
 
     private fun createWebClient(builder: WebClient.Builder, addressEnvProperty: String): WebClient {

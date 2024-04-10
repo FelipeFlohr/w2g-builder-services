@@ -148,16 +148,6 @@ services:
       interval: 1s
       timeout: 3s
       retries: 10
-  file-storage-local-s3:
-    container_name: file-storage-local-s3-1
-    image: localstack/localstack:s3-latest
-    restart: always
-    ports:
-      - "127.0.0.1:4566:4566"
-      - "127.0.0.1:4510-4559:4510-4559"
-    volumes:
-      - "./docker-volume/file-storage-local-s3:/var/lib/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
   file-storage-app:
     build:
       context: ./apps/file-storage
@@ -176,6 +166,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 5s
+    volumes:
+      - ./docker-volume/file-storage-local:/project/storage:rw
   downloader-app:
     build:
       context: ./apps/downloader

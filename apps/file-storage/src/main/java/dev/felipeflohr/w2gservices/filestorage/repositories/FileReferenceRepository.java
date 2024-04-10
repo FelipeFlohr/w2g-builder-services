@@ -1,10 +1,10 @@
 package dev.felipeflohr.w2gservices.filestorage.repositories;
 
 import dev.felipeflohr.w2gservices.filestorage.entities.FileReferenceEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import io.quarkus.hibernate.orm.panache.PanacheRepository;
 
-@Repository
-public interface FileReferenceRepository extends JpaRepository<FileReferenceEntity, Long> {
-    FileReferenceEntity getFileReferenceEntityByFileHash(String hash);
+import java.util.Optional;
+
+public interface FileReferenceRepository extends PanacheRepository<FileReferenceEntity> {
+    Optional<FileReferenceEntity> findByFileHash(String hash);
 }

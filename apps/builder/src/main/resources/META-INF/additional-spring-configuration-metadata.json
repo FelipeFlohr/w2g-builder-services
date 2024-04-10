@@ -9,6 +9,11 @@
       "name": "builder.messenger.address",
       "type": "java.lang.String",
       "description": "The address of the messenger application."
+    },
+    {
+      "name": "builder.file-storage.address",
+      "type": "java.lang.String",
+      "description": "The address of the file storage application."
     }
   ]
 }

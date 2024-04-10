@@ -10,12 +10,8 @@ import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 import dev.felipeflohr.w2gservices.builder.functions.virtualThread
 import dev.felipeflohr.w2gservices.builder.listeners.DiscordMessagesAMQPListener
 import dev.felipeflohr.w2gservices.builder.repositories.BuilderRepository
-import dev.felipeflohr.w2gservices.builder.services.BuilderService
-import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
-import dev.felipeflohr.w2gservices.builder.services.DownloaderService
-import dev.felipeflohr.w2gservices.builder.services.MessageFileLogService
-import dev.felipeflohr.w2gservices.builder.services.MessageFileReferenceService
-import dev.felipeflohr.w2gservices.builder.services.MessengerService
+import dev.felipeflohr.w2gservices.builder.services.*
+import dev.felipeflohr.w2gservices.builder.utils.LoggerUtils
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -25,7 +21,7 @@ import org.springframework.stereotype.Service
 import kotlin.concurrent.thread
 
 @Service
-class BuilderServiceImpl @Autowired constructor (
+class BuilderServiceImpl @Autowired constructor(
     private val repository: BuilderRepository,
     private val messageService: DiscordMessageService,
     private val messageFileReferenceService: MessageFileReferenceService,
@@ -33,20 +29,17 @@ class BuilderServiceImpl @Autowired constructor (
     private val downloaderService: DownloaderService,
     private val amqpListener: DiscordMessagesAMQPListener,
     private val messengerService: MessengerService,
+    private val fileStorageService: FileStorageService,
 ) : BuilderService {
     private val business: BuilderBusiness = BuilderBusinessImpl()
+    private val logger = LoggerUtils.getLogger(BuilderServiceImpl::class)
 
     @PostConstruct
     private fun init() {
         thread {
             runBlocking {
-                amqpListener.waitForOngoingMessages()
-                val references = getVideoReferencesForEveryGuild()
-                references.forEach { reference ->
-                    async {
-                        downloadReferencesOfMessagesWithoutReference(reference.value)
-                    }.await()
-                }
+                deleteStaleData()
+                downloadReferences()
             }
         }
     }
@@ -91,5 +84,30 @@ class BuilderServiceImpl @Autowired constructor (
         }
 
         return@coroutineScope res
+    }
+
+    private suspend fun downloadReferences() = coroutineScope {
+        amqpListener.waitForOngoingMessages()
+        val references = getVideoReferencesForEveryGuild()
+        references.forEach { reference ->
+            async {
+                downloadReferencesOfMessagesWithoutReference(reference.value)
+            }.await()
+        }
+    }
+
+    private suspend fun deleteStaleData() {
+        return coroutineScope {
+            val hashes = messageFileReferenceService.getAllHashes()
+            val staleData = fileStorageService.getStaleData(hashes)
+            staleData
+                .filter { !it.exist }
+                .forEach { stale ->
+                    async {
+                        messageFileReferenceService.deleteByHash(stale.hash)
+                        logger.info("Deleted stale data. Hash: ${stale.hash}")
+                    }.await()
+                }
+        }
     }
 }

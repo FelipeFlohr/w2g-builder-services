@@ -12,5 +12,5 @@
 - Social Media Downloader (aplicação que baixa vídeo de redes sociais)
 	- Nest.js
 - API File Storage (aplicação que devolve uma URL para o download de um arquivo)
-	- Spring com Java
+	- Quarkus com Java
 	- Postgres
