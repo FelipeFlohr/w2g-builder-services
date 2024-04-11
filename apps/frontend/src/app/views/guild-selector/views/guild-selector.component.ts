@@ -18,11 +18,7 @@ export class GuildSelectorComponent implements OnInit {
 
   private readonly service: GuildSelectorService = inject(GuildSelectorServiceImpl);
 
-  public ngOnInit(): void {
-    this.onInitWrapper();
-  }
-
-  private async onInitWrapper() {
+  public async ngOnInit(): Promise<void> {
     this.isLoadingGuilds.set(true);
     const guilds = await this.service.getGuilds();
     this.guilds.set(guilds);

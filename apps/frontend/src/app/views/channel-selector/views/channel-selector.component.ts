@@ -23,11 +23,7 @@ export class ChannelSelectorComponent implements OnInit {
 
   private readonly service = inject(ChannelSelectorServiceImpl);
 
-  public ngOnInit(): void {
-    this.onInitWrapper();
-  }
-
-  private async onInitWrapper() {
+  public async ngOnInit(): Promise<void> {
     this.isLoadingChannels.set(true);
     const channels = await this.service.getChannels(this.guildId);
     this.channels.set(channels);

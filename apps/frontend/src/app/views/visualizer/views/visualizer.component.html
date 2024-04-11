@@ -1,1 +1,13 @@
-<p>visualizer works!</p>
+@if (this.isVideosFetched()) {
+  @if (this.fetchedVideos!.length == 0) {
+    <div class="w-full h-full items-center justify-center">
+      <span>No videos were found.</span>
+    </div>
+  } @else {
+    <visualizer-display [fetchedVideos]="this.fetchedVideos!" [index]="this.index!" />
+  }
+} @else {
+  <div class="w-full h-full flex items-center justify-center">
+    <mat-spinner color="warm" mode="indeterminate" />
+  </div>
+}

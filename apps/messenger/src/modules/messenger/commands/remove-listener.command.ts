@@ -21,6 +21,7 @@ export class RemoveListenerCommand extends DiscordGuildSlashCommandDTO {
     );
     if (listenerExists) {
       await this.service.deleteListenerByChannelIdAndGuildId(interaction.channelId, interaction.guildId);
+      return "Listener deleted.";
     }
     return "Listener does not exist on this channel.";
   }

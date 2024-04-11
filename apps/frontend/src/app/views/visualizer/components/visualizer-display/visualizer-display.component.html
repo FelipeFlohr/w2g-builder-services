@@ -1,0 +1,33 @@
+<nav class="absolute flex right-4 w-48 h-8 bg-blue-800 rounded-md">
+  <input class="w-36 rounded-md text-black" type="number" [(ngModel)]="goToIndex">
+  <button class="w-full" (click)="jumpToIndex()">Go</button>
+</nav>
+
+<div class="w-full h-full flex flex-col items-center">
+  @if (isLoadingMetadata()) {
+    <div class="my-8">
+      <mat-spinner color="warm" mode="indeterminate" />
+    </div>
+  } @else if (!isLoadingMetadata() && metadata() != undefined) {
+    <header class="w-full flex flex-col items-center justify-center my-8">
+      <h1 class="text-4xl text-center">({{this.index + 1}} / {{ getVideosWithUrl().length }}) {{ metadata()!.title }}</h1>
+      <h2 class="text-center">{{ metadata()!.description }}</h2>
+    </header>
+  }
+
+  <div class="m-8">
+    @if (isLoadingVideo()) {
+      <mat-spinner color="warm" mode="indeterminate" />
+    } @else if (!isLoadingVideo() && videoBuffer() != undefined) {
+      <visualizer-player [buffer]="videoBuffer()!" [url]="getVideo().messageUrlContent!" />
+    } @else {
+      <span>Failed to create the video. </span>
+      <a class="text-blue-400" target="_blank" [href]="getVideo().messageUrlContent">Open the video.</a>
+    }
+  </div>
+
+  <nav>
+    <visualizer-display-control-button [enabled]="canGoBack()" (click)="goBack()">{{ '< Back' }}</visualizer-display-control-button>
+    <visualizer-display-control-button [enabled]="canGoForward()" (click)="goForward()">{{ 'Next >' }}</visualizer-display-control-button>
+  </nav>
+</div>

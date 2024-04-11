@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.jpa.repository.JpaContext
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.stereotype.Repository
+import java.util.Date
 
 @Repository
 class DiscordDelimitationMessageCustomRepositoryImpl @Autowired constructor (
@@ -22,17 +23,22 @@ class DiscordDelimitationMessageCustomRepositoryImpl @Autowired constructor (
     override fun update(delimitation: DiscordDelimitationMessageDTO) {
         val sql = """
             update DiscordDelimitationMessageEntity
-            set delimitationCreatedAt = :createdAt,
-            message.id = :id
-            where message.messageId = :messageId
+            set message.id = :messageId,
+            delimitationCreatedAt = :createdAt,
+            updatedAt = :updatedAt
+            where id = :id
         """.trimIndent()
-        val message = runBlocking { messageService.upsertAndFlush(delimitation.message) }
+        val delimitationId = getIdByMessageMessageId(delimitation.message.channelId, delimitation.message.guildId)
 
-        val query = entityManager.createQuery(sql)
-        query.setParameter("createdAt", delimitation.createdAt)
-        query.setParameter("id", message.id)
-        query.setParameter("messageId", message.messageId)
-        query.executeUpdate()
+        if (delimitationId != null) {
+            val message = runBlocking { messageService.upsertAndFlush(delimitation.message) }
+            val query = entityManager.createQuery(sql)
+            query.setParameter("messageId", message.id)
+            query.setParameter("createdAt", delimitation.createdAt)
+            query.setParameter("updatedAt", Date())
+            query.setParameter("id", delimitationId)
+            query.executeUpdate()
+        }
     }
 
     @Transactional
@@ -60,6 +66,27 @@ class DiscordDelimitationMessageCustomRepositoryImpl @Autowired constructor (
             query.singleResult != null
         } catch (e: NoResultException) {
             false
+        }
+    }
+
+    private fun getIdByMessageMessageId(channelId: String, guildId: String): Long? {
+        val sql = """
+            select ddm.id
+            from DiscordDelimitationMessageEntity ddm
+            inner join ddm.message dme
+            where dme.channelId = :channelId
+            and dme.guildId = :guildId
+        """.trimIndent()
+
+        val query = entityManager.createQuery(sql, Long::class.java)
+        query.setParameter("channelId", channelId)
+        query.setParameter("guildId", guildId)
+        query.setMaxResults(1)
+
+        return try {
+            query.singleResult
+        } catch (e: NoResultException) {
+            null
         }
     }
 }

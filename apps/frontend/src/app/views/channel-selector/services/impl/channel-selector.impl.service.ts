@@ -1,6 +1,6 @@
 import { Injectable, inject } from "@angular/core";
 import { ChannelInfoDTO } from "../../../../models/channel-info.dto";
-import { HttpService } from "../../../../services/http.service";
+import { BuilderHttpService } from "../../../../services/builder-http.service";
 import { ChannelInfoType } from "../../../../types/channel-info.type";
 import { ChannelSelectorRoutes } from "../../data/channel-selector-routes";
 import { ChannelSelectorService } from "../channel-selector.service";
@@ -9,12 +9,14 @@ import { ChannelSelectorService } from "../channel-selector.service";
   providedIn: "root",
 })
 export class ChannelSelectorServiceImpl implements ChannelSelectorService {
-  private readonly httpService = inject(HttpService);
+  private readonly builderHttpService = inject(BuilderHttpService);
 
   public constructor() {}
 
   public async getChannels(guildId: string): Promise<ChannelInfoDTO[]> {
-    const data = await this.httpService.get<Array<ChannelInfoType>>(ChannelSelectorRoutes.getChannelsRoute(guildId));
+    const data = await this.builderHttpService.get<Array<ChannelInfoType>>(
+      ChannelSelectorRoutes.getChannelsRoute(guildId),
+    );
     return data.map((d) => new ChannelInfoDTO(d));
   }
 }

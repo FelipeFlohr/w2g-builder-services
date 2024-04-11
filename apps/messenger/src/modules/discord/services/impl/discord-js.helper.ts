@@ -119,7 +119,7 @@ export class DiscordJsHelper {
 
   private userToAuthorDTO(user: User): DiscordMessageAuthorDTO {
     return new DiscordMessageAuthorDTO({
-      bot: user.bot,
+      bot: user.bot ?? false,
       createdAt: user.createdAt,
       discriminator: user.discriminator,
       displayName: user.displayName,

@@ -98,16 +98,20 @@ class BuilderServiceImpl @Autowired constructor(
 
     private suspend fun deleteStaleData() {
         return coroutineScope {
-            val hashes = messageFileReferenceService.getAllHashes()
-            val staleData = fileStorageService.getStaleData(hashes)
-            staleData
-                .filter { !it.exist }
-                .forEach { stale ->
-                    async {
-                        messageFileReferenceService.deleteByHash(stale.hash)
-                        logger.info("Deleted stale data. Hash: ${stale.hash}")
-                    }.await()
-                }
+            try {
+                val hashes = messageFileReferenceService.getAllHashes()
+                val staleData = fileStorageService.getStaleData(hashes)
+                staleData
+                    .filter { !it.exist }
+                    .forEach { stale ->
+                        async {
+                            messageFileReferenceService.deleteByHash(stale.hash)
+                            logger.info("Deleted stale data. Hash: ${stale.hash}")
+                        }.await()
+                    }
+            } catch (e: Exception) {
+                logger.error("Failed to delete stale data. Process will be ignored.", e)
+            }
         }
     }
 }
