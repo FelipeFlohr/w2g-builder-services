@@ -9,6 +9,10 @@
 			"name": "Environment variables"
 		},
 		{
+			"path": "apps/envstarter",
+			"name": "Environment starter"
+		},
+		{
 			"path": "apps/nginx",
 			"name": "Nginx"
 		},
