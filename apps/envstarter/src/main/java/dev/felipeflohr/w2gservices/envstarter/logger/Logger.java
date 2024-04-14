@@ -33,7 +33,7 @@ public class Logger {
     }
 
     private static String getLogString(String level, Object msg) {
-        return level + getDate() + getCallerMethod() + handleMessage(msg);
+        return level + getDate() + getThreadName() + getCallerMethod() + handleMessage(msg);
     }
 
     private static String handleMessage(Object msg) {
@@ -54,7 +54,11 @@ public class Logger {
 
         String className = caller.getClassName();
         String methodName = caller.getMethodName();
-        return className + "." + methodName + " | ";
+        return "CALLER: " + className + "." + methodName + " | ";
+    }
+
+    private static String getThreadName() {
+        return "[%s] | ".formatted(Thread.currentThread().getName());
     }
 
     private static String getDate() {

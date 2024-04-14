@@ -21,9 +21,7 @@ public class PropertiesUtils {
                 .stream()
                 .filter(String.class::isInstance)
                 .map(String.class::cast)
-                .forEach(k -> {
-                    map.put(k, (String) prop.get(k));
-                });
+                .forEach(k -> map.put(k, (String) prop.get(k)));
             return map;
         } catch (Exception e) {
             log.error(e);
@@ -34,7 +32,7 @@ public class PropertiesUtils {
     public static String propertyMapToPropertyString(Map<String, String> properties) {
         var sb = new StringBuilder();
         for (Map.Entry<String, String> entry : properties.entrySet()) {
-            sb.append(entry.getKey() + "=" + entry.getValue() + "\n");
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append("\n");
         }
         return sb.toString();
     }

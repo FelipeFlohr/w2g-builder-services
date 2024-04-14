@@ -14,14 +14,12 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.server.multipart.MultipartFormDataInput;
 
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
-@Slf4j
 @Path("/file")
 public class FileController {
     @Inject

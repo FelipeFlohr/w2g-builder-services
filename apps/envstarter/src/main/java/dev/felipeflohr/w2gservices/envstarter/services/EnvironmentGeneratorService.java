@@ -2,7 +2,9 @@ package dev.felipeflohr.w2gservices.envstarter.services;
 
 import dev.felipeflohr.w2gservices.envstarter.utils.FileUtils;
 import dev.felipeflohr.w2gservices.envstarter.utils.PropertiesUtils;
+import lombok.SneakyThrows;
 
+import java.io.File;
 import java.util.Map;
 
 public class EnvironmentGeneratorService {
@@ -16,6 +18,7 @@ public class EnvironmentGeneratorService {
     private static final String MESSENGER_PATH_ENV = "/env/messenger/env";
     private static final String RABBITMQ_PATH_LOCAL = "/env/rabbitmq/local";
     private static final String RABBITMQ_PATH_ENV = "/env/rabbitmq/env";
+    private static final String NGINX_LOG_FILE_PATH = "/apps/nginx/access.log";
     private static EnvironmentGeneratorService instance;
 
     private EnvironmentGeneratorService() {}
@@ -26,6 +29,16 @@ public class EnvironmentGeneratorService {
         generateFileStorageFiles(path);
         generateMessengerFiles(path, discordToken);
         generateRabbitMQFiles(path);
+        generateNginxLogFile(path);
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @SneakyThrows
+    private void generateNginxLogFile(String path) {
+        String logFile = path + NGINX_LOG_FILE_PATH;
+        if (FileUtils.fileNotExist(logFile)) {
+            new File(logFile).createNewFile();
+        }
     }
 
     private void generateRabbitMQFiles(String path) {

@@ -3,7 +3,6 @@ package dev.felipeflohr.w2gservices.envstarter.views;
 import dev.felipeflohr.w2gservices.envstarter.services.CheckerService;
 import dev.felipeflohr.w2gservices.envstarter.services.EnvironmentGeneratorService;
 import dev.felipeflohr.w2gservices.envstarter.views.components.GenerateButton;
-import lombok.CustomLog;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -14,7 +13,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import java.awt.BorderLayout;
 import java.util.List;
 
-@CustomLog
 public class MainView extends JFrame {
     private JButton generateButton;
     private FolderInputView folderInputView;
@@ -57,9 +55,7 @@ public class MainView extends JFrame {
     private JButton getGenerateButton() {
         var button = new GenerateButton();
         button.setEnabled(false);
-        button.addActionListener(actionEvent -> {
-            environmentGeneratorService.generateFiles(folderInputView.getPath(), folderInputView.getDiscordToken());
-        });
+        button.addActionListener(actionEvent -> environmentGeneratorService.generateFiles(folderInputView.getPath(), folderInputView.getDiscordToken()));
         return button;
     }
 
