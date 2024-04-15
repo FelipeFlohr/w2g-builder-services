@@ -160,7 +160,10 @@ export class MessengerServiceImpl implements MessengerService, OnModuleInit {
     const messages = await CollectionUtils.asyncMap(listeners, async (listener) =>
       this.cacheMessageFromListener(listener),
     );
-    return messages.reduce((prev, curr) => [...prev, ...curr]);
+    if (messages.length > 0) {
+      return messages.reduce((prev, curr) => [...prev, ...curr]);
+    }
+    return [];
   }
 
   private async cacheMessageFromListener(listener: DiscordListenerEntity): Promise<Array<DiscordMessageDTO>> {

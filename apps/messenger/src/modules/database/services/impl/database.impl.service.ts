@@ -9,6 +9,7 @@ import { DiscordMessageTypeORMEntity } from "src/modules/messenger/entities/impl
 import { LoggerUtils } from "src/utils/logger.utils";
 import { DataSource } from "typeorm";
 import { TypeORMLogger } from "../../logger/typeorm.logger";
+import { Migration11710456005183 } from "../../migrations/1710456005183-migration1";
 
 @Injectable()
 export class DatabaseServiceImpl implements OnModuleInit {
@@ -32,8 +33,8 @@ export class DatabaseServiceImpl implements OnModuleInit {
         DiscordMessageAuthorTypeORMEntity,
         DiscordListenerTypeORMEntity,
       ],
-      migrations: [],
-      synchronize: envService.application.env === "development",
+      migrations: [Migration11710456005183],
+      synchronize: true,
       logger: new TypeORMLogger("all"),
     });
   }

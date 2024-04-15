@@ -31,8 +31,6 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-    volumes:
-      - ./docker-volume/rabbitmq:/var/lib/rabbitmq/
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 5s

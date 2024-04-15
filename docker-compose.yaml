@@ -20,6 +20,8 @@ services:
         condition: service_healthy
       builder-app:
         condition: service_healthy
+      frontend-app:
+        condition: service_started
   rabbitmq:
     image: rabbitmq:3.12-management
     container_name: w2g-builder-rabbitmq-1
@@ -29,8 +31,6 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-    volumes:
-      - ./docker-volume/rabbitmq:/var/lib/rabbitmq/
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 5s
@@ -41,7 +41,7 @@ services:
     image: postgres:16
     restart: always
     env_file:
-      - ./env/builder/env/.env.builder-postgres
+      - ./env/messenger/env/.env.messenger-postgres
     ports:
       - 5432:5432
     volumes:
@@ -189,4 +189,18 @@ services:
       start_period: 5s
     depends_on:
       file-storage-app:
+        condition: service_healthy
+  frontend-app:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    expose:
+      - "3030:3030"
+    restart: always
+    depends_on:
+      file-storage-app:
+        condition: service_healthy
+      builder-app:
+        condition: service_healthy
+      downloader-app:
         condition: service_healthy
