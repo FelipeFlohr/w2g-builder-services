@@ -23,44 +23,18 @@ data class DiscordMessageDTO(
     var channelId: String,
     var deleted: Boolean,
 ) : Serializable {
-    fun toEntity(): DiscordMessageEntity {
+    fun toEntity(authorId: Long): DiscordMessageEntity {
         return DiscordMessageEntity(
-            messageCreatedAt = createdAt,
+            authorId = authorId,
+            system = system,
+            messageCreatedAt = createdAt.toInstant(),
             messageId = id,
             url = url,
+            channelId = channelId,
             pinned = pinned,
-            system = system,
+            position = position,
             content = content,
             guildId = guildId,
-            position = position,
-            channelId = channelId,
-            author = author.toEntity(),
-            id = null,
-            delimitationMessage = null,
-            fileLogs = null,
-            fileReferences = null,
         )
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as DiscordMessageDTO
-
-        if (content != other.content) return false
-        if (id != other.id) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = content.hashCode()
-        result = 31 * result + id.hashCode()
-        return result
-    }
-
-    override fun toString(): String {
-        return "DiscordMessageDTO(applicationId=$applicationId, author=$author, cleanContent='$cleanContent', content='$content', createdAt=$createdAt, hasThread=$hasThread, id='$id', pinnable=$pinnable, pinned=$pinned, position=$position, system=$system, url='$url', guildId='$guildId', channelId='$channelId', deleted=$deleted)"
     }
 }

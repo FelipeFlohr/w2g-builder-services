@@ -1,107 +1,76 @@
 package dev.felipeflohr.w2gservices.builder.listeners
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.rabbitmq.client.Delivery
 import dev.felipeflohr.w2gservices.builder.configurations.MessagesAMQPConfiguration
 import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
 import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
-import dev.felipeflohr.w2gservices.builder.services.DiscordDelimitationMessageService
-import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
-import dev.felipeflohr.w2gservices.builder.services.QueueStatsService
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import org.springframework.amqp.rabbit.annotation.RabbitListener
+import dev.felipeflohr.w2gservices.builder.services.BuilderService
+import jakarta.annotation.PostConstruct
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.messaging.Message
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Flux
+import kotlin.reflect.KClass
 
 @Component
 class DiscordMessagesAMQPListener @Autowired constructor(
-    private val messageService: DiscordMessageService,
-    private val delimitationService: DiscordDelimitationMessageService,
-    private val queueStatsService: QueueStatsService
+    @Qualifier(MessagesAMQPConfiguration.MESSAGES_BOOTSTRAP) private val bootstrapDeliveryFlux: Flux<Delivery>,
+    @Qualifier(MessagesAMQPConfiguration.MESSAGES_DELIMITATION) private val delimitationDeliveryFlux: Flux<Delivery>,
+    @Qualifier(MessagesAMQPConfiguration.MESSAGES_CREATED) private val createdDeliveryFlux: Flux<Delivery>,
+    @Qualifier(MessagesAMQPConfiguration.MESSAGES_UPDATED) private val updatedDeliveryFlux: Flux<Delivery>,
+    @Qualifier(MessagesAMQPConfiguration.MESSAGES_DELETED) private val deletedFlux: Flux<Delivery>,
+    private val service: BuilderService,
 ) {
-    companion object {
-        const val BOOTSTRAP_CONTAINER_NAME = "boostrapMessagesListener"
-        const val DELIMITATION_CONTAINER_NAME = "delimitationContainerName"
-        const val CREATE_CONTAINER_NAME = "createMessagesListener"
-        const val UPDATED_CONTAINER_NAME = "updatedMessagesListener"
-        const val DELETED_CONTAINER_NAME = "deletedMessagesListener"
-        private const val BOOTSTRAP_LISTENER_PRIORITY = "100"
-        private const val DELIMITATION_LISTENER_PRIORITY = "1000"
-        private val queues = listOf(
-            MessagesAMQPConfiguration.MESSAGES_BOOTSTRAP,
-            MessagesAMQPConfiguration.MESSAGES_DELIMITATION,
-            MessagesAMQPConfiguration.MESSAGES_CREATED,
-            MessagesAMQPConfiguration.MESSAGES_UPDATED,
-            MessagesAMQPConfiguration.MESSAGES_DELETED
-        )
+    @PostConstruct
+    private fun init() {
+        deliveryListenerWrapper(bootstrapDeliveryFlux, DiscordMessageDTO::class, ::bootstrapMessage)
+        deliveryListenerWrapper(delimitationDeliveryFlux, DiscordDelimitationMessageDTO::class, ::delimitationMessage)
+        deliveryListenerWrapper(createdDeliveryFlux, DiscordMessageDTO::class, ::createdMessage)
+        deliveryListenerWrapper(updatedDeliveryFlux, DiscordMessageDTO::class, ::updatedMessage)
+        deliveryListenerWrapper(deletedFlux, DiscordMessageDTO::class, ::deletedMessage)
     }
 
-    suspend fun waitForOngoingMessages() {
-        while(!allQueuesAreEmpty()) {
-            delay(500)
-        }
+    private fun <T : Any> deliveryListenerWrapper(deliveryFlux: Flux<Delivery>, clazz: KClass<T>, callback: suspend (T) -> Unit) {
+        val coroutineScope = CoroutineScope(Job() + Dispatchers.Default)
+        val mapper = ObjectMapper().registerKotlinModule()
+
+        deliveryFlux
+            .doOnCancel { coroutineScope.cancel() }
+            .doOnTerminate { coroutineScope.cancel() }
+            .asFlow()
+            .onEach {
+                val obj: T = mapper.readValue(it.body, clazz.java)
+                callback(obj)
+            }
+            .launchIn(coroutineScope)
     }
 
-    @RabbitListener(
-        id = BOOTSTRAP_CONTAINER_NAME,
-        queues = [MessagesAMQPConfiguration.MESSAGES_BOOTSTRAP],
-        priority = BOOTSTRAP_LISTENER_PRIORITY,
-    )
-    private fun bootstrapMessage(message: Message<DiscordMessageDTO>) {
-        runBlocking {
-            messageService.bootstrapMessage(message.payload)
-        }
+    private suspend fun bootstrapMessage(message: DiscordMessageDTO) {
+        service.bootstrapMessage(message)
     }
 
-    @RabbitListener(
-        id = DELIMITATION_CONTAINER_NAME,
-        queues = [MessagesAMQPConfiguration.MESSAGES_DELIMITATION],
-        priority = DELIMITATION_LISTENER_PRIORITY,
-    )
-    private fun delimitationMessage(message: Message<DiscordDelimitationMessageDTO>) {
-        runBlocking {
-            delimitationService.saveDelimitationMessage(message.payload)
-        }
+    private suspend fun delimitationMessage(message: DiscordDelimitationMessageDTO) {
+        service.delimitationMessage(message)
     }
 
-    @RabbitListener(
-        id = CREATE_CONTAINER_NAME,
-        queues = [MessagesAMQPConfiguration.MESSAGES_CREATED]
-    )
-    private fun createMessage(message: Message<DiscordMessageDTO>) {
-        runBlocking {
-            messageService.save(message.payload)
-        }
+    private suspend fun createdMessage(message: DiscordMessageDTO) {
+        service.createdMessage(message)
     }
 
-    @RabbitListener(
-        id = UPDATED_CONTAINER_NAME,
-        queues = [MessagesAMQPConfiguration.MESSAGES_UPDATED]
-    )
-    private fun updateMessage(message: Message<DiscordMessageDTO>) {
-        runBlocking {
-            messageService.update(message.payload)
-        }
+    private suspend fun updatedMessage(message: DiscordMessageDTO) {
+        service.updatedMessage(message)
     }
 
-    @RabbitListener(
-        id = DELETED_CONTAINER_NAME,
-        queues = [MessagesAMQPConfiguration.MESSAGES_DELETED]
-    )
-    private fun deleteMessage(message: Message<DiscordMessageDTO>) {
-        runBlocking {
-            messageService.delete(message.payload)
-        }
-    }
-
-    private suspend fun allQueuesAreEmpty() = coroutineScope {
-        return@coroutineScope queues
-            .map {queue ->
-                async {
-                    queueStatsService.getQueueSize(queue)
-                }.await()
-            }.all { it == 0 }
+    private suspend fun deletedMessage(message: DiscordMessageDTO) {
+        service.deletedMessage(message)
     }
 }

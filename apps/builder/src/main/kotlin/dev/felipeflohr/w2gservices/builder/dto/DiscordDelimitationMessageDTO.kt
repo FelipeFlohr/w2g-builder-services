@@ -1,6 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.dto
 
 import dev.felipeflohr.w2gservices.builder.annotations.NoArg
+import dev.felipeflohr.w2gservices.builder.entities.DiscordDelimitationMessageEntity
 import java.io.Serializable
 import java.util.Date
 
@@ -9,7 +10,10 @@ data class DiscordDelimitationMessageDTO(
     var createdAt: Date,
     var message: DiscordMessageDTO,
 ) : Serializable {
-    override fun toString(): String {
-        return "DiscordDelimitationMessageDTO(createdAt=$createdAt, message=$message)"
+    fun toEntity(messageId: Long): DiscordDelimitationMessageEntity {
+        return DiscordDelimitationMessageEntity(
+            messageId = messageId,
+            delimitationCreatedAt = createdAt.toInstant()
+        )
     }
 }

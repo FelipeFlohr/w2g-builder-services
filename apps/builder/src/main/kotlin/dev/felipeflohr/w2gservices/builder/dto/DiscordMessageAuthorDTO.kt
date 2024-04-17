@@ -9,7 +9,7 @@ import java.util.Date
 data class DiscordMessageAuthorDTO(
     var avatarPngUrl: String?,
     var bannerPngUrl: String?,
-    var bot: Boolean,
+    var bot: Boolean? = false,
     var createdAt: Date,
     var discriminator: String,
     var displayName: String,
@@ -21,21 +21,15 @@ data class DiscordMessageAuthorDTO(
 ) : Serializable {
     fun toEntity(): DiscordMessageAuthorEntity {
         return DiscordMessageAuthorEntity(
-            system = system,
             authorId = id,
-            bot = bot,
-            username = username,
-            autCreatedAt = createdAt,
+            autCreatedAt = createdAt.toInstant(),
             avatarPngUrl = avatarPngUrl,
+            bot = bot ?: false,
             bannerPngUrl = bannerPngUrl,
             globalName = globalName,
             displayName = displayName,
-            id = null,
-            message = null,
+            system = system,
+            username = username,
         )
-    }
-
-    override fun toString(): String {
-        return "DiscordMessageAuthorDTO(avatarPngUrl=$avatarPngUrl, bannerPngUrl=$bannerPngUrl, bot=$bot, createdAt=$createdAt, discriminator='$discriminator', displayName='$displayName', globalName=$globalName, id='$id', tag='$tag', system=$system, username='$username')"
     }
 }

@@ -1,17 +1,23 @@
 package dev.felipeflohr.w2gservices.builder.configurations
 
+import com.rabbitmq.client.Connection
+import com.rabbitmq.client.Delivery
 import org.springframework.amqp.core.Binding
 import org.springframework.amqp.core.BindingBuilder
 import org.springframework.amqp.core.Queue
 import org.springframework.amqp.core.TopicExchange
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitAdmin
-import org.springframework.amqp.rabbit.core.RabbitTemplate
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.rabbitmq.RabbitFlux
+import reactor.rabbitmq.Receiver
+import reactor.rabbitmq.ReceiverOptions
 
 @Configuration
 class MessagesAMQPConfiguration {
@@ -30,20 +36,50 @@ class MessagesAMQPConfiguration {
     }
 
     @Bean
-    fun rabbitMessageConverter(): Jackson2JsonMessageConverter {
-        return Jackson2JsonMessageConverter()
-    }
-
-    @Bean
-    fun rabbitTemplate(connection: ConnectionFactory, messageConverter: Jackson2JsonMessageConverter): RabbitTemplate {
-        val rabbitTemplate = RabbitTemplate(connection)
-        rabbitTemplate.messageConverter = messageConverter
-        return rabbitTemplate
+    fun connectionMono(rabbitProperties: RabbitProperties): Mono<Connection> {
+        val connectionFactory = com.rabbitmq.client.ConnectionFactory();
+        connectionFactory.host = rabbitProperties.host
+        connectionFactory.port = rabbitProperties.port
+        connectionFactory.username = rabbitProperties.username
+        connectionFactory.password = rabbitProperties.password
+        return Mono.fromCallable {
+            connectionFactory.newConnection("a")
+        }
     }
 
     @Bean
     fun initializeAdmin(admin: RabbitAdmin): ApplicationListener<ApplicationReadyEvent> {
         return ApplicationListener { admin.initialize() }
+    }
+
+    @Bean
+    fun receiver(connection: Mono<Connection>): Receiver {
+        return RabbitFlux.createReceiver(ReceiverOptions().connectionMono(connection))
+    }
+
+    @Bean(MESSAGES_BOOTSTRAP)
+    fun bootstrapDeliveryFlux(receiver: Receiver): Flux<Delivery> {
+         return receiver.consumeAutoAck(MESSAGES_BOOTSTRAP)
+    }
+
+    @Bean(MESSAGES_DELIMITATION)
+    fun delimitationDeliveryFlux(receiver: Receiver): Flux<Delivery> {
+        return receiver.consumeAutoAck(MESSAGES_DELIMITATION)
+    }
+
+    @Bean(MESSAGES_CREATED)
+    fun createdDeliveryFlux(receiver: Receiver): Flux<Delivery> {
+        return receiver.consumeAutoAck(MESSAGES_CREATED)
+    }
+
+    @Bean(MESSAGES_UPDATED)
+    fun updatedDeliveryFlux(receiver: Receiver): Flux<Delivery> {
+        return receiver.consumeAutoAck(MESSAGES_UPDATED)
+    }
+
+    @Bean(MESSAGES_DELETED)
+    fun deletedDeliveryFlux(receiver: Receiver): Flux<Delivery> {
+        return receiver.consumeAutoAck(MESSAGES_DELETED)
     }
 
     @Bean

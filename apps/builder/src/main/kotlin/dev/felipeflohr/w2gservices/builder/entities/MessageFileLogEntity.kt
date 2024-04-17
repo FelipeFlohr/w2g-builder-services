@@ -1,33 +1,21 @@
 package dev.felipeflohr.w2gservices.builder.entities
 
+import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.SequenceGenerator
-import jakarta.persistence.Table
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 
-@Entity
-@Table(name = "TB_MESSAGE_FILE_LOG")
-class MessageFileLogEntity(
+@NoArg
+@Table("\"TB_MESSAGE_FILE_LOG\"")
+data class MessageFileLogEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MESSAGE_FILE_LOG")
-    @SequenceGenerator(name = "MESSAGE_FILE_LOG", sequenceName = "\"MESSAGE_FILE_LOG_PK\"")
-    @Column(name = "MFL_ID")
+    @Column("\"MFL_ID\"")
     var id: Long? = null,
 
-    @ManyToOne
-    @JoinColumn(name = "MFL_DMEID", referencedColumnName = "DME_ID", nullable = false)
-    var message: DiscordMessageEntity,
+    @Column("\"MFL_DMEID\"")
+    var messageId: Long,
 
-    @Column(name = "MFL_BODY", nullable = false, columnDefinition = "TEXT")
-    var body: String
-) : BuilderBaseEntity() {
-    override fun toString(): String {
-        return "MessageFileLogEntity(id=$id, messageId=${message.id}, body='$body')"
-    }
-}
+    @Column("\"MFL_BODY\"")
+    var body: String,
+) : BuilderBaseEntity()

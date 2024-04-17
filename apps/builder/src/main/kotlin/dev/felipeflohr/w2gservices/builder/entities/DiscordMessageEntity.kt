@@ -1,87 +1,46 @@
 package dev.felipeflohr.w2gservices.builder.entities
 
+import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
-import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
-import jakarta.persistence.SequenceGenerator
-import jakarta.persistence.Table
-import java.util.Date
+import java.time.Instant
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 
-@Entity
-@Table(name = "TB_DISCORD_MESSAGE")
-class DiscordMessageEntity(
+@NoArg
+@Table("\"TB_DISCORD_MESSAGE\"")
+data class DiscordMessageEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DISCORD_MESSAGE")
-    @SequenceGenerator(name = "DISCORD_MESSAGE", sequenceName = "\"DISCORD_MESSAGE_PK\"")
-    @Column(name = "DME_ID")
+    @Column("\"DME_ID\"")
     var id: Long? = null,
 
-    @OneToOne(targetEntity = DiscordMessageAuthorEntity::class, fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-    @JoinColumn(name = "DME_DMAID", referencedColumnName = "DMA_ID", nullable = false)
-    var author: DiscordMessageAuthorEntity,
+    @Column("\"DME_DMAID\"")
+    var authorId: Long,
 
-    @Column(name = "DME_CONTENT", length = 8192, nullable = false)
+    @Column("\"DME_CONTENT\"")
     var content: String,
 
-    @Column(name = "DME_MSG_CREATED_AT")
-    var messageCreatedAt: Date,
+    @Column("\"DME_MSG_CREATED_AT\"")
+    var messageCreatedAt: Instant,
 
-    @Column(name = "DME_MSGID", length = 32, nullable = false, unique = true)
+    @Column("\"DME_MSGID\"")
     var messageId: String,
 
-    @Column(name = "DME_PINNED", nullable = false)
+    @Column("\"DME_PINNED\"")
     var pinned: Boolean,
 
-    @Column(name = "DME_POS", nullable = true)
+    @Column("\"DME_POS\"")
     var position: Int?,
 
-    @Column(name = "DME_SYS", length = 128, nullable = false)
+    @Column("\"DME_SYS\"")
     var system: Boolean,
 
-    @Column(name = "DME_URL", length = 1024, nullable = false)
+    @Column("\"DME_URL\"")
     var url: String,
 
-    @Column(name = "DME_GUIID", length = 64, nullable = false)
+    @Column("\"DME_GUIID\"")
     var guildId: String,
 
-    @Column(name = "DME_CHAID", length = 64, nullable = false)
+    @Column("\"DME_CHAID\"")
     var channelId: String,
-
-    @OneToOne(mappedBy = "message", orphanRemoval = true)
-    var delimitationMessage: DiscordDelimitationMessageEntity?,
-
-    @OneToMany(mappedBy = "message", orphanRemoval = true)
-    var fileReferences: Set<MessageFileReferenceEntity>?,
-
-    @OneToMany(mappedBy = "message", orphanRemoval = true)
-    var fileLogs: Set<MessageFileLogEntity>?,
-) : BuilderBaseEntity() {
-    fun toDTO(): DiscordMessageDTO {
-        return DiscordMessageDTO(
-            channelId = channelId,
-            id = messageId,
-            createdAt = messageCreatedAt,
-            system = system,
-            url = url,
-            hasThread = false,
-            cleanContent = content,
-            applicationId = null,
-            author = author.toDTO(),
-            pinned = pinned,
-            pinnable = false,
-            position = null,
-            content = content,
-            deleted = false,
-            guildId = guildId
-        )
-    }
-}
+) : BuilderBaseEntity()
