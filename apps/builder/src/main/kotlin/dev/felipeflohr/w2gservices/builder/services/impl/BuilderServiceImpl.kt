@@ -21,7 +21,7 @@ class BuilderServiceImpl @Autowired constructor(
     }
 
     override suspend fun delimitationMessage(delimitation: DiscordDelimitationMessageDTO) {
-        delimitationService.save(delimitation)
+        delimitationService.upsert(delimitation)
     }
 
     override suspend fun createdMessage(message: DiscordMessageDTO) {
@@ -29,21 +29,19 @@ class BuilderServiceImpl @Autowired constructor(
     }
 
     override suspend fun updatedMessage(message: DiscordMessageDTO) {
-        val updatedMessage = messageService.update(message)
-        if (updatedMessage == null) {
-            logger.warn(generateMessageForEntityNotFound("update", message))
-        }
+        val result = messageService.update(message)
+        logEntityNotFoundMessage(message, "update", result == null)
     }
 
     override suspend fun deletedMessage(message: DiscordMessageDTO) {
-        val deletedMessage = messageService.delete(message)
-        if (deletedMessage == null) {
-            logger.warn(generateMessageForEntityNotFound("delete", message))
-        }
+        val messageWasDeleted = messageService.delete(message)
+        logEntityNotFoundMessage(message, "delete", !messageWasDeleted)
     }
 
-    private fun generateMessageForEntityNotFound(queueName: String, message: DiscordMessageDTO): String {
-        return "The following message has been received on the $queueName queue, however, no message was found to " +
-                "update: $message"
+    private fun logEntityNotFoundMessage(message: DiscordMessageDTO, operation: String, log: Boolean) {
+        if (log) {
+            logger.warn("The following message was received in the \"$operation\" listener, however, no entity was " +
+                    "found to perform such action: $message")
+        }
     }
 }

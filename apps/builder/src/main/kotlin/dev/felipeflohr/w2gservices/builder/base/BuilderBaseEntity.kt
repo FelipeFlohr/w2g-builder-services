@@ -1,17 +1,19 @@
 package dev.felipeflohr.w2gservices.builder.base
 
-import java.time.Instant
-import org.springframework.data.annotation.Version
-import org.springframework.data.relational.core.mapping.Column
+import jakarta.persistence.Column
+import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.Version
+import java.util.Date
 
-abstract class BuilderBaseEntity(
-    @Column("\"CREATED_AT\"")
-    var createdAt: Instant = Instant.now(),
+@MappedSuperclass
+abstract class BuilderBaseEntity (
+    @Column(name = "CREATED_AT")
+    var createdAt: Date = Date(),
 
-    @Column("\"UPDATED_AT\"")
-    var updatedAt: Instant = Instant.now(),
+    @Column(name = "UPDATED_AT")
+    var updatedAt: Date = Date(),
 
     @Version
-    @Column("\"VERSION\"")
+    @Column(name = "VERSION")
     var version: Long = 0L,
 )

@@ -8,6 +8,7 @@ import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
 import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
 import dev.felipeflohr.w2gservices.builder.services.BuilderService
 import jakarta.annotation.PostConstruct
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,6 +31,12 @@ class DiscordMessagesAMQPListener @Autowired constructor(
     @Qualifier(MessagesAMQPConfiguration.MESSAGES_DELETED) private val deletedFlux: Flux<Delivery>,
     private val service: BuilderService,
 ) {
+    private var bootstrapJob: CompletableJob = Job();
+    private var delimitationJob: CompletableJob = Job();
+    private var createdJob: CompletableJob = Job();
+    private var updatedJob: CompletableJob = Job();
+    private var deletedJob: CompletableJob = Job();
+
     @PostConstruct
     private fun init() {
         deliveryListenerWrapper(bootstrapDeliveryFlux, DiscordMessageDTO::class, ::bootstrapMessage)
@@ -55,22 +62,51 @@ class DiscordMessagesAMQPListener @Autowired constructor(
     }
 
     private suspend fun bootstrapMessage(message: DiscordMessageDTO) {
+        bootstrapJob.start()
         service.bootstrapMessage(message)
+
+        bootstrapJob.complete()
+        bootstrapJob = Job()
     }
 
     private suspend fun delimitationMessage(message: DiscordDelimitationMessageDTO) {
+        delimitationJob.start()
         service.delimitationMessage(message)
+
+        delimitationJob.complete()
+        delimitationJob = Job()
     }
 
     private suspend fun createdMessage(message: DiscordMessageDTO) {
+        createdJob.start()
+        bootstrapJob.join()
+        delimitationJob.join()
+
         service.createdMessage(message)
+        createdJob.complete()
+        createdJob = Job()
     }
 
     private suspend fun updatedMessage(message: DiscordMessageDTO) {
+        updatedJob.start()
+        bootstrapJob.join()
+        delimitationJob.join()
+        createdJob.join()
+
         service.updatedMessage(message)
+        updatedJob.complete()
+        updatedJob = Job()
     }
 
     private suspend fun deletedMessage(message: DiscordMessageDTO) {
+        deletedJob.start()
+        bootstrapJob.join()
+        delimitationJob.join()
+        createdJob.join()
+        updatedJob.join()
+
         service.deletedMessage(message)
+        deletedJob.complete()
+        deletedJob = Job()
     }
 }

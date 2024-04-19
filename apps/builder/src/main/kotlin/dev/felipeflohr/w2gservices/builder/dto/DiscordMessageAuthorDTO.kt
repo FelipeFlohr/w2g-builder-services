@@ -2,14 +2,13 @@ package dev.felipeflohr.w2gservices.builder.dto
 
 import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageAuthorEntity
-import java.io.Serializable
 import java.util.Date
 
 @NoArg
 data class DiscordMessageAuthorDTO(
     var avatarPngUrl: String?,
     var bannerPngUrl: String?,
-    var bot: Boolean? = false,
+    var bot: Boolean,
     var createdAt: Date,
     var discriminator: String,
     var displayName: String,
@@ -18,18 +17,25 @@ data class DiscordMessageAuthorDTO(
     var tag: String,
     var system: Boolean,
     var username: String,
-) : Serializable {
+) {
     fun toEntity(): DiscordMessageAuthorEntity {
         return DiscordMessageAuthorEntity(
+            system = system,
             authorId = id,
-            autCreatedAt = createdAt.toInstant(),
+            bot = bot,
+            username = username,
+            autCreatedAt = createdAt,
             avatarPngUrl = avatarPngUrl,
-            bot = bot ?: false,
             bannerPngUrl = bannerPngUrl,
             globalName = globalName,
             displayName = displayName,
-            system = system,
-            username = username,
+            id = null,
+            message = null,
         )
+    }
+    fun toEntity(id: Long): DiscordMessageAuthorEntity {
+        val entity = toEntity()
+        entity.id = id
+        return entity
     }
 }

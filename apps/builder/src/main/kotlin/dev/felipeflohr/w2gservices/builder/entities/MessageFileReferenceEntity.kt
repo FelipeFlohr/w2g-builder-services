@@ -2,23 +2,33 @@ package dev.felipeflohr.w2gservices.builder.entities
 
 import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.Table
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 
 @NoArg
-@Table("\"TB_MESSAGE_FILE_REFERENCE\"")
-data class MessageFileReferenceEntity(
+@Entity
+@Table(name = "TB_MESSAGE_FILE_REFERENCE")
+class MessageFileReferenceEntity(
     @Id
-    @Column("\"MFR_ID\"")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MESSAGE_FILE_REFERENCE")
+    @SequenceGenerator(name = "MESSAGE_FILE_REFERENCE", sequenceName = "\"MESSAGE_FILE_PK\"")
+    @Column(name = "MFR_ID")
     var id: Long? = null,
 
-    @Column("\"MFR_DMEID\"")
-    var messageId: Long,
+    @ManyToOne
+    @JoinColumn(name = "MFR_DMEID", referencedColumnName = "DME_ID", nullable = false)
+    var message: DiscordMessageEntity,
 
-    @Column("\"MFR_URL\"")
+    @Column(name = "MFR_URL", length = 2048, nullable = false, unique = true)
     var url: String,
 
-    @Column("\"MFR_HASH\"")
+    @Column(name = "MFR_HASH", length = 64, nullable = false)
     var fileHash: String,
 ) : BuilderBaseEntity()

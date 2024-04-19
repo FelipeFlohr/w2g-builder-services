@@ -2,18 +2,26 @@ package dev.felipeflohr.w2gservices.builder.dto
 
 import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.entities.DiscordDelimitationMessageEntity
-import java.io.Serializable
+import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 import java.util.Date
 
 @NoArg
 data class DiscordDelimitationMessageDTO(
     var createdAt: Date,
     var message: DiscordMessageDTO,
-) : Serializable {
-    fun toEntity(messageId: Long): DiscordDelimitationMessageEntity {
+) {
+    fun toEntity(): DiscordDelimitationMessageEntity {
         return DiscordDelimitationMessageEntity(
-            messageId = messageId,
-            delimitationCreatedAt = createdAt.toInstant()
+            delimitationCreatedAt = createdAt,
+            message = message.toEntity()
+        )
+    }
+
+    fun toEntity(id: Long?, message: DiscordMessageEntity): DiscordDelimitationMessageEntity {
+        return DiscordDelimitationMessageEntity(
+            id = id,
+            delimitationCreatedAt = createdAt,
+            message = message
         )
     }
 }

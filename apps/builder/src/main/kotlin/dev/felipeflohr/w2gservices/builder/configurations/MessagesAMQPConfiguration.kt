@@ -59,7 +59,7 @@ class MessagesAMQPConfiguration {
 
     @Bean(MESSAGES_BOOTSTRAP)
     fun bootstrapDeliveryFlux(receiver: Receiver): Flux<Delivery> {
-         return receiver.consumeAutoAck(MESSAGES_BOOTSTRAP)
+        return receiver.consumeAutoAck(MESSAGES_BOOTSTRAP)
     }
 
     @Bean(MESSAGES_DELIMITATION)

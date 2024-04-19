@@ -2,7 +2,6 @@ package dev.felipeflohr.w2gservices.builder.dto
 
 import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
-import java.io.Serializable
 import java.util.Date
 
 @NoArg
@@ -22,19 +21,23 @@ data class DiscordMessageDTO(
     var guildId: String,
     var channelId: String,
     var deleted: Boolean,
-) : Serializable {
-    fun toEntity(authorId: Long): DiscordMessageEntity {
+) {
+    fun toEntity(): DiscordMessageEntity {
         return DiscordMessageEntity(
-            authorId = authorId,
-            system = system,
-            messageCreatedAt = createdAt.toInstant(),
+            messageCreatedAt = createdAt,
             messageId = id,
             url = url,
-            channelId = channelId,
             pinned = pinned,
-            position = position,
+            system = system,
             content = content,
             guildId = guildId,
+            position = position,
+            channelId = channelId,
+            author = author.toEntity(),
+            id = null,
+            delimitationMessage = null,
+            fileLogs = null,
+            fileReferences = null,
         )
     }
 }

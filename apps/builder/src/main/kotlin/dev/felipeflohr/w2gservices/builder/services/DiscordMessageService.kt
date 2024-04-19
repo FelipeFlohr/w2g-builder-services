@@ -7,5 +7,5 @@ interface DiscordMessageService {
     suspend fun save(dto: DiscordMessageDTO): DiscordMessageEntity
     suspend fun upsert(dto: DiscordMessageDTO): DiscordMessageEntity
     suspend fun update(dto: DiscordMessageDTO): DiscordMessageEntity?
-    suspend fun delete(dto: DiscordMessageDTO): DiscordMessageEntity?
+    suspend fun delete(dto: DiscordMessageDTO): Boolean
 }

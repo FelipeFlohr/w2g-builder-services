@@ -2,42 +2,53 @@ package dev.felipeflohr.w2gservices.builder.entities
 
 import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
-import java.time.Instant
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.Table
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.OneToOne
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
+import java.util.Date
 
 @NoArg
-@Table("\"TB_DISCORD_MESSAGE_AUTHOR\"")
+@Entity
+@Table(name = "TB_DISCORD_MESSAGE_AUTHOR")
 class DiscordMessageAuthorEntity(
     @Id
-    @Column("\"DMA_ID\"")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DISCORD_MESSAGE_AUTHOR")
+    @SequenceGenerator(name = "DISCORD_MESSAGE_AUTHOR", sequenceName = "\"DISCORD_MESSAGE_AUTHOR_PK\"")
+    @Column(name = "DMA_ID")
     var id: Long? = null,
 
-    @Column("\"DMA_AVAPNGURL\"")
+    @Column(name = "DMA_AVAPNGURL", length = 512, nullable = true)
     var avatarPngUrl: String?,
 
-    @Column("\"DMA_BANPNGURL\"")
+    @Column(name = "DMA_BANPNGURL", length = 512, nullable = true)
     var bannerPngUrl: String?,
 
-    @Column("\"DMA_BOT\"")
-    var bot: Boolean? = false,
+    @Column(name = "DMA_BOT", nullable = false)
+    var bot: Boolean,
 
-    @Column("\"DMA_AUT_CREATED_AT\"")
-    var autCreatedAt: Instant,
+    @Column(name = "DMA_AUT_CREATED_AT", nullable = false)
+    var autCreatedAt: Date,
 
-    @Column("\"DMA_DIS_NAME\"")
+    @Column(name = "DMA_DIS_NAME", length = 128, nullable = false)
     var displayName: String,
 
-    @Column("\"DMA_GNAME\"")
+    @Column(name = "DMA_GNAME", length = 128, nullable = true)
     var globalName: String?,
 
-    @Column("\"DMA_AUTID\"")
+    @Column(name = "DMA_AUTID", length = 32, nullable = false)
     var authorId: String,
 
-    @Column("\"DMA_SYS\"")
-    var system: Boolean? = false,
+    @Column(name = "DMA_SYS", length = 128, nullable = false)
+    var system: Boolean,
 
-    @Column("\"DMA_USERNAME\"")
+    @Column(name = "DMA_USERNAME", nullable = false)
     var username: String,
+
+    @OneToOne(mappedBy = "author")
+    var message: DiscordMessageEntity?,
 ) : BuilderBaseEntity()
