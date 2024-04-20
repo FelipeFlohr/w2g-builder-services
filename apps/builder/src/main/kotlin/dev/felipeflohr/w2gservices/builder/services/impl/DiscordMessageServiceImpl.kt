@@ -28,8 +28,8 @@ class DiscordMessageServiceImpl @Autowired constructor(
     override suspend fun update(dto: DiscordMessageDTO): DiscordMessageEntity? {
         val id = virtualThread { repository.findIdByMessageId(dto.id) }
         if (id != null) {
-            val entity = dto.toEntity()
-            val authorId = virtualThread { repository.findAuthorIdById(id) }!!
+            val entity = dto.toEntity(id)
+            val authorId = virtualThread { repository.findAuthorIdById(id) }
 
             entity.author.id = authorId
             val authorEntity = authorService.save(entity.author)

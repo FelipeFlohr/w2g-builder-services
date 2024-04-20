@@ -10,13 +10,6 @@ data class DiscordDelimitationMessageDTO(
     var createdAt: Date,
     var message: DiscordMessageDTO,
 ) {
-    fun toEntity(): DiscordDelimitationMessageEntity {
-        return DiscordDelimitationMessageEntity(
-            delimitationCreatedAt = createdAt,
-            message = message.toEntity()
-        )
-    }
-
     fun toEntity(id: Long?, message: DiscordMessageEntity): DiscordDelimitationMessageEntity {
         return DiscordDelimitationMessageEntity(
             id = id,

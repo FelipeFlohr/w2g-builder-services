@@ -18,7 +18,7 @@ import java.util.Date
 @NoArg
 @Entity
 @Table(name = "TB_DISCORD_DELIMITATION_MESSAGE")
-class DiscordDelimitationMessageEntity (
+class DiscordDelimitationMessageEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DISCORD_DELIMITATION_MESSAGE")
     @SequenceGenerator(name = "DISCORD_DELIMITATION_MESSAGE", sequenceName = "\"DISCORD_DELIMITATION_MESSAGE_PK\"")

@@ -40,4 +40,10 @@ data class DiscordMessageDTO(
             fileReferences = null,
         )
     }
+
+    fun toEntity(id: Long): DiscordMessageEntity {
+        val entity = toEntity()
+        entity.id = id
+        return entity
+    }
 }

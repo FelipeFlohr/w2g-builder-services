@@ -37,7 +37,7 @@ class MessagesAMQPConfiguration {
 
     @Bean
     fun connectionMono(rabbitProperties: RabbitProperties): Mono<Connection> {
-        val connectionFactory = com.rabbitmq.client.ConnectionFactory();
+        val connectionFactory = com.rabbitmq.client.ConnectionFactory()
         connectionFactory.host = rabbitProperties.host
         connectionFactory.port = rabbitProperties.port
         connectionFactory.username = rabbitProperties.username

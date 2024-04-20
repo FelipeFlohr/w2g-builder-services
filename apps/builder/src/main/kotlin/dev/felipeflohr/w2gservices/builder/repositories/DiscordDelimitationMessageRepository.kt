@@ -7,12 +7,14 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface DiscordDelimitationMessageRepository : CrudRepository<DiscordDelimitationMessageEntity, Long> {
-    @Query("""
+    @Query(
+        """
         select ddm.id
         from DiscordDelimitationMessageEntity ddm
         inner join ddm.message dme
         where dme.guildId = :guildId
         and dme.channelId = :channelId
-    """)
+    """
+    )
     fun findIdByGuildIdAndChannelId(guildId: String, channelId: String): Long?
 }

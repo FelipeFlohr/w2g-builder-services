@@ -33,6 +33,7 @@ data class DiscordMessageAuthorDTO(
             message = null,
         )
     }
+
     fun toEntity(id: Long): DiscordMessageAuthorEntity {
         val entity = toEntity()
         entity.id = id

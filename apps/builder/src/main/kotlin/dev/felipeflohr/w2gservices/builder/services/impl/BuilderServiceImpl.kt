@@ -40,8 +40,10 @@ class BuilderServiceImpl @Autowired constructor(
 
     private fun logEntityNotFoundMessage(message: DiscordMessageDTO, operation: String, log: Boolean) {
         if (log) {
-            logger.warn("The following message was received in the \"$operation\" listener, however, no entity was " +
-                    "found to perform such action: $message")
+            logger.warn(
+                "The following message was received in the \"$operation\" listener, however, no entity was " +
+                        "found to perform such action: $message"
+            )
         }
     }
 }

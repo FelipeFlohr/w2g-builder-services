@@ -31,11 +31,11 @@ class DiscordMessagesAMQPListener @Autowired constructor(
     @Qualifier(MessagesAMQPConfiguration.MESSAGES_DELETED) private val deletedFlux: Flux<Delivery>,
     private val service: BuilderService,
 ) {
-    private var bootstrapJob: CompletableJob = Job();
-    private var delimitationJob: CompletableJob = Job();
-    private var createdJob: CompletableJob = Job();
-    private var updatedJob: CompletableJob = Job();
-    private var deletedJob: CompletableJob = Job();
+    private var bootstrapJob: CompletableJob = Job()
+    private var delimitationJob: CompletableJob = Job()
+    private var createdJob: CompletableJob = Job()
+    private var updatedJob: CompletableJob = Job()
+    private var deletedJob: CompletableJob = Job()
 
     @PostConstruct
     private fun init() {
@@ -46,7 +46,11 @@ class DiscordMessagesAMQPListener @Autowired constructor(
         deliveryListenerWrapper(deletedFlux, DiscordMessageDTO::class, ::deletedMessage)
     }
 
-    private fun <T : Any> deliveryListenerWrapper(deliveryFlux: Flux<Delivery>, clazz: KClass<T>, callback: suspend (T) -> Unit) {
+    private fun <T : Any> deliveryListenerWrapper(
+        deliveryFlux: Flux<Delivery>,
+        clazz: KClass<T>,
+        callback: suspend (T) -> Unit
+    ) {
         val coroutineScope = CoroutineScope(Job() + Dispatchers.Default)
         val mapper = ObjectMapper().registerKotlinModule()
 
@@ -71,6 +75,7 @@ class DiscordMessagesAMQPListener @Autowired constructor(
 
     private suspend fun delimitationMessage(message: DiscordDelimitationMessageDTO) {
         delimitationJob.start()
+        bootstrapJob.join()
         service.delimitationMessage(message)
 
         delimitationJob.complete()

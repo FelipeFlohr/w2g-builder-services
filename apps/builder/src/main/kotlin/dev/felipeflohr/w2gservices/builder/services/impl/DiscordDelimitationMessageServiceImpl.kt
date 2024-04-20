@@ -19,7 +19,12 @@ class DiscordDelimitationMessageServiceImpl @Autowired constructor(
     }
 
     suspend fun update(delimitation: DiscordDelimitationMessageDTO): DiscordDelimitationMessageEntity? {
-        val existingEntityId = virtualThread { repository.findIdByGuildIdAndChannelId(delimitation.message.guildId, delimitation.message.channelId) }
+        val existingEntityId = virtualThread {
+            repository.findIdByGuildIdAndChannelId(
+                delimitation.message.guildId,
+                delimitation.message.channelId
+            )
+        }
         if (existingEntityId != null) {
             val message = messageService.upsert(delimitation.message)
             val entity = delimitation.toEntity(existingEntityId, message)
@@ -29,7 +34,7 @@ class DiscordDelimitationMessageServiceImpl @Autowired constructor(
     }
 
     suspend fun save(delimitation: DiscordDelimitationMessageDTO): DiscordDelimitationMessageEntity {
-        val message = messageService.save(delimitation.message)
+        val message = messageService.upsert(delimitation.message)
         val entity = delimitation.toEntity(null, message)
         return virtualThread { repository.save(entity) }
     }
