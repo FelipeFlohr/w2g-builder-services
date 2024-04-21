@@ -2,41 +2,47 @@ package dev.felipeflohr.w2gservices.builder.services.impl
 
 import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
 import dev.felipeflohr.w2gservices.builder.entities.DiscordDelimitationMessageEntity
-import dev.felipeflohr.w2gservices.builder.functions.virtualThread
+import dev.felipeflohr.w2gservices.builder.functions.virtualThreadSupplier
 import dev.felipeflohr.w2gservices.builder.repositories.DiscordDelimitationMessageRepository
 import dev.felipeflohr.w2gservices.builder.services.DiscordDelimitationMessageService
 import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
-import jakarta.transaction.Transactional
-import kotlinx.coroutines.coroutineScope
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.jpa.repository.Modifying
 import org.springframework.stereotype.Service
 
 @Service
 class DiscordDelimitationMessageServiceImpl @Autowired constructor(
-    private val messageService: DiscordMessageService,
     private val repository: DiscordDelimitationMessageRepository,
+    private val messageService: DiscordMessageService,
 ) : DiscordDelimitationMessageService {
-    @Modifying
-    @Transactional
-    override suspend fun saveDelimitationMessage(delimitation: DiscordDelimitationMessageDTO): Unit = coroutineScope {
-        val persistedMessage = messageService.getByMessageId(delimitation.message.id)
+    override suspend fun upsert(delimitation: DiscordDelimitationMessageDTO): DiscordDelimitationMessageEntity {
+        return update(delimitation) ?: save(delimitation)
+    }
 
-        val entity = if (persistedMessage != null) {
-            DiscordDelimitationMessageEntity(
-                id = null,
-                message = persistedMessage,
-                delimitationCreatedAt = delimitation.createdAt
+    override suspend fun getLastByGuildIdAndChannelId(
+        guildId: String,
+        channelId: String
+    ): DiscordDelimitationMessageEntity? {
+        return virtualThreadSupplier { repository.findLastByGuildIdAndChannelId(guildId, channelId) }
+    }
+
+    suspend fun update(delimitation: DiscordDelimitationMessageDTO): DiscordDelimitationMessageEntity? {
+        val existingEntityId = virtualThreadSupplier {
+            repository.findIdByGuildIdAndChannelId(
+                delimitation.message.guildId,
+                delimitation.message.channelId
             )
-        } else {
-            val messageSaved = messageService.saveAndFlush(delimitation.message)
-            val entityDetached = DiscordDelimitationMessageEntity.toEntity(delimitation)
-            entityDetached.message = messageSaved
-            entityDetached
         }
+        if (existingEntityId != null) {
+            val message = messageService.upsert(delimitation.message)
+            val entity = delimitation.toEntity(existingEntityId, message)
+            return virtualThreadSupplier { repository.save(entity) }
+        }
+        return null
+    }
 
-        virtualThread {
-            repository.upsert(entity)
-        }
+    suspend fun save(delimitation: DiscordDelimitationMessageDTO): DiscordDelimitationMessageEntity {
+        val message = messageService.upsert(delimitation.message)
+        val entity = delimitation.toEntity(null, message)
+        return virtualThreadSupplier { repository.save(entity) }
     }
 }

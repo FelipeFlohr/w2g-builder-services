@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("builder")
-class BuilderControllerImpl @Autowired constructor (
+class BuildControllerImpl @Autowired constructor(
     private val service: BuilderService
 ) : BuilderController {
     @GetMapping("/references/{guildId}/{channelId}")

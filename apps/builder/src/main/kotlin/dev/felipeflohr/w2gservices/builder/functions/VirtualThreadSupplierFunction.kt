@@ -1,29 +1,29 @@
 package dev.felipeflohr.w2gservices.builder.functions
 
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-suspend fun <T> virtualThread(consumer: suspend () -> T): T {
+suspend fun <T> virtualThreadSupplier(supplier: suspend () -> T): T {
     val executor = Executors.newVirtualThreadPerTaskExecutor()
     return suspendCancellableCoroutine { continuation ->
         val future = CompletableFuture.supplyAsync({
             try {
                 runBlocking {
-                    consumer()
+                    supplier()
                 }
             } finally {
                 executor.shutdown()
             }
         }, executor)
         future.whenComplete { result, exception ->
-            if (exception == null) {
-                continuation.resume(result)
-            } else {
+            if (exception != null) {
                 continuation.resumeWithException(exception)
+            } else {
+                continuation.resume(result)
             }
         }
     }

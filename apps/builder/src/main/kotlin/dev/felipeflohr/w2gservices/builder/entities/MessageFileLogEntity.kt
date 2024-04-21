@@ -1,5 +1,6 @@
 package dev.felipeflohr.w2gservices.builder.entities
 
+import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -11,6 +12,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 
+@NoArg
 @Entity
 @Table(name = "TB_MESSAGE_FILE_LOG")
 class MessageFileLogEntity(
@@ -26,8 +28,4 @@ class MessageFileLogEntity(
 
     @Column(name = "MFL_BODY", nullable = false, columnDefinition = "TEXT")
     var body: String
-) : BuilderBaseEntity() {
-    override fun toString(): String {
-        return "MessageFileLogEntity(id=$id, messageId=${message.id}, body='$body')"
-    }
-}
+) : BuilderBaseEntity()

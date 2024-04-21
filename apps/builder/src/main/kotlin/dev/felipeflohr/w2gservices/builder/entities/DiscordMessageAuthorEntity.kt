@@ -1,7 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.entities
 
+import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
-import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageAuthorDTO
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -12,6 +12,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import java.util.Date
 
+@NoArg
 @Entity
 @Table(name = "TB_DISCORD_MESSAGE_AUTHOR")
 class DiscordMessageAuthorEntity(
@@ -50,24 +51,4 @@ class DiscordMessageAuthorEntity(
 
     @OneToOne(mappedBy = "author")
     var message: DiscordMessageEntity?,
-) : BuilderBaseEntity() {
-    override fun toString(): String {
-        return "DiscordMessageAuthorEntity(id=$id, avatarPngUrl=$avatarPngUrl, bannerPngUrl=$bannerPngUrl, bot=$bot, autCreatedAt=$autCreatedAt, displayName='$displayName', globalName=$globalName, authorId='$authorId', system=$system, username='$username', message=$message)"
-    }
-
-    fun toDTO(): DiscordMessageAuthorDTO {
-        return DiscordMessageAuthorDTO(
-            avatarPngUrl = avatarPngUrl,
-            bannerPngUrl = bannerPngUrl,
-            bot = bot,
-            username = username,
-            id = authorId,
-            tag = "",
-            createdAt = autCreatedAt,
-            discriminator = "",
-            globalName = globalName,
-            displayName = displayName,
-            system = system
-        )
-    }
-}
+) : BuilderBaseEntity()

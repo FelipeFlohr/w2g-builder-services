@@ -1,20 +1,22 @@
 package dev.felipeflohr.w2gservices.builder.services.impl
 
 import dev.felipeflohr.w2gservices.builder.business.BuilderBusiness
-import dev.felipeflohr.w2gservices.builder.business.impl.BuilderBusinessImpl
 import dev.felipeflohr.w2gservices.builder.dto.AvailableChannelDTO
 import dev.felipeflohr.w2gservices.builder.dto.AvailableGuildDTO
+import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
+import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
 import dev.felipeflohr.w2gservices.builder.dto.GuildAndChannelIdsDTO
 import dev.felipeflohr.w2gservices.builder.dto.VideoReferenceDTO
-import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
-import dev.felipeflohr.w2gservices.builder.functions.virtualThread
 import dev.felipeflohr.w2gservices.builder.listeners.DiscordMessagesAMQPListener
-import dev.felipeflohr.w2gservices.builder.repositories.BuilderRepository
-import dev.felipeflohr.w2gservices.builder.services.*
+import dev.felipeflohr.w2gservices.builder.services.BuilderService
+import dev.felipeflohr.w2gservices.builder.services.DiscordDelimitationMessageService
+import dev.felipeflohr.w2gservices.builder.services.DiscordMessageService
+import dev.felipeflohr.w2gservices.builder.services.FileStorageService
+import dev.felipeflohr.w2gservices.builder.services.MessageFileReferenceService
+import dev.felipeflohr.w2gservices.builder.services.MessengerService
+import dev.felipeflohr.w2gservices.builder.services.ReferenceDownloadService
 import dev.felipeflohr.w2gservices.builder.utils.LoggerUtils
 import jakarta.annotation.PostConstruct
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -22,20 +24,18 @@ import kotlin.concurrent.thread
 
 @Service
 class BuilderServiceImpl @Autowired constructor(
-    private val repository: BuilderRepository,
+    private val business: BuilderBusiness,
     private val messageService: DiscordMessageService,
+    private val delimitationService: DiscordDelimitationMessageService,
     private val messageFileReferenceService: MessageFileReferenceService,
-    private val messageFileLogService: MessageFileLogService,
-    private val downloaderService: DownloaderService,
-    private val amqpListener: DiscordMessagesAMQPListener,
-    private val messengerService: MessengerService,
     private val fileStorageService: FileStorageService,
+    private val referenceDownloadService: ReferenceDownloadService,
+    private val messengerService: MessengerService,
 ) : BuilderService {
-    private val business: BuilderBusiness = BuilderBusinessImpl()
     private val logger = LoggerUtils.getLogger(BuilderServiceImpl::class)
 
     @PostConstruct
-    private fun init() {
+    private fun onInit() {
         thread {
             runBlocking {
                 deleteStaleData()
@@ -44,13 +44,26 @@ class BuilderServiceImpl @Autowired constructor(
         }
     }
 
-    override suspend fun getVideoReferences(guildId: String, channelId: String): List<VideoReferenceDTO> {
-        val buildMessages = virtualThread { repository.getBuildMessages(guildId, channelId) }
-        val references = messageFileReferenceService.getAllByDiscordMessageIds(buildMessages.map { it.id })
-        val logs = messageFileLogService.getAllByDiscordMessageIds(buildMessages.map { it.id })
+    override suspend fun bootstrapMessage(message: DiscordMessageDTO) {
+        messageService.upsert(message)
+    }
 
-        business.populateVideoReferencesAndLogs(buildMessages, references, logs)
-        return business.generateVideoReferencesFromBuildMessages(buildMessages)
+    override suspend fun delimitationMessage(delimitation: DiscordDelimitationMessageDTO) {
+        delimitationService.upsert(delimitation)
+    }
+
+    override suspend fun createdMessage(message: DiscordMessageDTO) {
+        messageService.save(message)
+    }
+
+    override suspend fun updatedMessage(message: DiscordMessageDTO) {
+        val result = messageService.update(message)
+        logEntityNotFoundMessage(message, "update", result == null)
+    }
+
+    override suspend fun deletedMessage(message: DiscordMessageDTO) {
+        val messageWasDeleted = messageService.delete(message)
+        logEntityNotFoundMessage(message, "delete", !messageWasDeleted)
     }
 
     override suspend fun getAvailableGuilds(): Set<AvailableGuildDTO> {
@@ -64,54 +77,42 @@ class BuilderServiceImpl @Autowired constructor(
         return messengerService.getChannelNames(GuildAndChannelIdsDTO(guildId, channels))
     }
 
-    private suspend fun downloadReferencesOfMessagesWithoutReference(references: List<VideoReferenceDTO>) {
-        val entities = getEntitiesFromVideoReferences(references)
-        downloaderService.downloadVideosAndSave(entities)
-    }
-
-    private suspend fun getEntitiesFromVideoReferences(references: List<VideoReferenceDTO>): List<DiscordMessageEntity> {
-        val ids = references.map { it.discordMessageId }
-        return messageService.getAllByMessageIds(ids)
-    }
-
-    private suspend fun getVideoReferencesForEveryGuild(): Map<String, List<VideoReferenceDTO>> = coroutineScope {
-        val res: MutableMap<String, List<VideoReferenceDTO>> = HashMap()
-        val guilds = messageService.getAllDistinctGuildIdsAndChannelIds()
-        guilds.forEach { guild ->
-            async {
-                res[guild.guildId] = getVideoReferences(guild.guildId, guild.channelId)
-            }.await()
+    override suspend fun getVideoReferences(guildId: String, channelId: String): List<VideoReferenceDTO> {
+        val delimitationMessage = delimitationService.getLastByGuildIdAndChannelId(guildId, channelId)
+        if (delimitationMessage != null) {
+            val messages = messageService.getAllByGuildIdAndChannelIdAndMessageCreatedAtAfter(guildId, channelId, delimitationMessage.message.messageCreatedAt)
+            return business.getReferencesFromMessages(delimitationMessage, messages)
         }
-
-        return@coroutineScope res
+        return emptyList()
     }
 
-    private suspend fun downloadReferences() = coroutineScope {
-        amqpListener.waitForOngoingMessages()
-        val references = getVideoReferencesForEveryGuild()
-        references.forEach { reference ->
-            async {
-                downloadReferencesOfMessagesWithoutReference(reference.value)
-            }.await()
+    private fun logEntityNotFoundMessage(message: DiscordMessageDTO, operation: String, log: Boolean) {
+        if (log) {
+            logger.warn(
+                "The following message was received in the \"$operation\" listener, however, no entity was " +
+                        "found to perform such action: $message"
+            )
         }
     }
 
     private suspend fun deleteStaleData() {
-        return coroutineScope {
-            try {
-                val hashes = messageFileReferenceService.getAllHashes()
+        try {
+            val hashes = messageFileReferenceService.findAllHashes()
+            if (hashes.isNotEmpty()) {
                 val staleData = fileStorageService.getStaleData(hashes)
-                staleData
+                val staleHashes = staleData
                     .filter { !it.exist }
-                    .forEach { stale ->
-                        async {
-                            messageFileReferenceService.deleteByHash(stale.hash)
-                            logger.info("Deleted stale data. Hash: ${stale.hash}")
-                        }.await()
-                    }
-            } catch (e: Exception) {
-                logger.error("Failed to delete stale data. Process will be ignored.", e)
+                    .map { it.hash }
+                messageFileReferenceService.deleteManyByHashIn(staleHashes)
             }
+        } catch (e: Exception) {
+            logger.error("Failed to delete stale data. Process will be ignored.", e)
         }
+    }
+
+    private suspend fun downloadReferences() {
+        DiscordMessagesAMQPListener.waitForOngoingMessages()
+        val messagesWithoutReferencesAndLogs = messageService.getAllByFileReferencesEmptyAndFileLogsEmpty()
+        referenceDownloadService.downloadAndSaveReferenceForEntitiesInBackground(messagesWithoutReferencesAndLogs)
     }
 }

@@ -1,68 +1,65 @@
 package dev.felipeflohr.w2gservices.builder.business.impl
 
+import dev.felipeflohr.w2gservices.builder.annotations.Business
 import dev.felipeflohr.w2gservices.builder.business.BuilderBusiness
-import dev.felipeflohr.w2gservices.builder.dto.DiscordBuildMessageDTO
-import dev.felipeflohr.w2gservices.builder.dto.MessageFileLogDTO
-import dev.felipeflohr.w2gservices.builder.dto.MessageFileReferenceDTO
 import dev.felipeflohr.w2gservices.builder.dto.VideoReferenceDTO
-import dev.felipeflohr.w2gservices.builder.entities.MessageFileLogEntity
-import dev.felipeflohr.w2gservices.builder.entities.MessageFileReferenceEntity
+import dev.felipeflohr.w2gservices.builder.entities.DiscordDelimitationMessageEntity
+import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
 
+@Business
 class BuilderBusinessImpl : BuilderBusiness {
-    override fun generateVideoReferencesFromBuildMessages(messages: Collection<DiscordBuildMessageDTO>): List<VideoReferenceDTO> {
-        val res: MutableList<VideoReferenceDTO> = ArrayList()
-        messages.forEach { message ->
-            if (message.references.isNotEmpty()) {
-                message.references.forEach { res.addLast(generateVideoReferenceFromMessageFileReference(message, it)) }
-            } else if (message.logs.isNotEmpty()) {
-                message.logs.forEach { res.addLast(generateVideoReferenceFromMessageFileLog(message, it)) }
-            } else {
-                res.addLast(generateVideoReference(message))
+    override fun getReferencesFromMessages(
+        delimitationMessage: DiscordDelimitationMessageEntity,
+        messages: List<DiscordMessageEntity>
+    ): List<VideoReferenceDTO> {
+        val references: MutableList<VideoReferenceDTO> = ArrayList()
+        references.addAll(messageToReference(delimitationMessage.message))
+        messages.map { references.addAll(messageToReference(it)) }
+
+        return references
+            .sortedByDescending { it.messageCreatedAt }
+    }
+
+    private fun messageToReference(message: DiscordMessageEntity): List<VideoReferenceDTO> {
+        if (message.fileReferences != null && message.fileReferences!!.isNotEmpty()) {
+            return getVideoReferenceFromMessageFileReference(message)
+        } else if (message.fileLogs != null && message.fileLogs!!.isNotEmpty()) {
+            return getVideoReferenceFromMessageLog(message)
+        }
+        return listOf(getVideoReferenceWithNoFileReferenceAndNoLog(message))
+    }
+
+    private fun getVideoReferenceFromMessageFileReference(message: DiscordMessageEntity): List<VideoReferenceDTO> {
+        return message.fileReferences!!
+            .map { reference ->
+                VideoReferenceDTO(
+                    discordMessageId = message.messageId,
+                    discordMessageUrl = message.url,
+                    messageCreatedAt = message.createdAt,
+                    messageContent = message.content,
+                    messageUrlContent = reference.url,
+                    fileStorageHashId = reference.fileHash,
+                    logBody = null,
+                )
             }
-        }
-
-        return res
     }
 
-    override fun populateVideoReferencesAndLogs(messages: Set<DiscordBuildMessageDTO>, references: List<MessageFileReferenceEntity>, logs: List<MessageFileLogEntity>) {
-        messages.forEach { message ->
-            val thisReferences = references
-                .filter { it.message.id == message.id }
-                .map { MessageFileReferenceDTO.fromEntity(it) }
-            val thisLogs = logs
-                .filter { it.message.id == message.id }
-                .map { MessageFileLogDTO.fromEntity(it) }
-
-            message.references = thisReferences
-            message.logs = thisLogs
-        }
+    private fun getVideoReferenceFromMessageLog(message: DiscordMessageEntity): List<VideoReferenceDTO> {
+        return message.fileLogs!!
+            .map { log ->
+                VideoReferenceDTO(
+                    discordMessageId = message.messageId,
+                    discordMessageUrl = message.url,
+                    messageCreatedAt = message.createdAt,
+                    messageContent = message.content,
+                    messageUrlContent = null,
+                    fileStorageHashId = null,
+                    logBody = log.body
+                )
+            }
     }
 
-    private fun generateVideoReferenceFromMessageFileReference(message: DiscordBuildMessageDTO, reference: MessageFileReferenceDTO): VideoReferenceDTO {
-        return VideoReferenceDTO(
-            discordMessageId = message.messageId,
-            discordMessageUrl = message.url,
-            messageCreatedAt = message.createdAt,
-            messageContent = message.content,
-            messageUrlContent = reference.url,
-            fileStorageHashId = reference.fileHash,
-            logBody = null,
-        )
-    }
-
-    private fun generateVideoReferenceFromMessageFileLog(message: DiscordBuildMessageDTO, log: MessageFileLogDTO): VideoReferenceDTO {
-        return VideoReferenceDTO(
-            discordMessageId = message.messageId,
-            discordMessageUrl = message.url,
-            messageCreatedAt = message.createdAt,
-            messageContent = message.content,
-            messageUrlContent = null,
-            fileStorageHashId = null,
-            logBody = log.body
-        )
-    }
-
-    private fun generateVideoReference(message: DiscordBuildMessageDTO): VideoReferenceDTO {
+    private fun getVideoReferenceWithNoFileReferenceAndNoLog(message: DiscordMessageEntity): VideoReferenceDTO {
         return VideoReferenceDTO(
             discordMessageId = message.messageId,
             discordMessageUrl = message.url,

@@ -1,7 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.entities
 
+import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
-import dev.felipeflohr.w2gservices.builder.dto.DiscordDelimitationMessageDTO
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -15,9 +15,10 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import java.util.Date
 
+@NoArg
 @Entity
 @Table(name = "TB_DISCORD_DELIMITATION_MESSAGE")
-class DiscordDelimitationMessageEntity (
+class DiscordDelimitationMessageEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DISCORD_DELIMITATION_MESSAGE")
     @SequenceGenerator(name = "DISCORD_DELIMITATION_MESSAGE", sequenceName = "\"DISCORD_DELIMITATION_MESSAGE_PK\"")
@@ -30,22 +31,4 @@ class DiscordDelimitationMessageEntity (
     @OneToOne(targetEntity = DiscordMessageEntity::class, fetch = FetchType.LAZY, cascade = [CascadeType.MERGE])
     @JoinColumn(name = "DDM_DMEID", referencedColumnName = "DME_ID", nullable = false, unique = true)
     var message: DiscordMessageEntity,
-) : BuilderBaseEntity() {
-    companion object {
-        @JvmStatic
-        fun toEntity(delimitationDTO: DiscordDelimitationMessageDTO): DiscordDelimitationMessageEntity {
-            return DiscordDelimitationMessageEntity(
-                id = null,
-                message = delimitationDTO.message.toEntity(),
-                delimitationCreatedAt = delimitationDTO.createdAt,
-            )
-        }
-    }
-
-    fun toDTO(): DiscordDelimitationMessageDTO {
-        return DiscordDelimitationMessageDTO(
-            message = message.toDTO(),
-            createdAt = delimitationCreatedAt
-        )
-    }
-}
+) : BuilderBaseEntity()

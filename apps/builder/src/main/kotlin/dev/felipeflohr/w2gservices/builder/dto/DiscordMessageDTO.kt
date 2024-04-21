@@ -2,7 +2,6 @@ package dev.felipeflohr.w2gservices.builder.dto
 
 import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.entities.DiscordMessageEntity
-import java.io.Serializable
 import java.util.Date
 
 @NoArg
@@ -22,7 +21,7 @@ data class DiscordMessageDTO(
     var guildId: String,
     var channelId: String,
     var deleted: Boolean,
-) : Serializable {
+) {
     fun toEntity(): DiscordMessageEntity {
         return DiscordMessageEntity(
             messageCreatedAt = createdAt,
@@ -42,25 +41,9 @@ data class DiscordMessageDTO(
         )
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as DiscordMessageDTO
-
-        if (content != other.content) return false
-        if (id != other.id) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = content.hashCode()
-        result = 31 * result + id.hashCode()
-        return result
-    }
-
-    override fun toString(): String {
-        return "DiscordMessageDTO(applicationId=$applicationId, author=$author, cleanContent='$cleanContent', content='$content', createdAt=$createdAt, hasThread=$hasThread, id='$id', pinnable=$pinnable, pinned=$pinned, position=$position, system=$system, url='$url', guildId='$guildId', channelId='$channelId', deleted=$deleted)"
+    fun toEntity(id: Long): DiscordMessageEntity {
+        val entity = toEntity()
+        entity.id = id
+        return entity
     }
 }

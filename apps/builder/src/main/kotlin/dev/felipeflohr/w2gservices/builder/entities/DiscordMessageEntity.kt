@@ -1,7 +1,7 @@
 package dev.felipeflohr.w2gservices.builder.entities
 
+import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
-import dev.felipeflohr.w2gservices.builder.dto.DiscordMessageDTO
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -16,6 +16,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import java.util.Date
 
+@NoArg
 @Entity
 @Table(name = "TB_DISCORD_MESSAGE")
 class DiscordMessageEntity(
@@ -25,7 +26,7 @@ class DiscordMessageEntity(
     @Column(name = "DME_ID")
     var id: Long? = null,
 
-    @OneToOne(targetEntity = DiscordMessageAuthorEntity::class, fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+    @OneToOne(targetEntity = DiscordMessageAuthorEntity::class, fetch = FetchType.LAZY, cascade = [CascadeType.MERGE])
     @JoinColumn(name = "DME_DMAID", referencedColumnName = "DMA_ID", nullable = false)
     var author: DiscordMessageAuthorEntity,
 
@@ -56,32 +57,12 @@ class DiscordMessageEntity(
     @Column(name = "DME_CHAID", length = 64, nullable = false)
     var channelId: String,
 
-    @OneToOne(mappedBy = "message", orphanRemoval = true)
+    @OneToOne(mappedBy = "message")
     var delimitationMessage: DiscordDelimitationMessageEntity?,
 
-    @OneToMany(mappedBy = "message", orphanRemoval = true)
+    @OneToMany(mappedBy = "message", fetch = FetchType.EAGER)
     var fileReferences: Set<MessageFileReferenceEntity>?,
 
-    @OneToMany(mappedBy = "message", orphanRemoval = true)
+    @OneToMany(mappedBy = "message", fetch = FetchType.EAGER)
     var fileLogs: Set<MessageFileLogEntity>?,
-) : BuilderBaseEntity() {
-    fun toDTO(): DiscordMessageDTO {
-        return DiscordMessageDTO(
-            channelId = channelId,
-            id = messageId,
-            createdAt = messageCreatedAt,
-            system = system,
-            url = url,
-            hasThread = false,
-            cleanContent = content,
-            applicationId = null,
-            author = author.toDTO(),
-            pinned = pinned,
-            pinnable = false,
-            position = null,
-            content = content,
-            deleted = false,
-            guildId = guildId
-        )
-    }
-}
+) : BuilderBaseEntity()

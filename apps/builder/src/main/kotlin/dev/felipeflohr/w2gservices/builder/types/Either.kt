@@ -1,4 +1,4 @@
-package dev.felipeflohr.w2gservices.builder.utils
+package dev.felipeflohr.w2gservices.builder.types
 
 sealed class Either<out L, out R> {
     class Left<out L>(val value: L) : Either<L, Nothing>()

@@ -171,7 +171,7 @@ export class DiscordMessageTypeORMEntity
       channelId: this.channelId,
       cleanContent: this.cleanContent,
       content: this.content,
-      createdAt: this.createdAt,
+      createdAt: this.messageCreatedAt,
       guildId: this.guildId,
       hasThread: this.hasThread,
       id: this.messageId,

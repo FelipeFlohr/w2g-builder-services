@@ -1,5 +1,6 @@
 package dev.felipeflohr.w2gservices.builder.entities
 
+import dev.felipeflohr.w2gservices.builder.annotations.NoArg
 import dev.felipeflohr.w2gservices.builder.base.BuilderBaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -11,6 +12,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 
+@NoArg
 @Entity
 @Table(name = "TB_MESSAGE_FILE_REFERENCE")
 class MessageFileReferenceEntity(
@@ -29,8 +31,4 @@ class MessageFileReferenceEntity(
 
     @Column(name = "MFR_HASH", length = 64, nullable = false)
     var fileHash: String,
-) : BuilderBaseEntity() {
-    override fun toString(): String {
-        return "MessageFileReferenceEntity(id=$id, messageId=${message.id}, url='$url', fileHash='$fileHash')"
-    }
-}
+) : BuilderBaseEntity()
