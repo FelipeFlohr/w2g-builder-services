@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface DiscordDelimitationMessageRepository : CrudRepository<DiscordDelimitationMessageEntity, Long> {
+interface DiscordDelimitationMessageRepository : CrudRepository<DiscordDelimitationMessageEntity, Long>, DiscordDelimitationMessageCustomRepository {
     @Query(
         """
         select ddm.id

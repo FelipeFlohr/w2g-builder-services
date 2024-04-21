@@ -31,11 +31,27 @@ class DiscordMessagesAMQPListener @Autowired constructor(
     @Qualifier(MessagesAMQPConfiguration.MESSAGES_DELETED) private val deletedFlux: Flux<Delivery>,
     private val service: BuilderService,
 ) {
-    private var bootstrapJob: CompletableJob = Job()
-    private var delimitationJob: CompletableJob = Job()
-    private var createdJob: CompletableJob = Job()
-    private var updatedJob: CompletableJob = Job()
-    private var deletedJob: CompletableJob = Job()
+    companion object {
+        @JvmStatic
+        private var bootstrapJob: CompletableJob? = null
+        @JvmStatic
+        private var delimitationJob: CompletableJob? = null
+        @JvmStatic
+        private var createdJob: CompletableJob? = null
+        @JvmStatic
+        private var updatedJob: CompletableJob? = null
+        @JvmStatic
+        private var deletedJob: CompletableJob? = null
+
+        @JvmStatic
+        suspend fun waitForOngoingMessages() {
+            bootstrapJob?.join()
+            delimitationJob?.join()
+            createdJob?.join()
+            updatedJob?.join()
+            deletedJob?.join()
+        }
+    }
 
     @PostConstruct
     private fun init() {
@@ -66,52 +82,57 @@ class DiscordMessagesAMQPListener @Autowired constructor(
     }
 
     private suspend fun bootstrapMessage(message: DiscordMessageDTO) {
-        bootstrapJob.start()
+        bootstrapJob = Job()
+        bootstrapJob!!.start()
         service.bootstrapMessage(message)
 
-        bootstrapJob.complete()
-        bootstrapJob = Job()
+        bootstrapJob!!.complete()
+        bootstrapJob = null
     }
 
     private suspend fun delimitationMessage(message: DiscordDelimitationMessageDTO) {
-        delimitationJob.start()
-        bootstrapJob.join()
+        delimitationJob = Job()
+        delimitationJob?.start()
+        bootstrapJob?.join()
         service.delimitationMessage(message)
 
-        delimitationJob.complete()
-        delimitationJob = Job()
+        delimitationJob?.complete()
+        delimitationJob = null
     }
 
     private suspend fun createdMessage(message: DiscordMessageDTO) {
-        createdJob.start()
-        bootstrapJob.join()
-        delimitationJob.join()
+        createdJob = Job()
+        createdJob!!.start()
+        bootstrapJob?.join()
+        delimitationJob?.join()
 
         service.createdMessage(message)
-        createdJob.complete()
-        createdJob = Job()
+        createdJob!!.complete()
+        createdJob = null
     }
 
     private suspend fun updatedMessage(message: DiscordMessageDTO) {
-        updatedJob.start()
-        bootstrapJob.join()
-        delimitationJob.join()
-        createdJob.join()
+        updatedJob = Job()
+        updatedJob!!.start()
+        bootstrapJob?.join()
+        delimitationJob?.join()
+        createdJob?.join()
 
         service.updatedMessage(message)
-        updatedJob.complete()
-        updatedJob = Job()
+        updatedJob!!.complete()
+        updatedJob = null
     }
 
     private suspend fun deletedMessage(message: DiscordMessageDTO) {
-        deletedJob.start()
-        bootstrapJob.join()
-        delimitationJob.join()
-        createdJob.join()
-        updatedJob.join()
+        deletedJob = Job()
+        deletedJob!!.start()
+        bootstrapJob?.join()
+        delimitationJob?.join()
+        createdJob?.join()
+        updatedJob?.join()
 
         service.deletedMessage(message)
-        deletedJob.complete()
-        deletedJob = Job()
+        deletedJob!!.complete()
+        deletedJob = null
     }
 }

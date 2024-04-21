@@ -7,7 +7,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-suspend fun <T> virtualThread(supplier: suspend () -> T): T {
+suspend fun <T> virtualThreadSupplier(supplier: suspend () -> T): T {
     val executor = Executors.newVirtualThreadPerTaskExecutor()
     return suspendCancellableCoroutine { continuation ->
         val future = CompletableFuture.supplyAsync({

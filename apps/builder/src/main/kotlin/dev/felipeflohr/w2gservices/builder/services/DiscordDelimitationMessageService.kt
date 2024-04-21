@@ -5,4 +5,5 @@ import dev.felipeflohr.w2gservices.builder.entities.DiscordDelimitationMessageEn
 
 interface DiscordDelimitationMessageService {
     suspend fun upsert(delimitation: DiscordDelimitationMessageDTO): DiscordDelimitationMessageEntity
+    suspend fun getLastByGuildIdAndChannelId(guildId: String, channelId: String): DiscordDelimitationMessageEntity?
 }

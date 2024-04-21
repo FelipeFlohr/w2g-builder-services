@@ -60,9 +60,9 @@ class DiscordMessageEntity(
     @OneToOne(mappedBy = "message")
     var delimitationMessage: DiscordDelimitationMessageEntity?,
 
-    @OneToMany(mappedBy = "message")
+    @OneToMany(mappedBy = "message", fetch = FetchType.EAGER)
     var fileReferences: Set<MessageFileReferenceEntity>?,
 
-    @OneToMany(mappedBy = "message")
+    @OneToMany(mappedBy = "message", fetch = FetchType.EAGER)
     var fileLogs: Set<MessageFileLogEntity>?,
 ) : BuilderBaseEntity()
