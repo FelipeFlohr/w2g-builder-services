@@ -10,7 +10,7 @@
     </div>
   } @else if (!isLoadingMetadata() && metadata() != undefined) {
     <header class="w-full flex flex-col items-center justify-center my-8">
-      <h1 class="text-4xl text-center">({{this.index + 1}} / {{ getVideosWithUrl().length }}) {{ metadata()!.title }}</h1>
+      <h1 class="text-4xl text-center">({{this.index + 1}} / {{ fetchedVideos.length }}) {{ metadata()!.title }}</h1>
       <h2 class="text-center">{{ metadata()!.description }}</h2>
     </header>
   }
@@ -21,7 +21,7 @@
     } @else if (!isLoadingVideo() && videoBuffer() != undefined) {
       <visualizer-player [buffer]="videoBuffer()!" [url]="getVideo().messageUrlContent!" />
     } @else {
-      <span>Failed to create the video. </span>
+      <span>Failed to create the video.</span>
       <a class="text-blue-400" target="_blank" [href]="getVideo().messageUrlContent">Open the video.</a>
     }
   </div>

@@ -92,6 +92,7 @@ class DownloaderBusinessImpl @Autowired constructor(
                 MessageFileLogEntity(
                     message = entity,
                     body = videoFailure.error,
+                    url = videoFailure.url,
                 )
             }
     }

@@ -47,7 +47,8 @@ class DownloaderServiceImpl @Autowired constructor(
         response.failed.forEach { failed ->
             val log = MessageFileLogEntity(
                 body = failed.error,
-                message = urlMap.entries.find { it.value.contains(failed.url) }!!.key
+                message = urlMap.entries.find { it.value.contains(failed.url) }!!.key,
+                url = failed.url,
             )
             res.add(Either.Right(log))
         }
@@ -57,6 +58,7 @@ class DownloaderServiceImpl @Autowired constructor(
                 val log = MessageFileLogEntity(
                     body = "URL not found in message",
                     message = entry.key,
+                    url = null
                 )
                 res.add(Either.Right(log))
             }

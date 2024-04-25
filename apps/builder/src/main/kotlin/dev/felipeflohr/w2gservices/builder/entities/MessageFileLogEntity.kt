@@ -27,5 +27,8 @@ class MessageFileLogEntity(
     var message: DiscordMessageEntity,
 
     @Column(name = "MFL_BODY", nullable = false, columnDefinition = "TEXT")
-    var body: String
+    var body: String,
+
+    @Column(name = "MFL_URL", nullable = true, length = 2048)
+    var url: String?,
 ) : BuilderBaseEntity()

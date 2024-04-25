@@ -52,7 +52,7 @@ class BuilderBusinessImpl : BuilderBusiness {
                     discordMessageUrl = message.url,
                     messageCreatedAt = message.createdAt,
                     messageContent = message.content,
-                    messageUrlContent = null,
+                    messageUrlContent = log.url,
                     fileStorageHashId = null,
                     logBody = log.body
                 )
